@@ -40,7 +40,7 @@ contextBridge.exposeInMainWorld('api', {
         'sin-flag-fetched', 'doc-flag-fetched', 'sin-flag-double', 'flag-conflag-sin',
         'ele-flag-unflag', 'flag-tag-fetched', 'flag-tag-updated','element-tag-is', 'flag-tag-is', 'ele-tag-sel', 'type-tag-ele','sel-flag-ele',  'ele-flag-out','master-doc-fetched', 'master-checked','store-master-fetched', 'read-svg-file-response','all-layers-fetched','doc-area-fetched','tag-ele-is','areatag-rel','con-doc-tag','det-doc-tag','fetched-Tag-path-pid','con-doc-tag','dxf-conversion-success' ,
         // MTO
-        'branch-table-response','branch-table-data-response','import-response','specsize-table-response','specmat-table-response','spectemp-table-response'
+        'branch-table-response','branch-table-data-response','import-response','specsize-table-response','specmat-table-response','spectemp-table-response', 'specdet-table-response','specdet-detail-response'
         
         
         ];

@@ -12,8 +12,8 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
     specName: '',
     Revision: '',
     RevisionDate: '',
-    branchTable:'',
-    type:''
+    branchTable: '',
+    type: ''
   });
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -29,8 +29,8 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
 
   }, [combinedData])
 
-   // Handle form data change
-   const handleChange = (e) => {
+  // Handle form data change
+  const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -278,9 +278,10 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
       });
 
       // setCombinedData(combined);
-      result['materials'] = combined;  // Replace materials data with combined data
+      // result['materials'] = combined;  // Replace materials data with combined data
+      result['specfinal'] = combined;
+      result['SpecDetails'] = formData
       console.log("Modified result:", result);
-
       try {
         const response = await window.api.send('import-excel', result);
         setMessage(response);
@@ -316,16 +317,16 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
                     <label>Document number</label>
                     <input type="text" name='Documentnumber' value={formData.Documentnumber} onChange={handleChange} />
                     <label>Spec name</label>
-                    <input type="text" name='specName' value={formData.specName} onChange={handleChange}/>
+                    <input type="text" name='specName' value={formData.specName} onChange={handleChange} />
                     <label>Revision</label>
-                    <input type="text" name='Revision' value={formData.Revision} onChange={handleChange}/>
+                    <input type="text" name='Revision' value={formData.Revision} onChange={handleChange} />
                     <label>Revision date</label>
-                    <input type="text" name='RevisionDate' value={formData.RevisionDate} onChange={handleChange}/>
+                    <input type="text" name='RevisionDate' value={formData.RevisionDate} onChange={handleChange} />
                     <label>Choose Branch table</label>
                     <input
                       list="branchTableOptions"
                       name='branchTable'
-                      value={formData.branchTable} 
+                      value={formData.branchTable}
                       onChange={handleChange}
                       placeholder="Select or type branch name"
                     />
@@ -335,7 +336,7 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
                       ))}
                     </datalist>
                     <label>Type</label>
-                    <input type="text" name='type' value={formData.type} onChange={handleChange}/>
+                    <input type="text" name='type' value={formData.type} onChange={handleChange} />
                     <label>Choose spec excel file</label>
                     <input type="file" accept=".xls,.xlsx" onChange={handleFileChange} />
                     <a href="#">Download sample excel template</a>

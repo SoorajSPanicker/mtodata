@@ -234,7 +234,7 @@ function createDatabase() {
             db.run('CREATE TABLE IF NOT EXISTS MtoBranchTable(branchId text,Documentnumber TEXT,branchtableName TEXT,Revision TEXT, RevisionDate TEXT, ExcelFileid TEXT,preparedBy TEXT,checkedBy TEXT, approvedBy TEXT, PRIMARY KEY(branchId))')
             db.run('CREATE TABLE IF NOT EXISTS MtoBranchTableData(BranchTableId TEXT,branchId text, MainSize TEXT, branchSize TEXT, Item TEXT, ItemDescription TEXT, PRIMARY KEY(BranchTableId))')
             //  ---------------Spec table------------------//
-            db.run('CREATE TABLE IF NOT EXISTS MtoSpecTable(specId text,Documentnumber TEXT,specName TEXT,Revision TEXT, RevisionDate TEXT,branchTable TEXT,type TEXT,  ExcelFileid TEXT,preparedBy TEXT,checkedBy TEXT, approvedBy TEXT, PRIMARY KEY(specId))')
+            db.run('CREATE TABLE IF NOT EXISTS MtoSpecTable(specId Text,Documentnumber TEXT,specName TEXT,Revision TEXT, RevisionDate TEXT,branchTable TEXT,type TEXT,  ExcelFileid TEXT,preparedBy TEXT,checkedBy TEXT, approvedBy TEXT, PRIMARY KEY(specId))')
 
             db.run('CREATE TABLE IF NOT EXISTS MtoSpecMaterialTable(specMaterialId TEXT,specId TEXT, itemType TEXT, fittingType TEXT, size1 NUMBER, size2 NUMBER, GeometricStd TEXT, EDS_VDS TEXT, endConn TEXT, materialDescrip TEXT, MDS TEXT, rating TEXT, SCHD TEXT, Notes TEXT, remarks TEXT, PRIMARY KEY(specMaterialId))')
             // db.run('CREATE TABLE IF NOT EXISTS MtoSpecMaterialTable(specMaterialId text,specId text, ITEM TEXT,TYPE TEXT, RANGE_FROM TEXT, RANGE_TO TEXT, GEOMETRIC_STANDARD TEXT, EDS_VDS TEXT,END_CONN_1 TEXT, END_CONN_2 TEXT, MATERIAL_DESCR TEXT, MDS TEXT, RATING TEXT, SCHD TEXT, NOTES TEXT, PRIMARY KEY(specMaterialId))')
@@ -242,7 +242,7 @@ function createDatabase() {
             db.run('CREATE TABLE IF NOT EXISTS MtoSpecSizeTable(SizeId TEXT, specId TEXT , ND_inch TEXT, OD_mm TEXT, THK_mm TEXT, SCH TEXT ,WEIGHT TEXT, PRIMARY KEY(SizeId))')
             // db.run('CREATE TABLE IF NOT EXISTS MtoSpecTempPresTable(tempPresId TEXT,specId TEXT ,Temperature TEXT, Pressure TEXT ,PRIMARY KEY(tempPresId))')
             db.run('CREATE TABLE IF NOT EXISTS MtoSpecTempPresTable(tempPresId TEXT,specId TEXT ,Pressure_Barg TEXT, Temperature_Deg_C TEXT ,PRIMARY KEY(tempPresId))')
-            db.run('CREATE TABLE IF NOT EXISTS MtoSpecDetTable(specDetId text,specId text, ITEM TEXT,TYPE TEXT, SIZE1, SIZE2 TEXT, GEOMETRIC_STANDARD TEXT, EDS_VDS TEXT,END_CONN_1 TEXT, END_CONN_2 TEXT, MATERIAL_DESCR TEXT, MDS TEXT, RATING TEXT, SCHD TEXT, NOTES TEXT, PRIMARY KEY(specDetId))')
+            db.run('CREATE TABLE IF NOT EXISTS MtoSpecDetTable(specDetId Text,specId text, ITEM TEXT,TYPE TEXT, RANGE_FROM TEXT, RANGE_TO TEXT, GEOMETRIC_STANDARD TEXT, EDS_VDS TEXT,END_CONN_1 TEXT, END_CONN_2 TEXT, MATERIAL_DESCR TEXT, MDS TEXT, RATING TEXT, SCHD TEXT, NOTES TEXT, PRIMARY KEY(specDetId))')
         }
     });
     databasePath = path.join(selectedFolderPath, 'database.db');
@@ -877,15 +877,15 @@ function insertMaterialsData(data, specId) {
     const stmt = db.prepare(sql);
 
     data.forEach(row => {
-       
+
         const specMaterialId = generateCustomID('Ma');
         stmt.run([
             specMaterialId,
             specId,
             row.itemType,
             row.fittingType,
-            row.size1,  
-            row.size2,  
+            row.size1,
+            row.size2,
             row.geometricStandard, // Matches GeometricStd in DB
             row.edsVds,          // Matches EDS_VDS in DB
             row.endConn,
@@ -1271,12 +1271,12 @@ app.whenReady().then(() => {
                         mainWindow.webContents.send('specsize-table-response', rows);
 
                     });
-                    db.all("SELECT * FROM MtoSpecMaterialTable", (err, rows) => {
+                    db.all("SELECT * FROM MtoSpecDetTable", (err, rows) => {
                         if (err) {
-                            console.error('Error fetching data from MtoBranchTable table:', err.message);
+                            console.error('Error fetching data from MtoSpecDetTable table:', err.message);
                             return;
                         }
-                        console.log('Data in the SpecMaterial table:', rows);
+                        console.log('Data in the MtoSpecDetTable table:', rows);
                         mainWindow.webContents.send('specmat-table-response', rows);
 
                     });
@@ -1287,6 +1287,22 @@ app.whenReady().then(() => {
                         }
                         console.log('Data in the SpecTemp table:', rows);
                         mainWindow.webContents.send('spectemp-table-response', rows);
+                    });
+                    db.all("SELECT * FROM MtoSpecTable", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from MtoSpecTable table:', err.message);
+                            return;
+                        }
+                        console.log('Data in the MtoSpecTable table:', rows);
+                        mainWindow.webContents.send('specdet-table-response', rows);
+                    });
+                    db.all("SELECT * FROM MtoSpecMaterialTable", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from MtoSpecMaterialTable table:', err.message);
+                            return;
+                        }
+                        console.log('Data in the MtoSpecMaterialTable table:', rows);
+                        mainWindow.webContents.send('specdet-detail-response', rows);
                     });
                 });
             } else {
@@ -8720,77 +8736,678 @@ app.whenReady().then(() => {
 
     // ------------------MTO------------------------------
 
+    // ipcMain.on('import-excel', async (event, data) => {
+    //     if (!databasePath) {
+    //         console.error('Project database path not available.');
+    //         return;
+    //     }
+    //     console.log(data);
+    //     const specId = generateCustomID('Sp');
+
+
+    //     const projectDb = new sqlite3.Database(databasePath, (err) => {
+    //         if (err) {
+    //             console.error('Error opening project database:', err.message);
+    //             return;
+    //         }
+    //         Object.entries(data).forEach(([sheet, rows]) => {
+    //             switch (sheet) {
+    //                 // case 'SpecDetails':
+    //                 //     console.log(`sheet:${sheet}`);
+    //                 //     console.log(rows);
+    //                 //     break;
+    //                 case 'materials':
+    //                     insertMaterialsData(rows, specId);
+    //                     // console.log(`sheet:${sheet}`);
+    //                     // console.log(rows);
+
+    //                     break;
+    //                 case 'size':
+    //                     insertSizeData(rows, specId);
+    //                     // console.log(`sheet:${sheet}`);
+    //                     // console.log(rows);
+    //                     break;
+    //                 case 'Temppres':
+    //                     insertTemppresData(rows, specId);
+    //                     // console.log(`sheet:${sheet}`);
+    //                     // console.log(rows);
+    //                     break;
+    //                 default:
+    //                     console.warn(`Unknown sheet: ${sheet}`);
+    //             }
+    //         });
+    //         projectDb.all("SELECT * FROM MtoSpecSizeTable", (err, rows) => {
+    //             if (err) {
+    //                 console.error('Error fetching data from MtoBranchTable table:', err.message);
+    //                 return;
+    //             }
+    //             // console.log(rows);
+    //             mainWindow.webContents.send('specsize-table-response', rows);
+
+    //         });
+    //         projectDb.all("SELECT * FROM MtoSpecMaterialTable", (err, rows) => {
+    //             if (err) {
+    //                 console.error('Error fetching data from MtoBranchTable table:', err.message);
+    //                 return;
+    //             }
+    //             console.log(`mtospecmaterialtable value: ${rows}`);
+    //             mainWindow.webContents.send('specmat-table-response', rows);
+
+    //         });
+    //         projectDb.all("SELECT * FROM MtoSpecTempPresTable", (err, rows) => {
+    //             if (err) {
+    //                 console.error('Error fetching data from MtoBranchTable table:', err.message);
+    //                 return;
+    //             }
+    //             // console.log(rows);
+    //             mainWindow.webContents.send('spectemp-table-response', rows);
+    //         });
+    //     })
+    //     event.reply('import-response', 'Data imported successfully');
+
+    // });
+
+    // ipcMain.on('import-excel', async (event, data) => {
+    //     if (!databasePath) {
+    //         console.error('Project database path not available.');
+    //         return;
+    //     }
+
+    //     const projectDb = new sqlite3.Database(databasePath, (err) => {
+    //         if (err) {
+    //             console.error('Error opening project database:', err.message);
+    //             return;
+    //         }
+
+    //         const specId = generateCustomID('Sp');
+
+    //         // First insert materials data
+    //         const materialStmt = projectDb.prepare(`INSERT INTO MtoSpecMaterialTable (
+    //             specMaterialId, specId, itemType, fittingType, size1, size2,
+    //             GeometricStd, EDS_VDS, endConn, materialDescrip, MDS, rating,
+    //             SCHD, Notes
+    //         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+    //         console.log(`materials value${data.materials}`);
+
+    //         data.materials.forEach(row => {
+    //             const specMaterialId = generateCustomID('Ma');
+    //             materialStmt.run([
+    //                 specMaterialId,
+    //                 specId,
+    //                 row.itemType,
+    //                 row.fittingType,
+    //                 row.size1,
+    //                 row.size2,
+    //                 row.geometricStandard,
+    //                 row.edsVds,
+    //                 row.endConn,
+    //                 row.materialDescr,
+    //                 row.mds,
+    //                 row.rating,
+    //                 row.schd,
+    //                 row.notes
+    //             ], (err) => {
+    //                 if (err) {
+    //                     console.error('Error inserting materials row:', err);
+    //                 }
+    //             });
+    //         });
+    //         materialStmt.finalize();
+
+    //         // Then insert size data
+    //         const sizeStmt = projectDb.prepare(`INSERT INTO MtoSpecSizeTable 
+    //             (SizeId, specId, ND_inch, OD_mm, THK_mm, SCH, WEIGHT) 
+    //             VALUES (?, ?, ?, ?, ?, ?, ?)`);
+    //         console.log(`size values ${data.size}`);
+
+    //         const ndInchRow = data.size.find(row => row[0] === 'ND (inch)');
+    //         const odRow = data.size.find(row => row[0] === 'OD (mm)');
+    //         const thkRow = data.size.find(row => row[0] === 'THK (mm)');
+    //         const schRow = data.size.find(row => row[0] === 'SCH');
+    //         const weightRow = data.size.find(row => row[0] === 'WEIGHT');
+
+    //         for (let i = 1; i < ndInchRow.length; i++) {
+    //             const SizeId = generateCustomID('Si');
+    //             sizeStmt.run([
+    //                 SizeId,
+    //                 specId,
+    //                 ndInchRow[i],
+    //                 odRow[i],
+    //                 thkRow[i],
+    //                 schRow[i],
+    //                 weightRow[i]
+    //             ], (err) => {
+    //                 if (err) {
+    //                     console.error('Error inserting size row:', err);
+    //                 }
+    //             });
+    //         }
+    //         sizeStmt.finalize();
+
+    //         // Finally insert temperature/pressure data
+    //         const tempPresStmt = projectDb.prepare(`INSERT INTO MtoSpecTempPresTable 
+    //             (tempPresId, specId, Pressure_Barg, Temperature_Deg_C)
+    //             VALUES (?, ?, ?, ?)`);
+    //         console.log(`temp values ${data.Temppres}`);
+
+    //         const pressureRow = data.Temppres.find(row => row[0] === 'Pressure (Barg)');
+    //         const temperatureRow = data.Temppres.find(row => row[0] === 'Temperature (Deg. C)');
+
+    //         for (let i = 1; i < pressureRow.length; i++) {
+    //             const tempPresId = generateCustomID('Te');
+    //             tempPresStmt.run([
+    //                 tempPresId,
+    //                 specId,
+    //                 pressureRow[i],
+    //                 temperatureRow[i]
+    //             ], (err) => {
+    //                 if (err) {
+    //                     console.error('Error inserting Temppres row:', err);
+    //                 }
+    //             });
+    //         }
+    //         tempPresStmt.finalize();
+
+    //         // Fetch and send back all data
+    // projectDb.all("SELECT * FROM MtoSpecSizeTable", (err, rows) => {
+    //     if (err) {
+    //         console.error('Error fetching data from MtoSpecSizeTable:', err.message);
+    //         return;
+    //     }
+    //     console.log('Data in the MtoSpecSizeTable table:', rows);
+    //     mainWindow.webContents.send('specsize-table-response', rows);
+    // });
+
+    // projectDb.all("SELECT * FROM MtoSpecMaterialTable", (err, rows) => {
+    //     if (err) {
+    //         console.error('Error fetching data from MtoSpecMaterialTable:', err.message);
+    //         return;
+    //     }
+    //     console.log('Data in the MtoSpecMaterialTable table:', rows);
+    //     mainWindow.webContents.send('specmat-table-response', rows);
+    // });
+
+    // projectDb.all("SELECT * FROM MtoSpecTempPresTable", (err, rows) => {
+    //     if (err) {
+    //         console.error('Error fetching data from MtoSpecTempPresTable:', err.message);
+    //         return;
+    //     }
+    //     console.log('Data in the MtoSpecTempPresTable table:', rows);
+    //     mainWindow.webContents.send('spectemp-table-response', rows);
+    // });
+    //     });
+
+    //     event.reply('import-response', 'Data imported successfully');
+    // });
+
+    // ipcMain.on('import-excel', async (event, data) => {
+    //     if (!databasePath) {
+    //         event.reply('import-response', { success: false, error: 'Project database path not available.' });
+    //         return;
+    //     }
+
+    //     const projectDb = new sqlite3.Database(databasePath);
+    //     let statements = []; // Track all prepared statements
+
+    //     try {
+    //         const specId = generateCustomID('Sp');
+
+    //         await new Promise((resolve, reject) => {
+    //             projectDb.serialize(() => {
+    //                 projectDb.run('BEGIN TRANSACTION');
+
+    //                 // First insert into MtoSpecTable
+    //                 projectDb.run(
+    //                     `INSERT INTO MtoSpecTable (
+    //                         specId, Documentnumber, specName, Revision, 
+    //                         RevisionDate, branchTable, type
+    //                     ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    //                     [
+    //                         specId,
+    //                         data.SpecDetails.Documentnumber,
+    //                         data.SpecDetails.specName,
+    //                         data.SpecDetails.Revision,
+    //                         data.SpecDetails.RevisionDate,
+    //                         data.SpecDetails.branchTable,
+    //                         data.SpecDetails.type
+    //                     ],
+    //                     (err) => {
+    //                         if (err) {
+    //                             reject(err);
+    //                             return;
+    //                         }
+    //                     }
+    //                 );
+
+    //                 // Materials Table Insertion
+    //                 const materialStmt = projectDb.prepare(`
+    //                     INSERT INTO MtoSpecMaterialTable (
+    //                         specMaterialId, specId, itemType, fittingType, size1, size2,
+    //                         GeometricStd, EDS_VDS, endConn, materialDescrip, MDS, rating,
+    //                         SCHD, Notes
+    //                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    //                 `);
+    //                 statements.push(materialStmt);
+
+    //                 data.specfinal.forEach(row => {
+    //                     const specMaterialId = generateCustomID('Ma');
+    //                     materialStmt.run([
+    //                         specMaterialId,
+    //                         specId,
+    //                         row.itemType,
+    //                         row.fittingType,
+    //                         row.size1,
+    //                         row.size2,
+    //                         row.geometricStandard,
+    //                         row.edsVds,
+    //                         row.endConn,
+    //                         row.materialDescr,
+    //                         row.mds,
+    //                         row.rating,
+    //                         row.schd,
+    //                         row.notes
+    //                     ], (err) => {
+    //                         if (err) reject(err);
+    //                     });
+    //                 });
+
+    //                 // Size Table Insertion
+    //                 const sizeStmt = projectDb.prepare(`
+    //                     INSERT INTO MtoSpecSizeTable 
+    //                     (SizeId, specId, ND_inch, OD_mm, THK_mm, SCH, WEIGHT) 
+    //                     VALUES (?, ?, ?, ?, ?, ?, ?)
+    //                 `);
+    //                 statements.push(sizeStmt);
+
+    //                 const ndInchRow = data.size.find(row => row[0] === 'ND (inch)');
+    //                 const odRow = data.size.find(row => row[0] === 'OD (mm)');
+    //                 const thkRow = data.size.find(row => row[0] === 'THK (mm)');
+    //                 const schRow = data.size.find(row => row[0] === 'SCH');
+    //                 const weightRow = data.size.find(row => row[0] === 'WEIGHT');
+
+    //                 for (let i = 1; i < ndInchRow.length; i++) {
+    //                     const SizeId = generateCustomID('Si');
+    //                     sizeStmt.run([
+    //                         SizeId,
+    //                         specId,
+    //                         ndInchRow[i],
+    //                         odRow[i],
+    //                         thkRow[i],
+    //                         schRow[i],
+    //                         weightRow[i]
+    //                     ], (err) => {
+    //                         if (err) reject(err);
+    //                     });
+    //                 }
+
+    //                 // Temperature/Pressure Table Insertion
+    //                 const tempPresStmt = projectDb.prepare(`
+    //                     INSERT INTO MtoSpecTempPresTable 
+    //                     (tempPresId, specId, Pressure_Barg, Temperature_Deg_C)
+    //                     VALUES (?, ?, ?, ?)
+    //                 `);
+    //                 statements.push(tempPresStmt);
+
+    //                 const pressureRow = data.Temppres.find(row => row[0] === 'Pressure (Barg)');
+    //                 const temperatureRow = data.Temppres.find(row => row[0] === 'Temperature (Deg. C)');
+
+    //                 for (let i = 1; i < pressureRow.length; i++) {
+    //                     const tempPresId = generateCustomID('Te');
+    //                     tempPresStmt.run([
+    //                         tempPresId,
+    //                         specId,
+    //                         pressureRow[i],
+    //                         temperatureRow[i]
+    //                     ], (err) => {
+    //                         if (err) reject(err);
+    //                     });
+    //                 }
+
+                    // const specDetStmt = projectDb.prepare(`
+                    //     INSERT INTO MtoSpecDetTable (
+                    //         specDetId, specId, ITEM, TYPE, RANGE_FROM, RANGE_TO,
+                    //         GEOMETRIC_STANDARD, EDS_VDS, END_CONN_1, END_CONN_2,
+                    //         MATERIAL_DESCR, MDS, RATING, SCHD, NOTES
+                    //     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    // `);
+                    // statements.push(specDetStmt);
+
+                    // // Process materials data starting from index 3 to skip headers
+                    // data.materials.slice(2).forEach(row => {
+                    //     const specDetId = generateCustomID('Sd');
+                    //     specDetStmt.run([
+                    //         specDetId,
+                    //         specId,
+                    //         row[0],  // ITEM (itemType)
+                    //         row[1],  // TYPE (fittingType)
+                    //         row[2],  // RANGE_FROM
+                    //         row[3],  // RANGE_TO
+                    //         row[4],  // GEOMETRIC_STANDARD
+                    //         row[5],  // EDS_VDS
+                    //         row[6],  // END_CONN_1
+                    //         row[6],  // END_CONN_2 (same as END_CONN_1)
+                    //         row[7],  // MATERIAL_DESCR
+                    //         row[8],  // MDS
+                    //         row[9],  // RATING
+                    //         row[10], // SCHD
+                    //         row[11]  // NOTES
+                    //     ], (err) => {
+                    //         if (err) reject(err);
+                    //     });
+                    // });
+
+    //                 // Finalize all statements before committing
+    //                 statements.forEach(stmt => stmt.finalize());
+
+    //                 // Commit transaction and fetch results
+    //                 projectDb.run('COMMIT', (err) => {
+    //                     if (err) {
+    //                         reject(err);
+    //                         return;
+    //                     }
+
+    //                     // Fetch and send data
+    //                     const queries = [
+    //                         { table: 'MtoSpecSizeTable', event: 'specsize-table-response' },
+    //                         { table: 'MtoSpecMaterialTable', event: 'specmat-table-response' },
+    //                         { table: 'MtoSpecTempPresTable', event: 'spectemp-table-response' },
+    //                         { table: 'MtoSpecTable', event: 'specdet-table-response' },
+    //                         {table: 'MtoSpecDetTable', event: 'specdet-detail-response'}
+    //                     ];
+
+    //                     let completed = 0;
+    //                     queries.forEach(({ table, event }) => {
+    //                         projectDb.all(`SELECT * FROM ${table}`, (err, rows) => {
+    //                             if (err) {
+    //                                 console.error(`Error fetching from ${table}:`, err);
+    //                             } else {
+    //                                 if (event) {
+    //                                     mainWindow.webContents.send(event, rows);
+    //                                 } else {
+    //                                     console.log(`Data in the ${table} table:`, rows);
+    //                                 }
+    //                             }
+    //                             completed++;
+    //                             if (completed === queries.length) {
+    //                                 resolve();
+    //                             }
+    //                         });
+    //                     });
+    //                 });
+    //             });
+    //         });
+
+    //         event.reply('import-response', {
+    //             success: true,
+    //             message: 'Data imported successfully'
+    //         });
+
+    //     } catch (error) {
+    //         // Rollback on error
+    //         projectDb.run('ROLLBACK');
+    //         console.error('Error during import:', error);
+    //         event.reply('import-response', {
+    //             success: false,
+    //             error: 'Failed to import data: ' + error.message
+    //         });
+    //     } finally {
+    //         // Ensure all statements are finalized before closing
+    //         statements.forEach(stmt => {
+    //             try {
+    //                 stmt.finalize();
+    //             } catch (e) {
+    //                 console.error('Error finalizing statement:', e);
+    //             }
+    //         });
+
+    //         // Close database connection
+    //         projectDb.close((err) => {
+    //             if (err) {
+    //                 console.error('Error closing database:', err);
+    //             }
+    //         });
+    //     }
+    // });
+
     ipcMain.on('import-excel', async (event, data) => {
         if (!databasePath) {
-            console.error('Project database path not available.');
+            event.reply('import-response', { success: false, error: 'Project database path not available.' });
             return;
         }
-        console.log(data);
-        const specId = generateCustomID('Sp');
+
+        const projectDb = new sqlite3.Database(databasePath);
+        let statements = []; // Track all prepared statements
+        let statementsFinalized = false; // Track if statements have been finalized
+
         try {
-            Object.entries(data).forEach(([sheet, rows]) => {
-                switch (sheet) {
-                    case 'SpecDetails':
-                        console.log(`sheet:${sheet}`);
-                        console.log(rows);
-                        break;
-                    case 'materials':
-                        insertMaterialsData(rows, specId);
-                        console.log(`sheet:${sheet}`);
-                        // console.log(rows);
-                        break;
-                    case 'size':
-                        insertSizeData(rows, specId);
-                        console.log(`sheet:${sheet}`);
-                        // console.log(rows);
-                        break;
-                    case 'Temppres':
-                        insertTemppresData(rows, specId);
-                        console.log(`sheet:${sheet}`);
-                        // console.log(rows);
-                        break;
-                    default:
-                        console.warn(`Unknown sheet: ${sheet}`);
+            const specId = generateCustomID('Sp');
+
+            await new Promise((resolve, reject) => {
+                projectDb.serialize(() => {
+                    projectDb.run('BEGIN TRANSACTION');
+
+                    // First insert into MtoSpecTable
+                    projectDb.run(
+                        `INSERT INTO MtoSpecTable (
+                            specId, Documentnumber, specName, Revision, 
+                            RevisionDate, branchTable, type
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            specId,
+                            data.SpecDetails.Documentnumber,
+                            data.SpecDetails.specName,
+                            data.SpecDetails.Revision,
+                            data.SpecDetails.RevisionDate,
+                            data.SpecDetails.branchTable,
+                            data.SpecDetails.type
+                        ],
+                        (err) => {
+                            if (err) {
+                                reject(err);
+                                return;
+                            }
+                        }
+                    );
+
+                    // SpecDet Table Insertion
+                    const specDetStmt = projectDb.prepare(`
+                        INSERT INTO MtoSpecDetTable (
+                            specDetId, specId, ITEM, TYPE, RANGE_FROM, RANGE_TO,
+                            GEOMETRIC_STANDARD, EDS_VDS, END_CONN_1, END_CONN_2,
+                            MATERIAL_DESCR, MDS, RATING, SCHD, NOTES
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `);
+                    statements.push(specDetStmt);
+
+                    // Process materials data starting from index 3 to skip headers
+                    data.materials.slice(2).forEach(row => {
+                        const specDetId = generateCustomID('Sd');
+                        specDetStmt.run([
+                            specDetId,
+                            specId,
+                            row[0],  // ITEM (itemType)
+                            row[1],  // TYPE (fittingType)
+                            row[2],  // RANGE_FROM
+                            row[3],  // RANGE_TO
+                            row[4],  // GEOMETRIC_STANDARD
+                            row[5],  // EDS_VDS
+                            row[6],  // END_CONN_1
+                            row[6],  // END_CONN_2 (same as END_CONN_1)
+                            row[7],  // MATERIAL_DESCR
+                            row[8],  // MDS
+                            row[9],  // RATING
+                            row[10], // SCHD
+                            row[11]  // NOTES
+                        ], (err) => {
+                            if (err) reject(err);
+                        });
+                    });
+
+
+                    // Materials Table Insertion for specfinal data
+                    const materialStmt = projectDb.prepare(`
+                        INSERT INTO MtoSpecMaterialTable (
+                            specMaterialId, specId, itemType, fittingType, size1, size2,
+                            GeometricStd, EDS_VDS, endConn, materialDescrip, MDS, rating,
+                            SCHD, Notes
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `);
+                    statements.push(materialStmt);
+
+                    data.specfinal.forEach(row => {
+                        const specMaterialId = generateCustomID('Ma');
+                        materialStmt.run([
+                            specMaterialId,
+                            specId,
+                            row.itemType,
+                            row.fittingType,
+                            row.size1,
+                            row.size2,
+                            row.geometricStandard,
+                            row.edsVds,
+                            row.endConn,
+                            row.materialDescr,
+                            row.mds,
+                            row.rating,
+                            row.schd,
+                            row.notes
+                        ], (err) => {
+                            if (err) reject(err);
+                        });
+                    });
+
+                    // Size Table Insertion
+                    const sizeStmt = projectDb.prepare(`
+                        INSERT INTO MtoSpecSizeTable 
+                        (SizeId, specId, ND_inch, OD_mm, THK_mm, SCH, WEIGHT) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    `);
+                    statements.push(sizeStmt);
+
+                    const ndInchRow = data.size.find(row => row[0] === 'ND (inch)');
+                    const odRow = data.size.find(row => row[0] === 'OD (mm)');
+                    const thkRow = data.size.find(row => row[0] === 'THK (mm)');
+                    const schRow = data.size.find(row => row[0] === 'SCH');
+                    const weightRow = data.size.find(row => row[0] === 'WEIGHT');
+
+                    for (let i = 1; i < ndInchRow.length; i++) {
+                        const SizeId = generateCustomID('Si');
+                        sizeStmt.run([
+                            SizeId,
+                            specId,
+                            ndInchRow[i],
+                            odRow[i],
+                            thkRow[i],
+                            schRow[i],
+                            weightRow[i]
+                        ], (err) => {
+                            if (err) reject(err);
+                        });
+                    }
+
+                    // Temperature/Pressure Table Insertion
+                    const tempPresStmt = projectDb.prepare(`
+                        INSERT INTO MtoSpecTempPresTable 
+                        (tempPresId, specId, Pressure_Barg, Temperature_Deg_C)
+                        VALUES (?, ?, ?, ?)
+                    `);
+                    statements.push(tempPresStmt);
+
+                    const pressureRow = data.Temppres.find(row => row[0] === 'Pressure (Barg)');
+                    const temperatureRow = data.Temppres.find(row => row[0] === 'Temperature (Deg. C)');
+
+                    for (let i = 1; i < pressureRow.length; i++) {
+                        const tempPresId = generateCustomID('Te');
+                        tempPresStmt.run([
+                            tempPresId,
+                            specId,
+                            pressureRow[i],
+                            temperatureRow[i]
+                        ], (err) => {
+                            if (err) reject(err);
+                        });
+                    }
+
+                    // Finalize statements
+                    if (!statementsFinalized) {
+                        statements.forEach(stmt => {
+                            try {
+                                stmt.finalize();
+                            } catch (e) {
+                                console.warn('Statement already finalized:', e.message);
+                            }
+                        });
+                        statementsFinalized = true;
+                    }
+
+                    // Commit transaction and fetch results
+                    projectDb.run('COMMIT', (err) => {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+
+                        const queries = [
+                            { table: 'MtoSpecSizeTable', event: 'specsize-table-response' },
+                            { table: 'MtoSpecMaterialTable', event: 'specmat-table-response' },
+                            { table: 'MtoSpecTempPresTable', event: 'spectemp-table-response' },
+                            { table: 'MtoSpecTable', event: 'specdet-table-response' },
+                            { table: 'MtoSpecDetTable', event: 'specdet-detail-response' }
+                        ];
+
+                        let completed = 0;
+                        queries.forEach(({ table, event }) => {
+                            projectDb.all(`SELECT * FROM ${table}`, (err, rows) => {
+                                if (err) {
+                                    console.error(`Error fetching from ${table}:`, err);
+                                } else {
+                                    if (event) {
+                                        mainWindow.webContents.send(event, rows);
+                                    }
+                                }
+                                completed++;
+                                if (completed === queries.length) {
+                                    resolve();
+                                }
+                            });
+                        });
+                    });
+                });
+            });
+
+            event.reply('import-response', {
+                success: true,
+                message: 'Data imported successfully'
+            });
+
+        } catch (error) {
+            projectDb.run('ROLLBACK');
+            console.error('Error during import:', error);
+            event.reply('import-response', {
+                success: false,
+                error: 'Failed to import data: ' + error.message
+            });
+        } finally {
+            // Only finalize statements if they haven't been finalized yet
+            if (!statementsFinalized && statements.length > 0) {
+                statements.forEach(stmt => {
+                    try {
+                        stmt.finalize();
+                    } catch (e) {
+                        // Ignore finalization errors in cleanup
+                    }
+                });
+            }
+
+            projectDb.close((err) => {
+                if (err) {
+                    console.error('Error closing database:', err);
                 }
             });
-            const projectDb = new sqlite3.Database(databasePath, (err) => {
-                if (err) {
-                    console.error('Error opening project database:', err.message);
-                    return;
-                }
-                projectDb.all("SELECT * FROM MtoSpecSizeTable", (err, rows) => {
-                    if (err) {
-                        console.error('Error fetching data from MtoBranchTable table:', err.message);
-                        return;
-                    }
-                    // console.log(rows);
-                    mainWindow.webContents.send('specsize-table-response', rows);
-
-                });
-                projectDb.all("SELECT * FROM MtoSpecMaterialTable", (err, rows) => {
-                    if (err) {
-                        console.error('Error fetching data from MtoBranchTable table:', err.message);
-                        return;
-                    }
-                    console.log(`mtospecmaterialtable value: ${rows}`);
-                    mainWindow.webContents.send('specmat-table-response', rows);
-
-                });
-                projectDb.all("SELECT * FROM MtoSpecTempPresTable", (err, rows) => {
-                    if (err) {
-                        console.error('Error fetching data from MtoBranchTable table:', err.message);
-                        return;
-                    }
-                    // console.log(rows);
-                    mainWindow.webContents.send('spectemp-table-response', rows);
-                });
-            })
-            event.reply('import-response', 'Data imported successfully');
-        } catch (error) {
-            console.error('Error importing data:', error);
-            event.reply('import-response', 'Error importing data: ' + error.message);
         }
     });
+
+
 
     ipcMain.on('branchtabledata', (event, data) => {
 

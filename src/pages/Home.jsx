@@ -184,6 +184,8 @@ const [branchTableDataDetails,setBranchTableDataDetails] = useState([])
 const [specsizeDetails,setspecsizeDetails]= useState([])
 const [specmatDetails,setspecmatDetails] = useState([])
 const [spectempDetails,setspectempDetails] = useState([])
+const [specDetails,setspecDetails] = useState([])
+const [specmat,setspecmat]= useState([])
 
   // useEffect(() => {
   //   // Initialize the start time when the component mounts
@@ -1743,6 +1745,18 @@ useEffect(()=>{
     })
   })
 
+  useEffect(()=>{
+    window.api.receive('specdet-table-response',(data)=>{
+      setspecDetails(data);
+    })
+  })
+
+  useEffect(()=>{
+    window.api.receive('specdet-detail-response',(data)=>{
+      setspecmat(data);
+    })
+  })
+
 
   const handleDeleteTag = (tag,sys,disc,area) => {
     console.log(tag,disc,sys,area)
@@ -2865,7 +2879,7 @@ return (
             }
 
             {
-              reviewSpectable && <ReviewSpecMaterialTable specsizeDetails={specsizeDetails} specmatDetails={specmatDetails} spectempDetails={spectempDetails}/>
+              reviewSpectable && <ReviewSpecMaterialTable specsizeDetails={specsizeDetails} specmatDetails={specmatDetails} spectempDetails={spectempDetails} specDetails={specDetails} specmat={specmat}/>
             }
 
             {

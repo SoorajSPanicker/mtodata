@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 
-function ReviewSpecMaterialTable({ specsizeDetails, specmatDetails, spectempDetails }) {
+
+function ReviewSpecMaterialTable({ specsizeDetails, specmatDetails, spectempDetails, specDetails, specmat }) {
   useEffect(() => {
     console.log(specmatDetails);
 
@@ -15,6 +16,16 @@ function ReviewSpecMaterialTable({ specsizeDetails, specmatDetails, spectempDeta
     console.log(spectempDetails);
 
   }, [spectempDetails])
+
+  useEffect(() => {
+    console.log(specDetails);
+
+  }, [specDetails])
+
+  useEffect(() => {
+    console.log(specmat);
+
+  }, [specmat])
   return (
     <div style={{ zIndex: '1', position: 'absolute', width: '100%', backgroundColor: '#33334c', height: '100vh' }}>
 
@@ -25,45 +36,45 @@ function ReviewSpecMaterialTable({ specsizeDetails, specmatDetails, spectempDeta
 
 
         <div>
-          <h4>Materials table</h4>
+          <h4>Spec Details Table</h4>
           {/* <div className="table-container"> */}
           <table className='tagTable'>
             <thead>
               <tr>
-                <th className="wideHead">Item</th>
-                <th className="wideHead">Type</th>
-                <th className="mediumHead">From</th>
-                <th className="wideHead">To</th>
-                <th className="wideHead">Geometric Standard</th>
-                <th className="wideHead">EDS/VDS</th>
-                <th className="wideHead">End Conn#1</th>
-                <th className="wideHead">End Conn#2</th>
-                <th className="wideHead">Material Descr</th>
-                <th className="wideHead">MDS</th>
-                <th className="wideHead">Rating</th>
-                <th className="wideHead">SCHD</th>
-                <th className="wideHead">Notes</th>
+                <th>Item Type</th>
+                <th>Fitting Type</th>
+                <th>Size1</th>
+                <th>Size2</th>
+                <th>Geometric Standard</th>
+                <th>EDS/VDS</th>
+                <th>End Conn #1 #2</th>
+                <th>Material Descr.</th>
+                <th>MDS</th>
+                <th>Rating</th>
+                <th>SCHD.</th>
+                <th>Notes</th>
+                <th>Remarks</th>
                 <th className="tableActionCell">
                   <i className="fa fa-download" title="Import" ></i>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {specmatDetails.map((row, index) => (
-                <tr>
-                  <td>{row.ITEM}</td>
-                  <td>{row.TYPE}</td>
-                  <td>{row.RANGE_FROM}</td>
-                  <td>{row.RANGE_TO}</td>
-                  <td>{row.GEOMETRIC_STANDARD}</td>
+              {specmat.map((row, index) => (
+                <tr style={{backgroundColor:'black'}}>
+                  <td>{row.itemType}</td>
+                  <td>{row.fittingType}</td>
+                  <td>{row.size1}</td>
+                  <td>{row.size2}</td>
+                  <td>{row.GeometricStd}</td>
                   <td>{row.EDS_VDS}</td>
-                  <td>{row.END_CONN_1}</td>
-                  <td>{row.END_CONN_2}</td>
-                  <td>{row.MATERIAL_DESCR}</td>
+                  <td>{row.endConn}</td>
+                  <td>{row.materialDescrip}</td>
                   <td>{row.MDS}</td>
-                  <td>{row.RATING}</td>
+                  <td>{row.rating}</td>
                   <td>{row.SCHD}</td>
-                  <td>{row.NOTES}</td>
+                  <td>{row.Notes}</td>
+                  <td>{row.remarks}</td>
                   <td>
                     <i className="fa-solid fa-pencil"></i>
                     <i className="fa-solid fa-trash-can ms-3" ></i>
@@ -71,35 +82,6 @@ function ReviewSpecMaterialTable({ specsizeDetails, specmatDetails, spectempDeta
 
                 </tr>
               ))}
-            </tbody>
-          </table>
-          {/* </div>           */}
-        </div>
-        <div>
-          <h4>Spec Details Table</h4>
-          {/* <div className="table-container"> */}
-          <table className='tagTable'>
-            <thead>
-              <tr>
-                <th className="wideHead">Size1</th>
-                <th className="wideHead">Size2</th>
-                <th className="mediumHead">Item</th>
-                <th className="wideHead">Item Description</th>
-                <th className="tableActionCell">
-                  <i className="fa fa-download" title="Import" ></i>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>aaaa</td>
-                <td>bbbb</td>
-                <td>cccc</td>
-                <td>aaaa</td>
-                <i className="fa-solid fa-pencil"></i>
-                <i className="fa-solid fa-trash-can ms-3" ></i>
-              </tr>
-
             </tbody>
           </table>
           {/* </div>           */}
