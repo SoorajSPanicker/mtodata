@@ -1,0 +1,270 @@
+// import React, { useEffect, useRef } from 'react';
+// import * as THREE from 'three';
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+// import 'cesium/Build/Cesium/Widgets/widgets.css';
+
+// class EarthViewerClass {
+//     constructor(options = {}) {
+//         this.cesiumContainer = options.cesiumContainer;
+//         this.threeContainer = options.threeContainer;
+//         this.cesiumViewer = null;
+//         this.threeRenderer = null;
+//         this.threeScene = null;
+//         this.threeCamera = null;
+//         this.orbitControls = null;
+//         this.animationFrameId = null;
+//         this.ionToken = options.ionToken || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZWU3MTJjNi00Njk1LTQxZDktYmE4OS1mY2I3NTIyYzVhZTgiLCJpZCI6MTg3NjI0LCJpYXQiOjE3MDQ1NjAzMzF9.5FAkHltPwh5gROFmAfIEalS68ob5Xnsjt7EMkNcyIjE';
+        
+//     }
+
+//     async initialize() {
+//         try {
+//             await this.initCesium();
+//             // this.initThree();
+//             this.initOrbitControls(); // Added initialization of orbit controls
+//             this.setupEventListeners();
+//             this.startAnimation();
+//             return true;
+//         } catch (error) {
+//             console.error('Initialization error:', error);
+//             return false;
+//         }
+//     }
+
+//     async initCesium() {
+//         const Cesium = window.Cesium;
+//         Cesium.Ion.defaultAccessToken = this.ionToken;
+        
+//         this.cesiumViewer = new Cesium.Viewer(this.cesiumContainer, {
+//             terrainProvider: await Cesium.createWorldTerrainAsync(),
+//             baseLayerPicker: false,
+//             skyBox: false,
+//             skyAtmosphere: false,
+//             sceneMode: Cesium.SceneMode.SCENE3D,
+//             animation: false,
+//             timeline: false,
+//             navigationHelpButton: false,
+//             infoBox: false,
+//             fullscreenButton: false,
+//             geocoder: false,
+//             homeButton: false,
+//             scene3DOnly: true
+//         });
+
+//         this.cesiumViewer.cesiumWidget.creditContainer.style.display = "none";
+//         this.cesiumViewer.camera.setView({
+//             destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000)
+//         });
+//     }
+
+//     initThree() {
+//         this.threeRenderer = new THREE.WebGLRenderer({ 
+//             antialias: true,
+//             alpha: true
+//         });
+//         this.threeRenderer.setSize(window.innerWidth, window.innerHeight);
+//         this.threeRenderer.setClearColor(0x000000, 0);
+        
+//         this.threeContainer.appendChild(this.threeRenderer.domElement);
+
+//         this.threeScene = new THREE.Scene();
+//         this.threeCamera = new THREE.PerspectiveCamera(
+//             75,
+//             window.innerWidth / window.innerHeight,
+//             0.1,
+//             1000
+//         );
+//         this.threeCamera.position.z = 5;
+//     }
+
+//     initOrbitControls() {
+//         if (this.threeCamera && this.threeRenderer) {
+//             this.orbitControls = new OrbitControls(
+//                 this.threeCamera,
+//                 this.threeRenderer.domElement
+//             );
+            
+//             // Configure orbit controls
+//             this.orbitControls.enableDamping = true;
+//             this.orbitControls.dampingFactor = 0.05;
+//             this.orbitControls.screenSpacePanning = false;
+//             this.orbitControls.minDistance = 1;
+//             this.orbitControls.maxDistance = 50;
+//             this.orbitControls.maxPolarAngle = Math.PI;
+            
+//             // Enable smooth rotation
+//             this.orbitControls.rotateSpeed = 0.5;
+//             this.orbitControls.zoomSpeed = 1.0;
+//             this.orbitControls.panSpeed = 0.8;
+            
+//             // Add event listener for control changes
+//             this.orbitControls.addEventListener('change', () => {
+//                 if (this.threeRenderer && this.threeScene && this.threeCamera) {
+//                     this.threeRenderer.render(this.threeScene, this.threeCamera);
+//                 }
+//             });
+//         }
+//     }
+
+//     startAnimation() {
+//         const animate = () => {
+//             this.animationFrameId = requestAnimationFrame(animate);
+            
+//             // Update orbit controls
+//             if (this.orbitControls) {
+//                 this.orbitControls.update();
+//             }
+            
+//             if (this.threeRenderer && this.threeScene && this.threeCamera) {
+//                 this.threeRenderer.render(this.threeScene, this.threeCamera);
+//             }
+//         };
+//         animate();
+//     }
+
+//     async loadTileset(assetId) {
+//         const Cesium = window.Cesium;
+//         try {
+//             const tilesetResource = await Cesium.IonResource.fromAssetId(assetId);
+//             const tileset = await Cesium.Cesium3DTileset.fromUrl(tilesetResource);
+//             this.cesiumViewer.scene.primitives.add(tileset);
+//             await this.cesiumViewer.zoomTo(tileset);
+//             return tileset;
+//         } catch (error) {
+//             console.error('Error loading tileset:', error);
+//             throw error;
+//         }
+//     }
+
+//     setupEventListeners() {
+//         this.handleResize = this.handleResize.bind(this);
+//         window.addEventListener('resize', this.handleResize);
+//     }
+
+//     handleResize() {
+//         const width = window.innerWidth;
+//         const height = window.innerHeight;
+
+//         if (this.threeCamera) {
+//             this.threeCamera.aspect = width / height;
+//             this.threeCamera.updateProjectionMatrix();
+//         }
+
+//         if (this.threeRenderer) {
+//             this.threeRenderer.setSize(width, height);
+//         }
+
+//         if (this.cesiumViewer) {
+//             this.cesiumViewer.canvas.width = width;
+//             this.cesiumViewer.canvas.height = height;
+//             this.cesiumViewer.resize();
+//         }
+//     }
+
+//     destroy() {
+//         // Cleanup OrbitControls
+//         if (this.orbitControls) {
+//             this.orbitControls.dispose();
+//         }
+
+//         // Cleanup Cesium
+//         if (this.cesiumViewer) {
+//             this.cesiumViewer.destroy();
+//         }
+
+//         // Cleanup Three.js
+//         if (this.threeRenderer) {
+//             this.threeRenderer.dispose();
+//             if (this.threeContainer && this.threeContainer.contains(this.threeRenderer.domElement)) {
+//                 this.threeContainer.removeChild(this.threeRenderer.domElement);
+//             }
+//         }
+
+//         // Cancel animation frame
+//         if (this.animationFrameId) {
+//             cancelAnimationFrame(this.animationFrameId);
+//         }
+
+//         // Remove event listeners
+//         window.removeEventListener('resize', this.handleResize);
+//     }
+// }
+
+// const EarthViewerComponent = () => {
+//     const cesiumContainerRef = useRef(null);
+//     const threeContainerRef = useRef(null);
+//     const viewerInstanceRef = useRef(null);
+//     const tilesetRef = useRef(null);
+
+//     useEffect(() => {
+//         const initViewer = async () => {
+//             if (!window.Cesium) {
+//                 console.error('Cesium not loaded');
+//                 return;
+//             }
+
+//             try {
+//                 const viewer = new EarthViewerClass({
+//                     cesiumContainer: cesiumContainerRef.current,
+//                     ionToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZWU3MTJjNi00Njk1LTQxZDktYmE4OS1mY2I3NTIyYzVhZTgiLCJpZCI6MTg3NjI0LCJpYXQiOjE3MDQ1NjAzMzF9.5FAkHltPwh5gROFmAfIEalS68ob5Xnsjt7EMkNcyIjE'
+//                 });
+
+//                 await viewer.initialize();
+//                 viewerInstanceRef.current = viewer;
+
+//                 const tileset = await viewer.loadTileset(2828197);
+//                 tilesetRef.current = tileset;
+//             } catch (error) {
+//                 console.error('Failed to initialize Earth Viewer:', error);
+//             }
+//         };
+
+//         initViewer();
+
+//         return () => {
+//             if (viewerInstanceRef.current) {
+//                 viewerInstanceRef.current.destroy();
+//             }
+//         };
+//     }, []);
+
+//     return (
+//         <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+//             <div 
+//                 ref={cesiumContainerRef} 
+//                 style={{
+//                     position: 'absolute',
+//                     top: 0,
+//                     left: 0,
+//                     width: '100%',
+//                     height: '100%',
+//                     zIndex: 0
+//                 }}
+                
+//             />
+//             {/* style={{
+//                     position: 'absolute',
+//                     top: 0,
+//                     left: 0,
+//                     width: '100%',
+//                     height: '100%',
+//                     zIndex: 0
+//                 }}
+//                 style={{
+//                     position: 'absolute',
+//                     top: 0,
+//                     left: 0,
+//                     width: '100%',
+//                     height: '100%',
+//                     zIndex: 1,
+//                     pointerEvents: 'auto'
+//                 }} */}
+//             {/* <div 
+//                 ref={threeContainerRef}
+                
+//             /> */}
+//         </div>
+//     );
+// };
+
+// export default EarthViewerComponent;

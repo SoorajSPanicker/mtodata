@@ -1,1 +1,0 @@
-export const base_url = "https://podselectronjsonserver-1.onrender.com"

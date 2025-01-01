@@ -3,39 +3,138 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1 maximum-scale=1, user-scalable=no"  />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!-- boostrap link -->
-    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"> -->
-  
-
-  <!-- font awesome -->
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
-
-  <link rel="stylesheet" href="css/fonts.css">
-  <link rel="stylesheet" href="fontawesome/css/all.min.css">       
-  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css"> 
-  <link href="https://cesium.com/downloads/cesiumjs/releases/latest/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-      
-    <title>PODS</title>
-   
-    </style>
+    <meta name="description" content="Web site created using create-react-app" />
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">       
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css"> 
+    <link href="https://cdn.jsdelivr.net/npm/cesium@latest/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/cesium@latest/Build/Cesium/Cesium.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- <style>
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            width: 100%; 
+            height: 100%; 
+        }
+        #threeContainer { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: 1; 
+            pointer-events: none;
+        }
+        #cesiumContainer { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: 0; 
+        }
+    </style> -->
+    <title>PODS BOM</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-   
+    <!-- <div id="cesiumContainer"></div>
+    <div id="threeContainer"></div> -->
+
+    <!-- <script>
+        window.onload = async function() {
+            try {
+                // Initialize Cesium Viewer
+                Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZWU3MTJjNi00Njk1LTQxZDktYmE4OS1mY2I3NTIyYzVhZTgiLCJpZCI6MTg3NjI0LCJpYXQiOjE3MDQ1NjAzMzF9.5FAkHltPwh5gROFmAfIEalS68ob5Xnsjt7EMkNcyIjE';
+                
+                const cesiumViewer = new Cesium.Viewer('cesiumContainer', {
+                    terrainProvider: await Cesium.createWorldTerrainAsync(),
+                    baseLayerPicker: false,
+                    skyBox: false,
+                    skyAtmosphere: false,
+                    sceneMode: Cesium.SceneMode.SCENE3D,
+                    animation: false,
+                    timeline: false,
+                    navigationHelpButton: false,
+                    infoBox: false,
+                    fullscreenButton: false,
+                    geocoder: false,
+                    homeButton: false,
+                    scene3DOnly: true
+                });
+
+                // Remove default credits
+                cesiumViewer.cesiumWidget.creditContainer.style.display = "none";
+
+                // Initialize Three.js
+                const threeContainer = document.getElementById('threeContainer');
+                const renderer = new THREE.WebGLRenderer({ 
+                    antialias: true,
+                    alpha: true
+                });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setClearColor(0x000000, 0);
+                threeContainer.appendChild(renderer.domElement);
+
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 5;
+
+                
+                // Load Cesium Ion asset
+                try {
+                    const tilesetResource = await Cesium.IonResource.fromAssetId(2828197); // Replace with your asset ID
+                    const tileset = await Cesium.Cesium3DTileset.fromUrl(tilesetResource);
+                    cesiumViewer.scene.primitives.add(tileset);
+                    
+                    // Zoom to the tileset
+                    cesiumViewer.zoomTo(tileset).then(function() {
+                        console.log('Zoomed to tileset');
+                    }).catch(function(error) {
+                        console.error('Error zooming to tileset:', error);
+                    });
+                } catch (error) {
+                    console.error('Error loading tileset:', error);
+                }
+
+                // Set initial camera position
+                cesiumViewer.camera.setView({
+                    destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000)
+                });
+
+                // Animation loop
+                function animate() {
+                    requestAnimationFrame(animate);
+                    
+                    renderer.render(scene, camera);
+                }
+
+                animate();
+
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    const width = window.innerWidth;
+                    const height = window.innerHeight;
+
+                    camera.aspect = width / height;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(width, height);
+
+                    cesiumViewer.canvas.width = width;
+                    cesiumViewer.canvas.height = height;
+                    cesiumViewer.resize();
+                });
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        };
+    </script> -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
   </body>
-   <!-- boostrap script -->
-   <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
- <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script> -->
- <script src="https://cesium.com/downloads/cesiumjs/releases/latest/Build/Cesium/Cesium.js"></script>
- 
 </html>
