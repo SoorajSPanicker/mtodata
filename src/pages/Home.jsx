@@ -51,6 +51,13 @@ import ReviewSpecMaterialTable from '../components/ReviewSpecMaterialTable';
 import CustomSpecManangement from '../components/CustomSpecManangement';
 import ThreeComponent from '../components/ThreeComponent';
 import ReviewMtoDoc from '../components/ReviewMtoDoc';
+import ReviewMtoArea from '../components/ReviewMtoArea';
+import ReviewMtoTag from '../components/ReviewMtoTag';
+import ReviewMtoLine from '../components/ReviewMtoLine';
+import CreateMaterialList from '../components/CreateMaterialList';
+
+// import { div } from 'three/src/nodes/TSL.js';
+
 
 function Home() {
   const [leftNavVisible, setLeftNavVisible] = useState(true);
@@ -171,7 +178,12 @@ function Home() {
   const [reviewSpectable, setReviewSpectable] = useState(false);
   const [openCustomSpec, setOpenCustomSpec] = useState(false);
   const [openMto, setOpenMto] = useState(false);
-  const [reviewmtodoc , setreviewmtodoc]= useState(false)
+  const [createOpenMto, setcreateOpenMto] = useState(false)
+  const [createMtoMat, setcreateMtoMat] = useState(false)
+  const [reviewdocmto, setreviewdocmto] = useState(false)
+  const [reviewtagmto, setreviewtagmto] = useState(false)
+  const [reviewareamto, setreviewareamto] = useState(false)
+  const [reviewlinemto, setreviewlinemto] = useState(false)
 
   // ------------------------------------PID--------------------------//
   const [svgcontent, setsvgcontent] = useState('')
@@ -191,7 +203,11 @@ function Home() {
   const [specmat, setspecmat] = useState([])
   const [speccus, setspeccus] = useState([])
   const [mtodoc, setmtodoc] = useState([])
- 
+  const [mtoarea, setmtoarea] = useState([])
+  const [mtotag, setmtotag] = useState([])
+  const [mtolinelist, setmtolinelist] = useState([])
+  const [mtolinearea, setmtolinearea] = useState([])
+
   // useEffect(() => {
   //   // Initialize the start time when the component mounts
   //   const initializeSession = () => {
@@ -258,6 +274,40 @@ function Home() {
         console.log("deactivate")
         setActivate(true);
       }
+    })
+  }, [])
+
+  useEffect(() => {
+    window.api.receive('area-save-mto', (data) => {
+      console.log(data);
+      setmtoarea(data)
+    })
+  }, [])
+
+
+
+  useEffect(() => {
+    window.api.receive('tag-save-mto', (data) => {
+      console.log(data);
+      setmtotag(data)
+    })
+  }, [])
+
+  useEffect(() => {
+    console.log(mtoarea);
+  }, [mtoarea])
+
+  useEffect(() => {
+    window.api.receive('linelist-save-mto', (data) => {
+      console.log(data);
+      setmtolinelist(data)
+    })
+  }, [])
+
+  useEffect(() => {
+    window.api.receive('mtoline-area-save', (data) => {
+      console.log(data);
+      setmtolinearea(data)
     })
   }, [])
 
@@ -949,6 +999,7 @@ function Home() {
 
   const handleopenMtomanagement = (activesidelink) => {
     setOpenMto(true);
+    setcreateOpenMto(true);
     setOpenSpec(false);
     setOpenCustomSpec(false);
     setOpenBranchTable(false);
@@ -973,10 +1024,12 @@ function Home() {
     setExpandTreeManangement(false);
     setOpenTreeTable(false);
     setiRoamercanvas(false);
+    setreviewdocmto(false)
   }
 
-  const handleReviewmtodoctable = () => {
-    setOpenMto(false);
+  const handlematlistTable = () => {
+    setOpenMto(true);
+    setcreateOpenMto(false)
     setOpenSpec(false);
     setOpenCustomSpec(false);
     setOpenBranchTable(false);
@@ -1001,7 +1054,78 @@ function Home() {
     setExpandTreeManangement(false);
     setOpenTreeTable(false);
     setiRoamercanvas(false);
-    setreviewmtodoc(true)
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(true)
+  }
+
+  const handleReviewmtodoctable = (activesidelink) => {
+    setOpenMto(true);
+    setcreateOpenMto(false)
+    setOpenSpec(false);
+    setOpenCustomSpec(false);
+    setOpenBranchTable(false);
+    setCreateBranchtable(false);
+    setReviewBranchtable(false);
+    setActiveTab(activesidelink)
+    setSpidOpen(false);
+    setReviewtag(false);
+    setRegisterTag(false);
+    setexpandGLobalModal(false);
+    setEquipment(false);
+    setrightSideNavVisible(false);
+    setbulkimport(false);
+    setLineList(false);
+    setExpandDocument(false)
+    setRegisterDocument(false);
+    setExpandTags(false);
+    setTagInfoTable(false);
+    setCommentExpand(false);
+    setEditCommentStatus(false);
+    setCommentReviewOpen(false);
+    setExpandTreeManangement(false);
+    setOpenTreeTable(false);
+    setiRoamercanvas(false);
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(true)
+    setcreateMtoMat(false)
+  }
+  const handleReviewmtocretable = (activesidelink) => {
+    setOpenMto(true);
+    setcreateOpenMto(true)
+    setOpenSpec(false);
+    setOpenCustomSpec(false);
+    setOpenBranchTable(false);
+    setCreateBranchtable(false);
+    setReviewBranchtable(false);
+    // setActiveTab(activesidelink)
+    setSpidOpen(false);
+    setReviewtag(false);
+    setRegisterTag(false);
+    setexpandGLobalModal(false);
+    setEquipment(false);
+    setrightSideNavVisible(false);
+    setbulkimport(false);
+    setLineList(false);
+    setExpandDocument(false)
+    setRegisterDocument(false);
+    setExpandTags(false);
+    setTagInfoTable(false);
+    setCommentExpand(false);
+    setEditCommentStatus(false);
+    setCommentReviewOpen(false);
+    setExpandTreeManangement(false);
+    setOpenTreeTable(false);
+    setiRoamercanvas(false);
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
   }
 
   const handleExpandBranchmanagement = (tab) => {
@@ -2669,6 +2793,7 @@ function Home() {
                               <a class="sideLnk">Create</a>
                             </div>
                           </li>
+
                           <li>
                             <div id="tagsSideLnk" class="tabtabInactive" onClick={handleReviewSpecTable}>
                               <a class="sideLnk">Review</a>
@@ -2697,12 +2822,18 @@ function Home() {
                     <>
                       <li>
                         <div id="tagsSideLnk" class="tabActive" >
-                          <a class="sideLnk">Create</a>
+                          <a class="sideLnk" onClick={() => handleReviewmtocretable('mto')}>Create</a>
+                        </div>
+                        {/* onClick={handleReviewmtocretable} */}
+                      </li>
+                      <li>
+                        <div id="tagsSideLnk" class="tabtabActive" onClick={handlematlistTable}>
+                          <a class="sideLnk">Create Material List</a>
                         </div>
                       </li>
                       <li>
                         <div id="tagsSideLnk" class="tabInactive" >
-                          <a class="sideLnk" onClick={handleReviewmtodoctable}>Review</a>
+                          <a class="sideLnk" onClick={() => handleReviewmtodoctable('mto')}>Review</a>
                         </div>
                       </li>
                       <li>
@@ -2942,11 +3073,16 @@ function Home() {
               }
 
               {
-                openMto && <CreateMto allLineList={allLineList} allAreasInTable={allAreasInTable}/>
+                createOpenMto && <CreateMto allLineList={allLineList} allAreasInTable={allAreasInTable} />
               }
-              {reviewmtodoc && <ReviewMtoDoc mtodoc = {mtodoc}/>}
-
+              {reviewdocmto && <ReviewMtoDoc mtodoc={mtodoc} />}
+              {reviewareamto && <ReviewMtoArea mtoarea={mtoarea} />}
+              {reviewtagmto && <ReviewMtoTag mtotag={mtotag} />}
+              {reviewlinemto && <ReviewMtoLine mtolinelist={mtolinelist}  />}
+              {/* mtoarea={mtoarea} */}
+              {createMtoMat && <CreateMaterialList mtolinelist={mtolinelist} mtoarea={mtoarea}/>}
               {
+
                 expanddocument && <Documenttable allDocuments={allDocuments} />
               }
               {

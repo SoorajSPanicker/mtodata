@@ -247,9 +247,21 @@ function createDatabase() {
             db.run('CREATE TABLE IF NOT EXISTS MtoCustomTable(specCustomId TEXT, itemType TEXT, fittingType TEXT, size1 NUMBER, size2 NUMBER, GeometricStd TEXT, EDS_VDS TEXT, endConn TEXT, materialDescrip TEXT, MDS TEXT, rating TEXT, SCHD TEXT, Notes TEXT, remarks TEXT, preparedBy TEXT,checkedBy TEXT, approvedBy TEXT, PRIMARY KEY(specCustomId))')
 
             //--------------------MTO table---------------------------//
+            // db.run('CREATE TABLE IF NOT EXISTS MtoDocumentTable(Mto_DocID TEXT, ProjID TEXT, M_DocNo TEXT, M_DocName TEXT, RevNo TEXT, RevDate TEXT, RevDes TEXT, RevPreBy TEXT, RevChecBy TEXT, RevAppBy TEXT, RevPrepDate TEXT,RevCheckDate TEXT,RevAppDate TEXT, ChecklistNo TEXT, MtoSta TEXT, Preocur TEXT, PRIMARY KEY(Mto_DocID))')
+            // // db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT, fileNo TEXT, DocNo TEXT, TagNo TEXT, AreaNO TEXT, DisNo TEXT, SysNo TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
             db.run('CREATE TABLE IF NOT EXISTS MtoDocumentTable(Mto_DocID TEXT, ProjID TEXT, M_DocNo TEXT, M_DocName TEXT, RevNo TEXT, RevDate TEXT, RevDes TEXT, RevPreBy TEXT, RevChecBy TEXT, RevAppBy TEXT, RevPrepDate TEXT,RevCheckDate TEXT,RevAppDate TEXT, ChecklistNo TEXT, MtoSta TEXT, Preocur TEXT, PRIMARY KEY(Mto_DocID))')
-            // db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT, fileNo TEXT, DocNo TEXT, TagNo TEXT, AreaNO TEXT, DisNo TEXT, SysNo TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
+            db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT,fileId Text, fileNo TEXT,DocId TEXT, DocNo TEXT, tagId TEXT, tagNo Text, areaId TEXT , areaName TEXT,DiscId TEXT, DisName TEXT,SysID TEXT, SysName TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
+            db.run('CREATE TABLE IF NOT EXISTS MtoAreaTable(mtoareaId TEXT PRIMARY KEY, area TEXT, name TEXT)')
+            db.run('CREATE TABLE IF NOT EXISTS MtoTagTable(mtotagId TEXT, number TEXT, name TEXT, PRIMARY KEY(number))')
 
+            db.run('CREATE TABLE IF NOT EXISTS MtoAreaTagRelTable(mtoareaId TEXT, mtotagId TEXT, areaname TEXT, tagnumber TEXT)')
+            // db.run('CREATE TABLE IF NOT EXISTS MtoAreaTagRelTable(mtoareaId TEXT, mtosysId TEXT, areaname TEXT, sysname TEXT)')
+            db.run('CREATE TABLE IF NOT EXISTS MtoLineList (mtotagId TEXT,tag TEXT, fluidCode TEXT, lineId TEXT, medium TEXT, lineSizeIn REAL, lineSizeNb REAL,'
+                + 'pipingSpec TEXT, insType TEXT, insThickness TEXT, heatTrace TEXT, lineFrom TEXT, lineTo TEXT, pnid TEXT, pipingIso TEXT,'
+                + 'pipingStressIso TEXT, maxOpPress REAL, maxOpTemp REAL, dsgnPress REAL, minDsgnTemp REAL, maxDsgnTemp REAL, testPress REAL,'
+                + 'testMedium TEXT, testMediumPhase TEXT, massFlow REAL, volFlow REAL, density REAL, velocity REAL, paintSystem TEXT, ndtGroup TEXT,'
+                + 'chemCleaning TEXT, pwht TEXT, sysname TEXT, PRIMARY KEY(tag))')
+            db.run('CREATE TABLE IF NOT EXISTS MtoSystemTable(mtosysId TEXT PRIMARY KEY, sys TEXT, name TEXT)')
         }
     });
     databasePath = path.join(selectedFolderPath, 'database.db');
@@ -1325,10 +1337,49 @@ app.whenReady().then(() => {
                             console.error('Error fetching data from Tree table:', err.message);
                             return;
                         }
-        
+
                         console.log('Data in the MtoDocumentTable table:', rows);
                         mainWindow.webContents.send('save-doc-mto', rows);
                     });
+                    db.all("SELECT * FROM MtoAreaTable", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from MtoAreaTable:', err.message);
+                            return;
+                        }
+
+                        console.log('Data in the MtoAreaTable table:', rows);
+                        mainWindow.webContents.send('area-save-mto', rows);
+                    });
+
+                    db.all("SELECT * FROM MtoTagTable", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from MtoTagTable:', err.message);
+                            return;
+                        }
+
+                        console.log('Data in the MtoTagTable table:', rows);
+                        mainWindow.webContents.send('tag-save-mto', rows);
+                    });
+
+                    db.all("SELECT * FROM MtoLineList", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from MtoLineList:', err.message);
+                            return;
+                        }
+
+                        console.log('Data in the MtoLineList table:', rows);
+                        mainWindow.webContents.send('linelist-save-mto', rows);
+                    });
+                    db.all("SELECT * FROM MtoAreaTagRelTable", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from Tree table:', err.message);
+                            return;
+                        }
+        
+                        console.log('Data in the MtoAreaTagRelTable table:', rows);
+                        mainWindow.webContents.send('mtoline-area-save', rows);
+                    });
+
                 });
             } else {
                 console.error(`Project with ID ${projectNumber} not found.`);
@@ -3310,6 +3361,57 @@ app.whenReady().then(() => {
                         }
 
                         mainWindow.webContents.send('all-lines-fetched', rows);
+                    });
+
+                }
+            );
+        });
+    });
+
+    ipcMain.on('update-mtolinelist-table', (event, updatedData) => {
+        console.log("Received update message");
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        // Extracting updated data
+        const { tag, fluidCode, medium, lineSizeIn, lineSizeNb, pipingSpec, insType,
+            insThickness, heatTrace, lineFrom, lineTo, maxOpPress, maxOpTemp, dsgnPress, minDsgnTemp, maxDsgnTemp, testPress, testMedium, testMediumPhase, massFlow, volFlow, density, velocity, paintSystem, ndtGroup,
+            chemCleaning, pwht, sysname } = updatedData;
+
+        // Open the project's database
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            // Update the record in the database
+            projectDb.run(`UPDATE MtoLineList SET 
+                fluidCode = ?, medium = ?, lineSizeIn = ?, lineSizeNb = ?, pipingSpec = ?, 
+                insType = ?, insThickness = ?, heatTrace = ?, lineFrom = ?, lineTo = ?, maxOpPress = ?, maxOpTemp = ?, dsgnPress = ?, minDsgnTemp = ?, maxDsgnTemp = ?, testPress = ?, testMedium = ?, testMediumPhase = ?, 
+                massFlow = ?, volFlow = ?, density = ?, velocity = ?, paintSystem = ?, ndtGroup = ?, chemCleaning = ?, pwht = ?, sysname = ?WHERE tag = ?`,
+                [
+                    fluidCode, medium, lineSizeIn, lineSizeNb, pipingSpec, insType,
+                    insThickness, heatTrace, lineFrom, lineTo, maxOpPress, maxOpTemp, dsgnPress, minDsgnTemp, maxDsgnTemp, testPress, testMedium, testMediumPhase, massFlow, volFlow, density, velocity, paintSystem, ndtGroup,
+                    chemCleaning, pwht, sysname, tag
+                ],
+                (err) => {
+                    if (err) {
+                        console.error('Error updating  MtoLineList table:', err.message);
+                        return;
+                    }
+
+                    console.log(' MtoLineList table updated successfully.');
+                    // Fetch updated data from the LineList table
+                    projectDb.all("SELECT * FROM  MtoLineList", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from  MtoLineList table:', err.message);
+                            return;
+                        }
+
+                        mainWindow.webContents.send('linelist-save-mto', rows);
                     });
 
                 }
@@ -9803,6 +9905,314 @@ app.whenReady().then(() => {
         })
 
     })
+
+    ipcMain.on('Mto-area-save', (event) => {
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+        const data = [
+            { area: 1000, name: 'Area1' },
+            { area: 1001, name: 'Area2' },
+            { area: 1002, name: 'Area3' }
+        ];
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            // Begin transaction for better performance with multiple inserts
+            projectDb.run('BEGIN TRANSACTION', (err) => {
+                if (err) {
+                    console.error('Error starting transaction:', err.message);
+                    return;
+                }
+
+                const insertPromises = data.map(item => {
+                    return new Promise((resolve, reject) => {
+                        const mtoareaId = generateCustomID('Am');
+
+                        projectDb.run(
+                            'INSERT INTO MtoAreaTable (mtoareaId, area, name) VALUES (?, ?, ?)',
+                            [mtoareaId, item.area, item.name],
+                            function (err) {
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    resolve();
+                                }
+                            }
+                        );
+                    });
+                });
+
+                Promise.all(insertPromises)
+                    .then(() => {
+                        // Commit transaction after all inserts are successful
+                        projectDb.run('COMMIT', (err) => {
+                            if (err) {
+                                console.error('Error committing transaction:', err.message);
+                                return;
+                            }
+
+                            // Fetch all records after successful insert
+                            projectDb.all("SELECT * FROM MtoAreaTable", (err, rows) => {
+                                if (err) {
+                                    console.error('Error fetching data from MtoAreaTable:', err.message);
+                                    return;
+                                }
+
+                                console.log('Data in the MtoAreaTable table:', rows);
+                                mainWindow.webContents.send('area-save-mto', rows);
+                            });
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Error during insertion:', err.message);
+                        // Rollback transaction if any insert fails
+                        projectDb.run('ROLLBACK', (rollbackErr) => {
+                            if (rollbackErr) {
+                                console.error('Error rolling back transaction:', rollbackErr.message);
+                            }
+                        });
+                    });
+            });
+        });
+    });
+
+    // ipcMain.on('Mto-tag-save', (event) => {
+    //     if (!databasePath) {
+    //         console.error('Project database path not available.');
+    //         return;
+    //     }
+    //     const data = [
+    //         {number: L001, name: 'Line1'},
+    //         {number: L002, name: 'Line2'},
+    //         {number: L003, name: 'Line3'}
+    //     ];
+
+    //     const projectDb = new sqlite3.Database(databasePath, (err) => {
+    //         if (err) {
+    //             console.error('Error opening project database:', err.message);
+    //             return;
+    //         }
+
+    //         // Begin transaction for better performance with multiple inserts
+    //         projectDb.run('BEGIN TRANSACTION', (err) => {
+    //             if (err) {
+    //                 console.error('Error starting transaction:', err.message);
+    //                 return;
+    //             }
+
+    //             const insertPromises = data.map(item => {
+    //                 return new Promise((resolve, reject) => {
+    //                     const mtotagId = generateCustomID('At');
+
+    //                     projectDb.run(
+    //                         'INSERT INTO MtoTagTable (mtotagId, number, name) VALUES (?, ?, ?)',
+    //                         [mtoareaId, item.number, item.name],
+    //                         function (err) {
+    //                             if (err) {
+    //                                 reject(err);
+    //                             } else {
+    //                                 resolve();
+    //                             }
+    //                         }
+    //                     );
+    //                 });
+    //             });
+
+    //             Promise.all(insertPromises)
+    //                 .then(() => {
+    //                     // Commit transaction after all inserts are successful
+    //                     projectDb.run('COMMIT', (err) => {
+    //                         if (err) {
+    //                             console.error('Error committing transaction:', err.message);
+    //                             return;
+    //                         }
+
+    //                         // Fetch all records after successful insert
+    //                         projectDb.all("SELECT * FROM MtoTagTable", (err, rows) => {
+    //                             if (err) {
+    //                                 console.error('Error fetching data from MtoTagTable:', err.message);
+    //                                 return;
+    //                             }
+
+    //                             console.log('Data in the MtoTagTable table:', rows);
+    //                             mainWindow.webContents.send('tag-save-mto', rows);
+    //                         });
+    //                     });
+    //                 })
+    //                 .catch(err => {
+    //                     console.error('Error during insertion:', err.message);
+    //                     // Rollback transaction if any insert fails
+    //                     projectDb.run('ROLLBACK', (rollbackErr) => {
+    //                         if (rollbackErr) {
+    //                             console.error('Error rolling back transaction:', rollbackErr.message);
+    //                         }
+    //                     });
+    //                 });
+    //         });
+    //     });
+    // });
+
+
+    ipcMain.on('Mto-tag-save', (event) => {
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        const data = [
+            { number: 'L001', name: 'Line1' },
+            { number: 'L002', name: 'Line2' },
+            { number: 'L003', name: 'Line3' }
+        ];
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            // Begin transaction for better performance with multiple inserts
+            projectDb.run('BEGIN TRANSACTION', (err) => {
+                if (err) {
+                    console.error('Error starting transaction:', err.message);
+                    return;
+                }
+
+                const insertPromises = data.map(item => {
+                    return new Promise((resolve, reject) => {
+                        const mtotagId = generateCustomID('At');
+
+                        // First insert into MtoTagTable
+                        projectDb.run(
+                            'INSERT INTO MtoTagTable (mtotagId, number, name) VALUES (?, ?, ?)',
+                            [mtotagId, item.number, item.name],
+                            function (err) {
+                                if (err) {
+                                    reject(err);
+                                    return;
+                                }
+
+                                // Then insert into LineList table
+                                projectDb.run(
+                                    'INSERT INTO MtoLineList (mtotagId, tag) VALUES (?, ?)',
+                                    [mtotagId, item.number],
+                                    function (err) {
+                                        if (err) {
+                                            reject(err);
+                                        } else {
+                                            resolve();
+                                        }
+                                    }
+                                );
+                            }
+                        );
+                    });
+                });
+
+                Promise.all(insertPromises)
+                    .then(() => {
+                        // Commit transaction after all inserts are successful
+                        projectDb.run('COMMIT', (err) => {
+                            if (err) {
+                                console.error('Error committing transaction:', err.message);
+                                return;
+                            }
+
+                            // Create promises for fetching data from both tables
+                            const fetchPromises = [
+                                new Promise((resolve, reject) => {
+                                    projectDb.all("SELECT * FROM MtoTagTable", (err, rows) => {
+                                        if (err) {
+                                            reject(err);
+                                        } else {
+                                            resolve(rows);
+                                        }
+                                    });
+                                }),
+                                new Promise((resolve, reject) => {
+                                    projectDb.all("SELECT * FROM MtoLineList", (err, rows) => {
+                                        if (err) {
+                                            reject(err);
+                                        } else {
+                                            resolve(rows);
+                                        }
+                                    });
+                                })
+                            ];
+
+                            // Fetch and send data from both tables
+                            Promise.all(fetchPromises)
+                                .then(([mtoTagRows, lineListRows]) => {
+                                    console.log('Data in the MtoTagTable table:', mtoTagRows);
+                                    console.log('Data in the MtoLineList table:', lineListRows);
+
+                                    mainWindow.webContents.send('tag-save-mto', mtoTagRows);
+                                    mainWindow.webContents.send('linelist-save-mto', lineListRows);
+                                })
+                                .catch(err => {
+                                    console.error('Error fetching data:', err.message);
+                                });
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Error during insertion:', err.message);
+                        // Rollback transaction if any insert fails
+                        projectDb.run('ROLLBACK', (rollbackErr) => {
+                            if (rollbackErr) {
+                                console.error('Error rolling back transaction:', rollbackErr.message);
+                            }
+                        });
+                    });
+            });
+        });
+    });
+
+    ipcMain.on('save-mtoline-area', (event, data) => {
+
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            // const Mto_DocID = generateCustomID('Md');
+
+            projectDb.run(
+                'INSERT INTO MtoAreaTagRelTable (mtoareaId ,  mtotagId,areaname, tagnumber ) VALUES (?, ?, ?, ?)',
+                [data.mtoareaId, data.areaname, data.mtotagId, data.tagnumber],
+                function (err) {
+                    if (err) {
+                        console.error('Error inserting into MtoAreaTagRelTable:', err.message);
+                        return;
+                    }
+                    console.log(`Row inserted with area name: ${data.areaname}`);
+                }
+
+            );
+            projectDb.all("SELECT * FROM MtoAreaTagRelTable", (err, rows) => {
+                if (err) {
+                    console.error('Error fetching data from Tree table:', err.message);
+                    return;
+                }
+
+                console.log('Data in the MtoAreaTagRelTable table:', rows);
+                mainWindow.webContents.send('mtoline-area-save', rows);
+            });
+        })
+
+    })
+
 
 });
 app.on('window-all-closed', () => {

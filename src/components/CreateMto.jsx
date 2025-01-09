@@ -79,6 +79,12 @@ function CreateMto({ allLineList }) {
     //     setCustomAlert(true);
     // };
 
+    const handleuserdata = (e) => {
+        e.preventDefault();
+        window.api.send('Mto-area-save');
+        window.api.send('Mto-tag-save');
+    }
+
     const handleSubmit = (e) => {
         // Prevent the default form submission
         e.preventDefault();
@@ -229,12 +235,16 @@ function CreateMto({ allLineList }) {
 
                             </section>
 
+                            <div style={{ padding: '20px' }}>
+                                <button className='btn btn-secondary' onClick={handleuserdata}>Add User Data</button>
+                            </div>
+{/* 
                             <div class="row" style={{ padding: '10px' }} >
                                 <i class="fa fa-list-alt" style={{ fontSize: '20px' }}  ></i>
                                 <h2 style={{ display: 'inline-block' }}>Add Items</h2>
-                            </div>
+                            </div> */}
 
-                            <ul>
+                            {/* <ul>
                                 {allLineList.map((item, index) => (
                                     <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <li style={{ listStyle: 'none' }}>{item.tag}</li>
@@ -242,7 +252,7 @@ function CreateMto({ allLineList }) {
                                     </div>
                                 ))}
                             </ul>
-                            {selectarea && <AreaSelect allAreasInTable = {allAreasInTable}></AreaSelect>}
+                            {selectarea && <AreaSelect allAreasInTable = {allAreasInTable}></AreaSelect>} */}
 
                             {/* <ul>
                                 {allLineList.map((item, index) => (

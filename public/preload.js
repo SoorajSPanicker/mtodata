@@ -23,7 +23,7 @@ contextBridge.exposeInMainWorld('api', {
             // PID
         'save-doc-data', 'fetch-sin-doc', 'save-ele-tag','fetch-sin-ele','save-area-data','fetch-tag-ele', 'fetch-info-tag', 'fetch-sin-docdetails', 'save-flag-ele','fetch-con-doc', 'fetch-condoc-path', 'create-new-window', 'fetch-sin-flag','fetch-doc-flag', 'update-flag-table', 'double-sin-flag', 'sin-flag-conflag','unflag-ele-flag', 'update-unflag-table','fetch-flag-tag', 'update-flag-tag','is-element-tag', 'sel-tag-ele', 'del-ele-tag','ele-tag-type', 'ele-flag-sel','flag-dou-sel','update-doc-table','insert-master-table', 'check-master','fetch-master-doc', 'copy-to-master', 'backup-masdoc','update-masdoc', 'save-svg', 'check-file-exists', 'load-svg', 'read-svg-file','save-layer','show-doc-area','is-ele-tag','save-areatag-rel','tag-doc-con','tag-doc-det','update-check-sta','open-three-from-pid','open-pid-from-three','tag-doc-det','dwg-svg-converter',
         // MTO
-        'branchtabledata','import-excel','save-custom-spec','spec-excel-data','update-customspec-table','Mto-doc-save'
+        'branchtabledata','import-excel','save-custom-spec','spec-excel-data','update-customspec-table','Mto-doc-save', 'Mto-area-save', 'Mto-tag-save', 'update-mtolinelist-table', 'save-mtoline-area'
     
     ]; // Add 'fetch-data' for reading data 'save-data', 'fetch-data', 
         if (validChannels.includes(channel)) {
@@ -40,7 +40,7 @@ contextBridge.exposeInMainWorld('api', {
         'sin-flag-fetched', 'doc-flag-fetched', 'sin-flag-double', 'flag-conflag-sin',
         'ele-flag-unflag', 'flag-tag-fetched', 'flag-tag-updated','element-tag-is', 'flag-tag-is', 'ele-tag-sel', 'type-tag-ele','sel-flag-ele',  'ele-flag-out','master-doc-fetched', 'master-checked','store-master-fetched', 'read-svg-file-response','all-layers-fetched','doc-area-fetched','tag-ele-is','areatag-rel','con-doc-tag','det-doc-tag','fetched-Tag-path-pid','con-doc-tag','dxf-conversion-success' ,
         // MTO
-        'branch-table-response','branch-table-data-response','import-response','specsize-table-response','specmat-table-response','spectemp-table-response', 'specdet-table-response','specdet-detail-response','custom-spec-res','save-doc-mto'
+        'branch-table-response','branch-table-data-response','import-response','specsize-table-response','specmat-table-response','spectemp-table-response', 'specdet-table-response','specdet-detail-response','custom-spec-res','save-doc-mto', 'area-save-mto', 'tag-save-mto', 'linelist-save-mto','mtoline-area-save'
         
         
         ];
