@@ -105,6 +105,8 @@ function AreaSelect({ allAreasInTable, onClose, showAreaDialog, selectedTag, sel
             tagnumber: selectedTagNo
     
           };
+          console.log(data);
+          
           window.api.send('save-mtoline-area', data);
           handleClose();
           

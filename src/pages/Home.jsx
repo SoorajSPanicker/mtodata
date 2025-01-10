@@ -1898,6 +1898,7 @@ function Home() {
 
   useEffect(() => {
     window.api.receive('specmat-table-response', (data) => {
+      console.log(data);
       setspecmatDetails(data);
     })
   })
@@ -3080,7 +3081,7 @@ function Home() {
               {reviewtagmto && <ReviewMtoTag mtotag={mtotag} />}
               {reviewlinemto && <ReviewMtoLine mtolinelist={mtolinelist}  />}
               {/* mtoarea={mtoarea} */}
-              {createMtoMat && <CreateMaterialList mtolinelist={mtolinelist} mtoarea={mtoarea} mtolinearea={mtolinearea}/>}
+              {createMtoMat && <CreateMaterialList mtolinelist={mtolinelist} mtoarea={mtoarea} mtolinearea={mtolinearea} specmatDetails={specmatDetails}/>}
               {
 
                 expanddocument && <Documenttable allDocuments={allDocuments} />

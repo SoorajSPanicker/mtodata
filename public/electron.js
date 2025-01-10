@@ -1375,7 +1375,7 @@ app.whenReady().then(() => {
                             console.error('Error fetching data from Tree table:', err.message);
                             return;
                         }
-        
+
                         console.log('Data in the MtoAreaTagRelTable table:', rows);
                         mainWindow.webContents.send('mtoline-area-save', rows);
                     });
@@ -10190,7 +10190,7 @@ app.whenReady().then(() => {
 
             projectDb.run(
                 'INSERT INTO MtoAreaTagRelTable (mtoareaId ,  mtotagId,areaname, tagnumber ) VALUES (?, ?, ?, ?)',
-                [data.mtoareaId, data.areaname, data.mtotagId, data.tagnumber],
+                [data.mtoareaId, data.mtotagId, data.areaname, data.tagnumber],
                 function (err) {
                     if (err) {
                         console.error('Error inserting into MtoAreaTagRelTable:', err.message);
