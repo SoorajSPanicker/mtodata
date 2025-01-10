@@ -3080,7 +3080,7 @@ function Home() {
               {reviewtagmto && <ReviewMtoTag mtotag={mtotag} />}
               {reviewlinemto && <ReviewMtoLine mtolinelist={mtolinelist}  />}
               {/* mtoarea={mtoarea} */}
-              {createMtoMat && <CreateMaterialList mtolinelist={mtolinelist} mtoarea={mtoarea}/>}
+              {createMtoMat && <CreateMaterialList mtolinelist={mtolinelist} mtoarea={mtoarea} mtolinearea={mtolinearea}/>}
               {
 
                 expanddocument && <Documenttable allDocuments={allDocuments} />
