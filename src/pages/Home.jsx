@@ -207,6 +207,7 @@ function Home() {
   const [mtotag, setmtotag] = useState([])
   const [mtolinelist, setmtolinelist] = useState([])
   const [mtolinearea, setmtolinearea] = useState([])
+  const [matdataarea, setmatdataarea] = useState([])
 
   // useEffect(() => {
   //   // Initialize the start time when the component mounts
@@ -308,6 +309,13 @@ function Home() {
     window.api.receive('mtoline-area-save', (data) => {
       console.log(data);
       setmtolinearea(data)
+    })
+  }, [])
+
+  useEffect(() => {
+    window.api.receive('material-data-save', (data) => {
+      console.log(data);
+      setmatdataarea(data)
     })
   }, [])
 
@@ -3079,9 +3087,9 @@ function Home() {
               {reviewdocmto && <ReviewMtoDoc mtodoc={mtodoc} />}
               {reviewareamto && <ReviewMtoArea mtoarea={mtoarea} />}
               {reviewtagmto && <ReviewMtoTag mtotag={mtotag} />}
-              {reviewlinemto && <ReviewMtoLine mtolinelist={mtolinelist}  />}
+              {reviewlinemto && <ReviewMtoLine mtolinelist={mtolinelist} />}
               {/* mtoarea={mtoarea} */}
-              {createMtoMat && <CreateMaterialList mtolinelist={mtolinelist} mtoarea={mtoarea} mtolinearea={mtolinearea} specmatDetails={specmatDetails}/>}
+              {createMtoMat && <CreateMaterialList mtolinelist={mtolinelist} mtoarea={mtoarea} mtolinearea={mtolinearea} specmatDetails={specmatDetails} />}
               {
 
                 expanddocument && <Documenttable allDocuments={allDocuments} />

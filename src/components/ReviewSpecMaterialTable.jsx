@@ -76,7 +76,7 @@ function ReviewSpecMaterialTable({ specsizeDetails, specmatDetails, spectempDeta
               </tr>
             </thead>
             <tbody>
-              {specmat.map((row, index) => (
+              {specmatDetails.map((row, index) => (
                 <tr style={{backgroundColor:'black'}}>
                   <td>{row.itemType}</td>
                   <td>{row.fittingType}</td>

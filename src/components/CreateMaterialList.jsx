@@ -10,6 +10,10 @@ function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails 
     const [expandedItems, setExpandedItems] = useState({});
     const [selectspec, setselectspec] = useState(false);
     const [selectedSpec, setSelectedSpec] = useState('');
+    const [mttagid, setmttagid] = useState('');
+    const [mtareaid, setmtareaid] = useState('');
+    const [mttagno, setmttagno] = useState('');
+    const [mtareaname, setmtareaname] = useState('');
     const handleaddarea = (tagId, tagNo) => {
         console.log(tagId);
         console.log(tagNo);
@@ -17,8 +21,12 @@ function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails 
         setSelectedTagNo(tagNo)
         setselectarea(true)
     }
-    const handleaddspec = (specname) => {
+    const handleaddspec = (specname, tagId, areaId, areaname, tagno) => {
         setSelectedSpec(specname)
+        setmttagid(tagId)
+        setmtareaid(areaId)
+        setmtareaname(areaname)
+        setmttagno(tagno)
         setselectspec(true)
     }
     // Add this function to handle closing the AreaSelect
@@ -69,7 +77,7 @@ function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails 
         }));
     };
 
-    
+
 
     return (
         <div style={{ zIndex: '1', position: 'absolute', width: '100%', backgroundColor: '#33334c', color: 'white' }}>
@@ -150,7 +158,7 @@ function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails 
                                                 className="fa-solid fa-circle-plus"
                                                 onClick={() => {
                                                     console.log('Icon clicked');
-                                                    handleaddspec(item.pipingSpec);
+                                                    handleaddspec(item.pipingSpec, areaItem.mtotagId, areaItem.mtoareaId, areaItem.areaname, areaItem.tagnumber);
                                                 }}
                                                 style={{ cursor: 'pointer', zIndex: '1' }}
                                             ></i>
@@ -168,7 +176,7 @@ function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails 
             </div>
 
             {selectarea && <AreaSelect allAreasInTable={mtoarea} onClose={handleAreaSelectClose} showAreaDialog={selectarea} selectedTag={selectedTag} selectedTagNo={selectedTagNo} />}
-            {selectspec && <SpecMaterialSearch specmatDetails={specmatDetails} onClose={handleSpecSelectClose} selectedSpec={selectedSpec} />}
+            {selectspec && <SpecMaterialSearch specmatDetails={specmatDetails} onClose={handleSpecSelectClose} selectedSpec={selectedSpec} mttagid={mttagid} mtareaid={mtareaid} mttagno={mttagno} mtareaname={mtareaname}  />}
         </div>
     );
 }

@@ -250,7 +250,7 @@ function createDatabase() {
             // db.run('CREATE TABLE IF NOT EXISTS MtoDocumentTable(Mto_DocID TEXT, ProjID TEXT, M_DocNo TEXT, M_DocName TEXT, RevNo TEXT, RevDate TEXT, RevDes TEXT, RevPreBy TEXT, RevChecBy TEXT, RevAppBy TEXT, RevPrepDate TEXT,RevCheckDate TEXT,RevAppDate TEXT, ChecklistNo TEXT, MtoSta TEXT, Preocur TEXT, PRIMARY KEY(Mto_DocID))')
             // // db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT, fileNo TEXT, DocNo TEXT, TagNo TEXT, AreaNO TEXT, DisNo TEXT, SysNo TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
             db.run('CREATE TABLE IF NOT EXISTS MtoDocumentTable(Mto_DocID TEXT, ProjID TEXT, M_DocNo TEXT, M_DocName TEXT, RevNo TEXT, RevDate TEXT, RevDes TEXT, RevPreBy TEXT, RevChecBy TEXT, RevAppBy TEXT, RevPrepDate TEXT,RevCheckDate TEXT,RevAppDate TEXT, ChecklistNo TEXT, MtoSta TEXT, Preocur TEXT, PRIMARY KEY(Mto_DocID))')
-            db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT,fileId Text, fileNo TEXT,DocId TEXT, DocNo TEXT, tagId TEXT, tagNo Text, areaId TEXT , areaName TEXT,DiscId TEXT, DisName TEXT,SysID TEXT, SysName TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
+            db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT,fileId Text, fileNo TEXT,DocId TEXT, DocNo TEXT, tagId TEXT, tagNo Text, areaId TEXT , areaName TEXT,DiscId TEXT, DisName TEXT,SysID TEXT, SysName TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT,Sizeone TEXT,Sizetwo TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
             db.run('CREATE TABLE IF NOT EXISTS MtoAreaTable(mtoareaId TEXT PRIMARY KEY, area TEXT, name TEXT)')
             db.run('CREATE TABLE IF NOT EXISTS MtoTagTable(mtotagId TEXT, number TEXT, name TEXT, PRIMARY KEY(number))')
 
@@ -1378,6 +1378,15 @@ app.whenReady().then(() => {
 
                         console.log('Data in the MtoAreaTagRelTable table:', rows);
                         mainWindow.webContents.send('mtoline-area-save', rows);
+                    });
+                    db.all("SELECT * FROM MtoMaterialListTable", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from Tree table:', err.message);
+                            return;
+                        }
+
+                        console.log('Data in the MtoMaterialListTable table:', rows);
+                        mainWindow.webContents.send('material-data-save', rows);
                     });
 
                 });
@@ -10208,6 +10217,55 @@ app.whenReady().then(() => {
 
                 console.log('Data in the MtoAreaTagRelTable table:', rows);
                 mainWindow.webContents.send('mtoline-area-save', rows);
+            });
+        })
+
+    })
+
+    ipcMain.on('save-material-data', (event, data) => {
+
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        // const data = {
+        //     tagId: mttagid,
+        //     tagNo: mttagno,
+        //     areaId: mtareaid,
+        //     areaName: mtareaname,
+        //     Qty: mtlqty,
+        //     Item: item
+        // }
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            const MatID = generateCustomID('Ml');
+
+            projectDb.run(
+                'INSERT INTO MtoMaterialListTable (MatID , tagId, tagNo, areaId, areaName, Item, Sizeone, Sizetwo, Qty ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [MatID, data.tagId, data.tagNo, data.areaId, data.areaName, data.Item, data.Sizeone, data.Sizetwo, data.Qty],
+                function (err) {
+                    if (err) {
+                        console.error('Error inserting into MtoMaterialListTable:', err.message);
+                        return;
+                    }
+                    console.log(`Row inserted with area name: ${data.areaname}`);
+                }
+
+            );
+            projectDb.all("SELECT * FROM MtoMaterialListTable", (err, rows) => {
+                if (err) {
+                    console.error('Error fetching data from Tree table:', err.message);
+                    return;
+                }
+
+                console.log('Data in the MtoMaterialListTable table:', rows);
+                mainWindow.webContents.send('material-data-save', rows);
             });
         })
 

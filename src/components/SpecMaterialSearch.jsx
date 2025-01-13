@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
 
-function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec }) {
-    const [materialval, setmaterialval] = useState('')
-    const [sizeoneval, setsizeoneval] = useState('')
-    const [sizetwoval, setsizetwoval] = useState('')
+function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec, mttagid, mtareaid, mttagno, mtareaname }) {
+    const [materialval, setmaterialval] = useState('');
+    const [sizeoneval, setsizeoneval] = useState('');
+    const [sizetwoval, setsizetwoval] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [mtlqty, setmtlqty] = useState('')
     const handleclose = () => {
         onClose();
     };
@@ -13,44 +15,27 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec }) {
     const uniqueItems = useMemo(() => {
         return _.uniqBy(specmatDetails, 'itemType')
             .map(detail => detail.itemType)
-            .filter(item => item); // Remove any null/undefined values
+            .filter(item => item);
     }, [specmatDetails]);
-
-    useEffect(() => {
-        console.log('Unique items:', uniqueItems);
-    }, [uniqueItems]);
 
     const handleChange = (e) => {
         console.log(e.target.value);
-
-        // const selectedCode = e.target.value;
-
-        // setCode(selectedCode);
-        // const selectedArea = allAreasInTable.find((area) => area.mtoareaId === selectedCode);
-        // if (selectedArea) {
-        //     console.log(selectedArea.name);
-        //     setName(selectedArea.name);
-
-        // } else {
-        //     console.log(selectedArea.name);
-        //     setName('');
-        // }
     };
 
     const handlesizeone = (e) => {
         console.log(e.target.value);
-        setsizeoneval(e.target.value)
-    }
+        setsizeoneval(e.target.value);
+    };
 
     const handlesizetwo = (e) => {
         console.log(e.target.value);
-        setsizetwoval(e.target.value)
-    }
+        setsizetwoval(e.target.value);
+    };
 
     const handlematerialselect = (e) => {
         console.log(e.target.value);
-        setmaterialval(e.target.value)
-    }
+        setmaterialval(e.target.value);
+    };
     useEffect(() => {
         console.log(materialval);
 
@@ -63,12 +48,45 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec }) {
         console.log(sizetwoval);
 
     }, [sizetwoval])
+    useEffect(() => {
+        console.log(mtlqty);
 
+    }, [mtlqty])
 
+    const handlesearch = () => {
+        // Filter specmatDetails based on input values
+        const filteredResults = specmatDetails.filter(item =>
+            item.itemType === materialval &&
+            item.size1.toString() === sizeoneval &&
+            item.size2.toString() === sizetwoval
+        );
 
-    const handlesearch = (e) => {
+        console.log('Filtered results:', filteredResults);
+        setSearchResults(filteredResults);
+    };
 
+    const handleqtychange = (e) => {
+        console.log(e.target.value);
+        setmtlqty(e.target.value)
+    }
+    useEffect(() => {
+        console.log(mtlqty);
 
+    }, [mtlqty])
+
+    const handlematsubmit = (item, sizeone, sizetwo) => {
+        const data = {
+            tagId: mttagid,
+            tagNo: mttagno,
+            areaId: mtareaid,
+            areaName: mtareaname,
+            Qty: mtlqty,
+            Item: item,
+            Sizeone: sizeone,
+            Sizetwo: sizetwo
+        }
+        window.api.send('save-material-data', data);
+        handleclose()
     }
 
     return (
@@ -78,7 +96,7 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec }) {
                 <div className="popup-window">
                     <div className="subHeadBg popup">
                         <i className="fa fa-times close" onClick={handleclose}></i>
-                        <div style={{ margin: '10px' }}>
+                        <div style={{ margin: '10px', color: 'black' }}>
                             <label>SPEC : {selectedSpec}</label>
                         </div>
                         <div className="input-section">
@@ -123,29 +141,21 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec }) {
                                 <i className="fa fa-search" aria-hidden="true" onClick={handlesearch}></i>
                             </button>
                         </div>
-                         <div id="specSearchResultDiv">
-                            <div className="mtoItemSearchListDiv">
-                                <label style={{ flex: 2, paddingRight: '5px' }}></label>
-                                <label style={{ flex: 1, paddingRight: '5px' }}></label>
-                                <label style={{ flex: 1, paddingRight: '5px' }}></label>
-                                <label style={{ flex: 1, paddingRight: '5px' }}></label>
-                                <label style={{ flex: 3, paddingRight: '5px' }}></label>
-                                <div style={{ width: '100px', display: 'flex' }}>
-                                    <input placeholder="Qty" type="text" />
-                                    <i className="fa fa-plus-square"></i>
+                        <div id="specSearchResultDiv">
+                            {searchResults.map((result, index) => (
+                                <div key={index} className="mtoItemSearchListDiv">
+                                    <label style={{ flex: 2, paddingRight: '5px', color: 'black' }}>{result.itemType}</label>
+                                    <label style={{ flex: 1, paddingRight: '5px', color: 'black' }}>{result.size1}</label>
+                                    <label style={{ flex: 1, paddingRight: '5px', color: 'black' }}>{result.size2}</label>
+                                    {/* <label style={{ flex: 1, paddingRight: '5px' }}>{result.UNIT || ''}</label>
+                                    <label style={{ flex: 3, paddingRight: '5px' }}>{result.DESCRIPTION || ''}</label> */}
+                                    <div style={{ width: '100px', display: 'flex' }}>
+                                        <input placeholder="Qty" type="text" onChange={handleqtychange} />
+                                        <i className="fa fa-plus-square" onClick={() => handlematsubmit(result.itemType, result.size1, result.size2)}></i>
+                                    </div>
                                 </div>
-                            </div>
+                            ))}
                         </div>
-                        {/* <div style={{ marginLeft: '10px', marginRight: '10px' }}>
-                            <textarea
-                                placeholder="Set description"
-                                style={{ width: '100%' }}
-                            />
-                            <button type="button">Save to spec</button>
-                        </div>
-                        <div style={{ marginLeft: '10px', marginRight: '10px' }}>
-                            <button type="button">Clear Result</button>
-                        </div> */}
                     </div>
                 </div>
             </div>
@@ -154,6 +164,135 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec }) {
 }
 
 export default SpecMaterialSearch;
+
+// import React, { useEffect, useMemo, useState } from 'react';
+// import _ from 'lodash';
+
+// function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec }) {
+//     const [materialval, setmaterialval] = useState('');
+//     const [sizeoneval, setsizeoneval] = useState('');
+//     const [sizetwoval, setsizetwoval] = useState('');
+//     const [searchResults, setSearchResults] = useState([]);
+//     const [searchtab, setsearchtab] = useState(false)
+
+//     const handleclose = () => {
+//         onClose();
+//     };
+
+//     // Get unique items from specmatDetails using lodash
+//     const uniqueItems = useMemo(() => {
+//         return _.uniqBy(specmatDetails, 'ITEM')
+//             .map(detail => detail.ITEM)
+//             .filter(item => item);
+//     }, [specmatDetails]);
+
+//     const handleChange = (e) => {
+//         console.log(e.target.value);
+//     };
+
+//     const handlesizeone = (e) => {
+//         console.log(e.target.value);
+//         setsizeoneval(e.target.value);
+//     };
+
+//     const handlesizetwo = (e) => {
+//         console.log(e.target.value);
+//         setsizetwoval(e.target.value);
+//     };
+
+//     const handlematerialselect = (e) => {
+//         console.log(e.target.value);
+//         setmaterialval(e.target.value);
+//     };
+
+//     const handlesearch = () => {
+//         // Filter specmatDetails based on input values
+//         const filteredResults = specmatDetails.filter(item =>
+//             item.ITEM === materialval &&
+//             item.SIZE1.toString() === sizeoneval &&
+//             item.SIZE2.toString() === sizetwoval
+//         );
+
+//         console.log('Filtered results:', filteredResults);
+//         setSearchResults(filteredResults);
+//         setsearchtab(true)
+//     };
+
+//     return (
+//         <div style={{ backgroundColor: 'red' }}>
+//             <div id="mtoItemAddDiv" className="popup-screen">
+//                 <div className="popup-bg"></div>
+//                 <div className="popup-window">
+//                     <div className="subHeadBg popup">
+//                         <i className="fa fa-times close" onClick={handleclose}></i>
+//                         <div style={{ margin: '10px' }}>
+//                             <label>SPEC : {selectedSpec}</label>
+//                         </div>
+//                         <div className="input-section">
+//                             <select style={{ width: '189px' }} onChange={handleChange} required>
+//                                 <option value="">Select Area</option>
+//                                 <option>STANDARD</option>
+//                                 <option>NORSOK</option>
+//                                 <option>EQUINOR</option>
+//                             </select>
+
+//                             <input
+//                                 list="items"
+//                                 type="tel"
+//                                 id="item"
+//                                 placeholder="Search Item.."
+//                                 onChange={handlematerialselect}
+//                             />
+//                             <span className="fg-space"></span>
+//                             <datalist id="items">
+//                                 {uniqueItems.map((item, index) => (
+//                                     <option key={index} value={item} />
+//                                 ))}
+//                             </datalist>
+
+//                             <input
+//                                 id="size1"
+//                                 type="text"
+//                                 placeholder="Size1"
+//                                 style={{ width: '50px', textAlign: 'center' }}
+//                                 onChange={handlesizeone}
+//                             />
+//                             <span className="fg-space"></span>
+//                             <input
+//                                 id="size2"
+//                                 type="text"
+//                                 placeholder="Size2"
+//                                 style={{ width: '50px' }}
+//                                 onChange={handlesizetwo}
+//                             />
+//                             <span className="fg-space"></span>
+//                             <button type="button" id="addMtoItem">
+//                                 <i className="fa fa-search" aria-hidden="true" onClick={handlesearch}></i>
+//                             </button>
+//                         </div>
+//                         {searchtab && <div id="specSearchResultDiv">
+//                             {searchResults.map((result, index) => (
+//                                 <div key={index} className="mtoItemSearchListDiv">
+//                                     <label style={{ flex: 2, paddingRight: '5px' }}>{result.ITEM}</label>
+//                                     <label style={{ flex: 1, paddingRight: '5px' }}>{result.SIZE1}</label>
+//                                     <label style={{ flex: 1, paddingRight: '5px' }}>{result.SIZE2}</label>
+//                                     {/* <label style={{ flex: 1, paddingRight: '5px' }}>{result.UNIT || ''}</label>
+//                                     <label style={{ flex: 3, paddingRight: '5px' }}>{result.DESCRIPTION || ''}</label> */}
+//                                     <div style={{ width: '100px', display: 'flex' }}>
+//                                         <input placeholder="Qty" type="text" />
+//                                         <i className="fa fa-plus-square"></i>
+//                                     </div>
+//                                 </div>
+//                             ))}
+//                         </div>}
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// }
+
+// export default SpecMaterialSearch;
 
 // import React, { useEffect } from 'react';
 // import Button from 'react-bootstrap/Button';
