@@ -1296,7 +1296,7 @@ app.whenReady().then(() => {
                             return;
                         }
                         console.log('Data in the MtoSpecDetTable table:', rows);
-                        mainWindow.webContents.send('specmat-table-response', rows);
+                        mainWindow.webContents.send('specdet-detail-response', rows);
 
                     });
                     db.all("SELECT * FROM MtoSpecTempPresTable", (err, rows) => {
@@ -1321,7 +1321,7 @@ app.whenReady().then(() => {
                             return;
                         }
                         console.log('Data in the MtoSpecMaterialTable table:', rows);
-                        mainWindow.webContents.send('specdet-detail-response', rows);
+                        mainWindow.webContents.send('specmat-table-response', rows);
                     });
                     db.all("SELECT * FROM MtoCustomTable", (err, rows) => {
                         if (err) {

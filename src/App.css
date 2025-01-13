@@ -1638,7 +1638,7 @@ div.popup-screen {
   width: 100%;
   height: calc(100% - 90px);
   z-index: 999;
-  display: none;
+  /* display: none; */
 }
 
 input#botFsFlag:checked+footer+div#popupScreens>div.popup-screen {
@@ -1711,19 +1711,45 @@ img#close {
 
 /* ---------------------------------- */
 
-div.popup {
+
+span.fg-space {
+  margin:0 5px;
+}
+div#mtoItemAddDiv div.popup{
   min-width: 600px;
 }
 
-div.input-section {
+div#mtoItemAddDiv div.input-section{
   text-align: center;
 }
 
-div.input-section input,
-button {
+div#mtoItemAddDiv div.input-section input,button {
   margin-top: 10px;
   margin-bottom: 10px;
 }
-span.fg-space {
-  margin:0 5px;
+div#specSearchResultDiv{
+  white-space: nowrap;
+  max-height: calc(100vh - 388px);
+  overflow: auto;
+}
+
+div#specSearchResultDiv div.mtoItemSearchListDiv{
+  margin: 10px;
+  display: flex;
+  padding: 10px;
+  box-shadow: -1px -1px 2px 1px #717388;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+div#specSearchResultDiv div i{
+  font-size: 25px;
+  margin: auto;
+  color: #7980d4;
+}
+
+div#specSearchResultDiv div input{
+  width: 50px;
+  text-align: center;
 }

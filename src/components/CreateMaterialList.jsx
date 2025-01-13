@@ -69,106 +69,7 @@ function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails 
         }));
     };
 
-    // return (
-    //     <div style={{ zIndex: '1', position: 'absolute', width: '100%', backgroundColor: '#33334c', color: 'white' }}>
-    // <div id="mtoDiv" class="sideLnkDiv">
-    //     <div id="mtoRegDiv" class="tabContentR mtoTab" >
-    //         {/* <form onSubmit={handleSubmit}> */}
-    //         <div class="tabContentHead" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px' }}>
-    //             <h1 style={{ color: 'white', paddingLeft: '20px' }} >Create Material List</h1>
-    //             {/* <button onClick={()=>handleaddarea()}>add</button> */}
-    //         </div>
-    //         <hr style={{ marginTop: '-10px' }} />
-
-    //         {/* </form> */}
-
-    //     </div>
-    // </div>
-    // {/* {customAlert && (
-    //     <Alert
-    //         message={modalMessage}
-    //         onAlertClose={() => setCustomAlert(false)}
-    //     />
-    // )} */}
-    //         <div style={{ padding: '100px 60px 80px 60px' }}>
-    //             {mtolinelist.map((item, index) => (
-    //                 <div
-    //                     className="border border-black my-1 p-2"
-    //                     key={index}
-    //                     style={{
-    //                         display: 'flex',
-    //                         gap: '10px',
-    //                         width: 'fit-content',
-    //                         paddingRight: '10px',
-    //                         alignItems: 'center',
-    //                     }}
-    //                 >
-    //                     {hasExistingArea(item.tag) && (
-    //                         <i
-    //                             className={`fa-solid ${expandedItems[item.tag] ? 'fa-angle-down' : 'fa-angle-right'}`}
-    //                             onClick={() => toggleExpand(item.tag)}
-    //                             style={{ cursor: 'pointer', zIndex: '1' }}
-    //                         ></i>
-    //                     )}
-    //                     <p>
-    //                         Linetag: {item.tag} Spec: {item.pipingSpec}
-    //                     </p>
-    //                     <i
-    //                         className="fa-solid fa-circle-plus"
-    //                         onClick={() => {
-    //                             console.log('Icon clicked');
-    //                             handleaddarea(item.mtotagId, item.tag);
-    //                         }}
-    //                         style={{ cursor: 'pointer', zIndex: '1' }}
-    //                     ></i>
-    //                     {expandedItems[item.tag] && (
-    //                         <div style={{
-    //                             display: 'flex',
-    //                             flexDirection: 'column',  // This makes items stack vertically
-    //                             position: 'absolute',
-    //                             left: '0',
-    //                             width: '100%',
-    //                             marginTop: '50px'  // Add space below the parent item
-    //                         }}>
-    //                             {mtolinearea
-    //                                 .filter(areaItem => areaItem.tagnumber === item.tag)  // Only show areas matching the current tag
-    //                                 .map((areaItem, areaIndex) => (
-    //                                     <div
-    //                                         key={areaIndex}
-    //                                         className="border border-black my-1 p-2"
-    //                                         style={{
-    //                                             display: 'flex',
-    //                                             alignItems: 'center',
-    //                                             gap: '10px',
-    //                                             width: 'fit-content'
-    //                                         }}
-    //                                     >
-    //                                         <p>Area: {areaItem.areaname}</p>
-    //                                         <i
-    //                                             className="fa-solid fa-circle-plus"
-    //                                             onClick={() => {
-    //                                                 console.log('Icon clicked');
-    //                                             }}
-    //                                             style={{ cursor: 'pointer', zIndex: '1' }}
-    //                                         ></i>
-    //                                         <i
-    //                                             className="fa-solid fa-trash"
-    //                                             style={{ cursor: 'pointer', zIndex: '1' }}
-    //                                         ></i>
-    //                                     </div>
-    //                                 ))
-    //                             }
-    //                         </div>
-    //                     )}
-    //                 </div>
-
-    //             ))}
-
-    //         </div>
-
-    //         {selectarea && <AreaSelect allAreasInTable={mtoarea} onClose={handleAreaSelectClose} showAreaDialog={selectarea} selectedTag={selectedTag} selectedTagNo={selectedTagNo} />}
-    //     </div>
-    // )
+    
 
     return (
         <div style={{ zIndex: '1', position: 'absolute', width: '100%', backgroundColor: '#33334c', color: 'white' }}>
@@ -267,7 +168,7 @@ function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails 
             </div>
 
             {selectarea && <AreaSelect allAreasInTable={mtoarea} onClose={handleAreaSelectClose} showAreaDialog={selectarea} selectedTag={selectedTag} selectedTagNo={selectedTagNo} />}
-            {selectspec && <SpecMaterialSearch specmatDetails={specmatDetails} onClose={handleSpecSelectClose} selectedTag={selectedTag} />}
+            {selectspec && <SpecMaterialSearch specmatDetails={specmatDetails} onClose={handleSpecSelectClose} selectedSpec={selectedSpec} />}
         </div>
     );
 }
