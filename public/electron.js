@@ -14,6 +14,7 @@ const startServer = require('./server');
 const moment = require('moment');
 const { TagFaces } = require('@mui/icons-material');
 const dxf = require('dxf');
+
 let mainWindow;
 let db;
 let selectedFolderPath;
@@ -236,13 +237,13 @@ function createDatabase() {
             //  ---------------Spec table------------------//
             db.run('CREATE TABLE IF NOT EXISTS MtoSpecTable(specId Text,Documentnumber TEXT,specName TEXT,Revision TEXT, RevisionDate TEXT,branchTable TEXT,type TEXT,  ExcelFileid TEXT,preparedBy TEXT,checkedBy TEXT, approvedBy TEXT, PRIMARY KEY(specId))')
 
-            db.run('CREATE TABLE IF NOT EXISTS MtoSpecMaterialTable(specMaterialId TEXT,specId TEXT, itemType TEXT, fittingType TEXT, size1 NUMBER, size2 NUMBER, GeometricStd TEXT, EDS_VDS TEXT, endConn TEXT, materialDescrip TEXT, MDS TEXT, rating TEXT, SCHD TEXT, Notes TEXT, remarks TEXT, PRIMARY KEY(specMaterialId))')
+            db.run('CREATE TABLE IF NOT EXISTS MtoSpecMaterialTable(specMaterialId TEXT,specId TEXT, itemType TEXT, fittingType TEXT, size1 NUMBER, size2 NUMBER, GeometricStd TEXT, EDS_VDS TEXT, endConn TEXT, materialDescrip TEXT, materialLgDescrip TEXT, MDS TEXT, rating TEXT, SCHD TEXT, Notes TEXT, remarks TEXT, PRIMARY KEY(specMaterialId))')
             // db.run('CREATE TABLE IF NOT EXISTS MtoSpecMaterialTable(specMaterialId text,specId text, ITEM TEXT,TYPE TEXT, RANGE_FROM TEXT, RANGE_TO TEXT, GEOMETRIC_STANDARD TEXT, EDS_VDS TEXT,END_CONN_1 TEXT, END_CONN_2 TEXT, MATERIAL_DESCR TEXT, MDS TEXT, RATING TEXT, SCHD TEXT, NOTES TEXT, PRIMARY KEY(specMaterialId))')
             // db.run('CREATE TABLE IF NOT EXISTS MtoSpecSizeTable(SizeId TEXT, specId TEXT , ND TEXT, OD TEXT, THICK TEXT, SCH TEXT ,WEIGHT TEXT, PRIMARY KEY(SizeId))')
             db.run('CREATE TABLE IF NOT EXISTS MtoSpecSizeTable(SizeId TEXT, specId TEXT , ND_inch TEXT, OD_mm TEXT, THK_mm TEXT, SCH TEXT ,WEIGHT TEXT, PRIMARY KEY(SizeId))')
             // db.run('CREATE TABLE IF NOT EXISTS MtoSpecTempPresTable(tempPresId TEXT,specId TEXT ,Temperature TEXT, Pressure TEXT ,PRIMARY KEY(tempPresId))')
             db.run('CREATE TABLE IF NOT EXISTS MtoSpecTempPresTable(tempPresId TEXT,specId TEXT ,Pressure_Barg TEXT, Temperature_Deg_C TEXT ,PRIMARY KEY(tempPresId))')
-            db.run('CREATE TABLE IF NOT EXISTS MtoSpecDetTable(specDetId Text,specId text, ITEM TEXT,TYPE TEXT, RANGE_FROM TEXT, RANGE_TO TEXT, GEOMETRIC_STANDARD TEXT, EDS_VDS TEXT,END_CONN_1 TEXT, END_CONN_2 TEXT, MATERIAL_DESCR TEXT, MDS TEXT, RATING TEXT, SCHD TEXT, NOTES TEXT, PRIMARY KEY(specDetId))')
+            db.run('CREATE TABLE IF NOT EXISTS MtoSpecDetTable(specDetId Text,specId text, ITEM TEXT,TYPE TEXT, RANGE_FROM TEXT, RANGE_TO TEXT, GEOMETRIC_STANDARD TEXT, EDS_VDS TEXT,END_CONN_1 TEXT, END_CONN_2 TEXT, MATERIAL_DESCR TEXT, MATERIAL_LG_DESCR TEXT, MDS TEXT, RATING TEXT, SCHD TEXT, NOTES TEXT, PRIMARY KEY(specDetId))')
             //  ---------------Custom Spec table------------------//
             db.run('CREATE TABLE IF NOT EXISTS MtoCustomTable(specCustomId TEXT, itemType TEXT, fittingType TEXT, size1 NUMBER, size2 NUMBER, GeometricStd TEXT, EDS_VDS TEXT, endConn TEXT, materialDescrip TEXT, MDS TEXT, rating TEXT, SCHD TEXT, Notes TEXT, remarks TEXT, preparedBy TEXT,checkedBy TEXT, approvedBy TEXT, PRIMARY KEY(specCustomId))')
 
@@ -250,7 +251,7 @@ function createDatabase() {
             // db.run('CREATE TABLE IF NOT EXISTS MtoDocumentTable(Mto_DocID TEXT, ProjID TEXT, M_DocNo TEXT, M_DocName TEXT, RevNo TEXT, RevDate TEXT, RevDes TEXT, RevPreBy TEXT, RevChecBy TEXT, RevAppBy TEXT, RevPrepDate TEXT,RevCheckDate TEXT,RevAppDate TEXT, ChecklistNo TEXT, MtoSta TEXT, Preocur TEXT, PRIMARY KEY(Mto_DocID))')
             // // db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT, fileNo TEXT, DocNo TEXT, TagNo TEXT, AreaNO TEXT, DisNo TEXT, SysNo TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
             db.run('CREATE TABLE IF NOT EXISTS MtoDocumentTable(Mto_DocID TEXT, ProjID TEXT, M_DocNo TEXT, M_DocName TEXT, RevNo TEXT, RevDate TEXT, RevDes TEXT, RevPreBy TEXT, RevChecBy TEXT, RevAppBy TEXT, RevPrepDate TEXT,RevCheckDate TEXT,RevAppDate TEXT, ChecklistNo TEXT, MtoSta TEXT, Preocur TEXT, PRIMARY KEY(Mto_DocID))')
-            db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT,fileId Text, fileNo TEXT,DocId TEXT, DocNo TEXT, tagId TEXT, tagNo Text, areaId TEXT , areaName TEXT,DiscId TEXT, DisName TEXT,SysID TEXT, SysName TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT,Sizeone TEXT,Sizetwo TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
+            db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT,fileId Text, fileNo TEXT,DocId TEXT, DocNo TEXT, tagId TEXT, tagNo Text, areaId TEXT , areaName TEXT,DiscId TEXT, DisName TEXT,SysID TEXT, SysName TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT,Sizeone TEXT,Sizetwo TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_Z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
             db.run('CREATE TABLE IF NOT EXISTS MtoAreaTable(mtoareaId TEXT PRIMARY KEY, area TEXT, name TEXT)')
             db.run('CREATE TABLE IF NOT EXISTS MtoTagTable(mtotagId TEXT, number TEXT, name TEXT, PRIMARY KEY(number))')
 
@@ -9315,6 +9316,7 @@ app.whenReady().then(() => {
         let statements = []; // Track all prepared statements
         let statementsFinalized = false; // Track if statements have been finalized
 
+
         try {
             const specId = generateCustomID('Sp');
 
@@ -9350,8 +9352,8 @@ app.whenReady().then(() => {
                         INSERT INTO MtoSpecDetTable (
                             specDetId, specId, ITEM, TYPE, RANGE_FROM, RANGE_TO,
                             GEOMETRIC_STANDARD, EDS_VDS, END_CONN_1, END_CONN_2,
-                            MATERIAL_DESCR, MDS, RATING, SCHD, NOTES
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            MATERIAL_DESCR , MATERIAL_LG_DESCR, MDS, RATING, SCHD, NOTES
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
                     `);
                     statements.push(specDetStmt);
 
@@ -9368,12 +9370,13 @@ app.whenReady().then(() => {
                             row[4],  // GEOMETRIC_STANDARD
                             row[5],  // EDS_VDS
                             row[6],  // END_CONN_1
-                            row[6],  // END_CONN_2 (same as END_CONN_1)
-                            row[7],  // MATERIAL_DESCR
-                            row[8],  // MDS
-                            row[9],  // RATING
-                            row[10], // SCHD
-                            row[11]  // NOTES
+                            row[7],  // END_CONN_2 (same as END_CONN_1)
+                            row[8],  // MATERIAL_DESCR
+                            row[9],  // MATERIAL_LG_DESCR
+                            row[10],   // MDS
+                            row[11],  // RATING
+                            row[12],   // SCHD
+                            row[13]    // NOTES
                         ], (err) => {
                             if (err) reject(err);
                         });
@@ -9384,9 +9387,9 @@ app.whenReady().then(() => {
                     const materialStmt = projectDb.prepare(`
                         INSERT INTO MtoSpecMaterialTable (
                             specMaterialId, specId, itemType, fittingType, size1, size2,
-                            GeometricStd, EDS_VDS, endConn, materialDescrip, MDS, rating,
+                            GeometricStd, EDS_VDS, endConn, materialDescrip, materialLgDescrip, MDS, rating,
                             SCHD, Notes
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
                     `);
                     statements.push(materialStmt);
 
@@ -9403,6 +9406,7 @@ app.whenReady().then(() => {
                             row.edsVds,
                             row.endConn,
                             row.materialDescr,
+                            row.materialLongDescr,
                             row.mds,
                             row.rating,
                             row.schd,
@@ -10270,6 +10274,402 @@ app.whenReady().then(() => {
         })
 
     })
+
+    ipcMain.on('update-matdataarea-table', (event, updatedData) => {
+        console.log("Received update message");
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        // Extracting updated data
+        const { M_DocNo, fileNo, DocNo, tagNo, areaName, DisName, SysName, Item_Cat, Item, Item_Sh_Des, Item_Lo_Des, Mat_Cat, Material, Sizeone, Sizetwo, Qty, Unit, Unit_Weight, Total_Weight, ItemPos_X, ItemPos_Y, ItemPos_Z, MTO_Source, Unit_Weight_Ref, MatID } = updatedData;
+
+        // Open the project's database
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            // Update the record in the database
+            projectDb.run(`UPDATE MtoMaterialListTable SET 
+                M_DocNo = ?, fileNo = ?, DocNo = ?, tagNo = ?, areaName = ?, 
+                DisName = ?, SysName = ?, Item_Cat = ?, Item = ?, Item_Sh_Des = ?, Item_Lo_Des = ?, Mat_Cat = ?, Material = ?, Sizeone = ?, Sizetwo = ?, Qty = ?, Unit = ?, Unit_Weight = ?, 
+                Total_Weight = ?, ItemPos_X = ?, ItemPos_Y = ?, ItemPos_Z = ?, MTO_Source = ?, Unit_Weight_Ref = ? WHERE MatID = ?`,
+                [
+                    M_DocNo, fileNo, DocNo, tagNo, areaName, DisName, SysName, Item_Cat, Item, Item_Sh_Des, Item_Lo_Des, Mat_Cat, Material, Sizeone, Sizetwo, Qty, Unit, Unit_Weight, Total_Weight, ItemPos_X, ItemPos_Y, ItemPos_Z, MTO_Source, Unit_Weight_Ref, MatID
+                ],
+                (err) => {
+                    if (err) {
+                        console.error('Error updating  MtoMaterialListTable table:', err.message);
+                        return;
+                    }
+
+                    console.log(' MtoMaterialListTable table updated successfully.');
+                    // Fetch updated data from the LineList table
+                    projectDb.all("SELECT * FROM  MtoMaterialListTable", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from  MtoMaterialListTable table:', err.message);
+                            return;
+                        }
+
+                        mainWindow.webContents.send('material-data-save', rows);
+                    });
+
+                }
+            );
+        });
+    });
+
+    ipcMain.on('delete-material-data', (event, MatID) => {
+        // console.log("Received request to remove discipline with area:", area, "and disc:", disc);
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        // Open the project's database
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            // Delete the row with the given tagId
+            projectDb.run('DELETE FROM MtoMaterialListTable WHERE MatID = ? ', [MatID], function (err) {
+                if (err) {
+                    console.error('Error deleting data:', err.message);
+                    return;
+                }
+                console.log(`Row with ${MatID}  deleted successfully.`);
+            });
+
+            projectDb.all("SELECT * FROM MtoMaterialListTable", (err, rows) => {
+                if (err) {
+                    console.error('Error fetching data from Tree table:', err.message);
+                    return;
+                }
+
+                console.log('Data in the MtoMaterialListTable table:', rows);
+                mainWindow.webContents.send('material-data-save', rows);
+            });
+
+        });
+    });
+
+    ipcMain.on('import-mtodataline-list', async (event) => {
+        const result = await dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [{ name: 'Excel Files', extensions: ['xlsx', 'xls'] }]
+        });
+
+        if (result.canceled) return;
+        const confirmation = await dialog.showMessageBox({
+            type: 'question',
+            buttons: ['Cancel', 'Upload'],
+            defaultId: 1,
+            title: 'Confirm Upload',
+            message: 'Do you want to upload this file?'
+        });
+        console.log('testing');
+
+
+        if (confirmation.response !== 1) return;
+
+        const filePath = result.filePaths[0];
+        const workbook = xlsx.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const lineList = xlsx.utils.sheet_to_json(sheet);
+        console.log(`mto list ${lineList}`);
+        event.reply('testing', lineList);
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+            lineList.forEach((line) => {
+                const tagNo = line['Tag No'];
+                const areaName = line['Area Name'];
+                const M_DocNo = line['M_Document No'];
+                const fileNo = line['File No'];
+                const DocNo = line['Document No'];
+                const DisName = line['Discipline Name'];
+                const SysName = line['System Name'];
+                const Item_Cat = line['Item Category'];
+                const Item = line['Item'];
+                const Item_Sh_Des = line['Item Short Description'];
+                const Item_Lo_Des = line['Item Long Description'];
+                const Mat_Cat = line['Material Category'];
+                const Material = line['Material'];
+                const Sizeone = line['Size 1'];
+                const Sizetwo = line['Size 2'];
+                const qty = line['Quantity'];
+                const Unit = line['Unit'];
+                const Unit_Weight = line['Unit Weight'];
+                const Total_Weight = line['Total Weight'];
+                const ItemPos_X = line['Item Position X'];
+                const ItemPos_Y = line['Item Position Y'];
+                const ItemPos_Z = line['Item Position Z'];
+                const Unit_Weight_Ref = line['Unit Weight Ref'];
+                const mtoSource = line['MTO Source'];
+                // console.log(tagNo);
+                // console.log(Sizeone);
+                const mtotagId = generateCustomID('At');
+                const mtoareaId = generateCustomID('Am');
+
+
+                projectDb.get('SELECT * FROM MtoTagTable WHERE name = ?', [tagNo], (err, row) => {
+                    if (err) {
+                        console.error('Error checking existing tag in MtoTagTable:', err.message);
+                        return;
+                    }
+
+                    if (row) {
+                        // // Merge existing data with new data, retaining old data where new data is not provided
+                        // const updatedLine = {
+                        //     mtotagId: row.mtotagId,
+                        //     number: tagNo                           
+                        // };
+
+                        // // Update the existing record
+                        // projectDb.run(
+                        //     `UPDATE MtoTagTable SET name = ? WHERE number = ?`,
+                        //     [updatedLine.name, updatedLine.number],
+                        //     (err) => {
+                        //         if (err) {
+                        //             console.error('Error updating data in MtoTagTable:', err.message);
+                        //             return;
+                        //         }
+                        //         console.log(`Row updated in MtoTagTable with tag: ${updatedLine.number}`);
+                        //         event.reply("tag-exists", { success: true, message: `Tag number ${updatedLine.number} already exist and data updated` })
+                        //         projectDb.all("SELECT * FROM MtoTagTable", (err, rows) => {
+                        //             if (err) {
+                        //                 console.error('Error fetching data from MtoTagTable table:', err.message);
+                        //                 return;
+                        //             }
+                        //             mainWindow.webContents.send('all-lines-fetched', rows);
+                        //         });
+                        //     }
+                        // );
+
+                        // Update TagInfo and Tags if necessary (assuming these tables don't need updates since they are for tag info)
+                    }
+                    else {
+                        // const mtotagId = generateCustomID('At');
+                        // // const mtoareaId = generateCustomID('Am');
+                        projectDb.run(
+                            `INSERT OR IGNORE INTO MtoTagTable (mtotagId,number) VALUES (?, ?)`,
+                            [mtotagId, tagNo],
+                            (err) => {
+                                if (err) {
+                                    console.error('Error inserting data into MtoTagTable:', err.message);
+                                    return;
+                                }
+                                console.log(`Row inserted into MtoTagTable with tag: ${tagNo}`);
+                                projectDb.all("SELECT * FROM MtoTagTable", (err, rows) => {
+                                    if (err) {
+                                        console.error('Error fetching data from LineList table:', err.message);
+                                        return;
+                                    }
+                                    mainWindow.webContents.send('tag-save-mto', rows);
+                                });
+                            }
+                        );
+
+                        // projectDb.run(
+                        //     'INSERT OR IGNORE INTO TagInfo (tagId,tag, type) VALUES (?, ?,?)',
+                        //     [TagId, tag, 'Line'],
+                        //     (err) => {
+                        //         if (err) {
+                        //             console.error('Error inserting data into TagInfo:', err.message);
+                        //             return;
+                        //         }
+                        //         console.log(`Row inserted into TagInfo with tag number: ${tag}`);
+                        //         projectDb.all("SELECT * FROM TagInfo", (err, rows) => {
+                        //             if (err) {
+                        //                 console.error('Error fetching data from TagInfo table:', err.message);
+                        //                 return;
+                        //             }
+                        //             mainWindow.webContents.send('all-taginfo-fetched', rows);
+                        //         });
+                        //     }
+                        // );
+
+                        // projectDb.run(
+                        //     'INSERT OR IGNORE INTO Tags (tagId, number, type) VALUES (?, ?, ?)',
+                        //     [TagId, tag, 'Line'],
+                        //     (err) => {
+                        //         if (err) {
+                        //             console.error('Error inserting data into Tags:', err.message);
+                        //             return;
+                        //         }
+                        //         console.log(`Row inserted into Tags with tag number: ${tag}`);
+                        //         projectDb.all("SELECT * FROM Tags", (err, rows) => {
+                        //             if (err) {
+                        //                 console.error('Error fetching data from Tags table:', err.message);
+                        //                 return;
+                        //             }
+                        //             mainWindow.webContents.send('all-tags-fetched', rows);
+                        //         });
+                        //     }
+                        // );
+                    }
+                });
+                projectDb.get('SELECT * FROM MtoAreaTable WHERE name = ?', [tagNo], (err, row) => {
+                    if (err) {
+                        console.error('Error checking existing tag in MtoTagTable:', err.message);
+                        return;
+                    }
+
+                    if (row) {
+
+                    }
+                    else {
+
+                        // const mtoareaId = generateCustomID('Am');
+                        projectDb.run(
+                            `INSERT OR IGNORE INTO MtoAreaTable (mtoareaId,name) VALUES (?, ?)`,
+                            [mtoareaId, areaName],
+                            (err) => {
+                                if (err) {
+                                    console.error('Error inserting data into MtoAreaTable:', err.message);
+                                    return;
+                                }
+                                console.log(`Row inserted into MtoAreaTable with area name: ${areaName}`);
+                                projectDb.all("SELECT * FROM MtoAreaTable", (err, rows) => {
+                                    if (err) {
+                                        console.error('Error fetching data from MtoAreaTable table:', err.message);
+                                        return;
+                                    }
+                                    mainWindow.webContents.send('area-save-mto', rows);
+                                });
+                            }
+                        );
+
+                    }
+                });
+                projectDb.get('SELECT * FROM MtoAreaTagRelTable WHERE tagnumber = ?, areaname=?', [tagNo, areaName], (err, row) => {
+                    if (err) {
+                        console.error('Error checking existing tag in MtoAreaTagRelTable:', err.message);
+                        return;
+                    }
+
+                    if (row) {
+
+                    }
+                    else {
+
+
+                        projectDb.run(
+                            `INSERT OR IGNORE INTO MtoAreaTagRelTable (mtoareaId,mtotagId,areaname,tagnumber) VALUES (?, ?)`,
+                            [mtoareaId, mtotagId, areaName, tagNo],
+                            (err) => {
+                                if (err) {
+                                    console.error('Error inserting data into MtoAreaTagRelTable:', err.message);
+                                    return;
+                                }
+                                console.log(`Row inserted into MtoAreaTagRelTable with area name: ${areaName}`);
+                                projectDb.all("SELECT * FROM MtoAreaTagRelTable", (err, rows) => {
+                                    if (err) {
+                                        console.error('Error fetching data from MtoAreaTagRelTable table:', err.message);
+                                        return;
+                                    }
+                                    mainWindow.webContents.send('mtoline-area-save', rows);
+                                });
+                            }
+                        );
+
+
+                    }
+                });
+
+                projectDb.get('SELECT * FROM MtoMaterialListTable WHERE tagNo = ?, areaName=?', [tagNo, areaName], (err, row) => {
+                    if (err) {
+                        console.error('Error checking existing tag in  MtoMaterialListTable:', err.message);
+                        return;
+                    }
+
+                    if (row) {
+
+                        // Merge existing data with new data, retaining old data where new data is not provided
+                        const updatedLine = {
+                            MatID: row.MatID,
+                            M_DocNo: M_DocNo || row.M_DocNo,
+                            fileNo: fileNo || row.fileNo,
+                            DocNo: DocNo || row.DocNo,
+                            DisName: DisName || row.DisName,
+                            SysName: SysName || row.SysName,
+                            Item_Cat: Item_Cat || row.Item_Cat,
+                            Item: Item || row.Item,
+                            Item_Sh_Des: Item_Sh_Des || row.Item_Sh_Des,
+                            Item_Lo_Des: Item_Lo_Des || row.Item_Lo_Des,
+                            Mat_Cat: Mat_Cat || row.Mat_Cat,
+                            Material: Material || row.Material,
+                            Sizeone: Sizeone || row.Sizeone,
+                            Sizetwo: Sizetwo || row.Sizetwo,
+                            mqty: qty || row.qty,
+                            Unit: Unit || row.Unit,
+                            Unit_Weight: Unit_Weight || row.Unit_Weight,
+                            Total_Weight: Total_Weight || row.Total_Weight,
+                            ItemPos_X: ItemPos_X || row.ItemPos_X,
+                            ItemPos_Y: ItemPos_Y || row.ItemPos_Y,
+                            ItemPos_Z: ItemPos_Z || row.ItemPos_Z,
+                            Unit_Weight_Ref: Unit_Weight_Ref || row.Unit_Weight_Ref,
+                            mtoSource: mtoSource || row.mtoSource
+                        };
+
+                        // Update the existing record
+                        projectDb.run(
+                            `UPDATE LineList SET fluidCode = ?, lineId = ?, medium = ?, lineSizeIn = ?, lineSizeNb = ?, pipingSpec = ?, insType = ?, insThickness = ?, heatTrace = ?, lineFrom = ?, lineTo = ?, maxOpPress = ?, maxOpTemp = ?, dsgnPress = ?, minDsgnTemp = ?, maxDsgnTemp = ?, testPress = ?, testMedium = ?, testMediumPhase = ?, massFlow = ?, volFlow = ?, density = ?, velocity = ?, paintSystem = ?, ndtGroup = ?, chemCleaning = ?, pwht = ? WHERE tag = ?`,
+                            [updatedLine.fluidCode, updatedLine.lineId, updatedLine.medium, updatedLine.lineSizeIn, updatedLine.lineSizeNb, updatedLine.pipingSpec, updatedLine.insType, updatedLine.insThickness, updatedLine.heatTrace, updatedLine.lineFrom, updatedLine.lineTo, updatedLine.maxOpPress, updatedLine.maxOpTemp, updatedLine.dsgnPress, updatedLine.minDsgnTemp, updatedLine.maxDsgnTemp, updatedLine.testPress, updatedLine.testMedium, updatedLine.testMediumPhase, updatedLine.massFlow, updatedLine.volFlow, updatedLine.density, updatedLine.velocity, updatedLine.paintSystem, updatedLine.ndtGroup, updatedLine.chemCleaning, updatedLine.pwht, tag],
+                            (err) => {
+                                if (err) {
+                                    console.error('Error updating data in LineList:', err.message);
+                                    return;
+                                }
+                                console.log(`Row updated in LineList with tag: ${updatedLine.tagId}`);
+                                event.reply("tag-exists", { success: true, message: `Tag number ${tag} already exist and data updated` })
+                                projectDb.all("SELECT * FROM LineList", (err, rows) => {
+                                    if (err) {
+                                        console.error('Error fetching data from LineList table:', err.message);
+                                        return;
+                                    }
+                                    mainWindow.webContents.send('all-lines-fetched', rows);
+                                });
+                            }
+                        );
+                    }
+                    else {
+
+
+                        projectDb.run(
+                            `INSERT OR IGNORE INTO MtoAreaTagRelTable (mtoareaId,mtotagId,areaname,tagnumber) VALUES (?, ?)`,
+                            [mtoareaId, mtotagId, areaName, tagNo],
+                            (err) => {
+                                if (err) {
+                                    console.error('Error inserting data into MtoAreaTagRelTable:', err.message);
+                                    return;
+                                }
+                                console.log(`Row inserted into MtoAreaTagRelTable with area name: ${areaName}`);
+                                projectDb.all("SELECT * FROM MtoAreaTagRelTable", (err, rows) => {
+                                    if (err) {
+                                        console.error('Error fetching data from MtoAreaTagRelTable table:', err.message);
+                                        return;
+                                    }
+                                    mainWindow.webContents.send('mtoline-area-save', rows);
+                                });
+                            }
+                        );
+
+
+                    }
+                });
+            });
+        });
+    });
 
 
 });

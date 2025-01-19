@@ -55,6 +55,7 @@ import ReviewMtoArea from '../components/ReviewMtoArea';
 import ReviewMtoTag from '../components/ReviewMtoTag';
 import ReviewMtoLine from '../components/ReviewMtoLine';
 import CreateMaterialList from '../components/CreateMaterialList';
+import MtoMaterialList from '../components/MtoMaterialList';
 
 // import { div } from 'three/src/nodes/TSL.js';
 
@@ -184,7 +185,8 @@ function Home() {
   const [reviewtagmto, setreviewtagmto] = useState(false)
   const [reviewareamto, setreviewareamto] = useState(false)
   const [reviewlinemto, setreviewlinemto] = useState(false)
-
+  const [reviewmtomat, setreviewmtomat] = useState(false)
+  const [reviewmtotable, setreviewmtotable] = useState(false)
   // ------------------------------------PID--------------------------//
   const [svgcontent, setsvgcontent] = useState('')
   const [allspids, setAllspids] = useState([]);
@@ -208,6 +210,7 @@ function Home() {
   const [mtolinelist, setmtolinelist] = useState([])
   const [mtolinearea, setmtolinearea] = useState([])
   const [matdataarea, setmatdataarea] = useState([])
+
 
   // useEffect(() => {
   //   // Initialize the start time when the component mounts
@@ -320,6 +323,12 @@ function Home() {
   }, [])
 
   useEffect(() => {
+    window.api.receive('testing', (data) => {
+      console.log(data);
+    })
+  })
+
+  useEffect(() => {
     window.api.receive('app-id', (data) => {
       setAppId(data);
     })
@@ -360,7 +369,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
-
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
   }
 
   const handleequipementList = (activesidelink) => {
@@ -390,6 +406,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
 
@@ -423,7 +447,14 @@ function Home() {
     setOpenSpec(false);
     setCreateBranchtable(false);
     setOpenMto(false);
-
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
   }
 
@@ -454,6 +485,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
   }
 
@@ -483,7 +522,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
-
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
   }
 
@@ -515,6 +561,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
   }
@@ -536,7 +590,15 @@ function Home() {
     setExpandTreeManangement(false);
     setOpenTreeTable(false);
     setSpidOpen(false);
-
+    setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
   }
@@ -563,7 +625,15 @@ function Home() {
     setOpenBranchTable(false);
     setOpenSpectable(false);
     setOpenCustomSpec(false)
-
+    setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
 
@@ -597,6 +667,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
   }
@@ -627,6 +705,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
 
@@ -658,6 +744,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
 
@@ -689,7 +783,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
-
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
   }
@@ -722,7 +823,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
-
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
   }
@@ -753,7 +861,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
-
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
   }
@@ -782,6 +897,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
 
   }
@@ -810,6 +933,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(false)
+    setcreateOpenMto(false);
 
 
 
@@ -838,8 +969,15 @@ function Home() {
     setOpenSpectable(false);
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
-
     setOpenMto(false);
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(false)
+    setcreateOpenMto(false);
 
 
   }
@@ -869,6 +1007,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(false)
+    setcreateOpenMto(false);
 
 
   }
@@ -940,6 +1086,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(false)
+    setcreateOpenMto(false);
 
 
   }
@@ -976,6 +1130,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(false)
+    setcreateOpenMto(false);
 
   }
 
@@ -1003,11 +1165,19 @@ function Home() {
     setExpandTreeManangement(false);
     setOpenTreeTable(false);
     setOpenMto(false);
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(false)
+    setcreateOpenMto(false);
   }
 
   const handleopenMtomanagement = (activesidelink) => {
     setOpenMto(true);
-    setcreateOpenMto(true);
+
     setOpenSpec(false);
     setOpenCustomSpec(false);
     setOpenBranchTable(false);
@@ -1033,6 +1203,13 @@ function Home() {
     setOpenTreeTable(false);
     setiRoamercanvas(false);
     setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(false)
+    setcreateOpenMto(true);
   }
 
   const handlematlistTable = () => {
@@ -1067,9 +1244,82 @@ function Home() {
     setreviewtagmto(false)
     setreviewlinemto(false)
     setcreateMtoMat(true)
+    setreviewmtomat(false)
   }
 
   const handleReviewmtodoctable = (activesidelink) => {
+    setOpenMto(true);
+    setcreateOpenMto(false)
+    setOpenSpec(false);
+    setOpenCustomSpec(false);
+    setOpenBranchTable(false);
+    setCreateBranchtable(false);
+    setReviewBranchtable(false);
+    setActiveTab(activesidelink)
+    setSpidOpen(false);
+    setReviewtag(false);
+    setRegisterTag(false);
+    setexpandGLobalModal(false);
+    setEquipment(false);
+    setrightSideNavVisible(false);
+    setbulkimport(false);
+    setLineList(false);
+    setExpandDocument(false)
+    setRegisterDocument(false);
+    setExpandTags(false);
+    setTagInfoTable(false);
+    setCommentExpand(false);
+    setEditCommentStatus(false);
+    setCommentReviewOpen(false);
+    setExpandTreeManangement(false);
+    setOpenTreeTable(false);
+    setiRoamercanvas(false);
+    setreviewdocmto(true)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(true)
+  }
+
+  const handleReviewmtoareatable = (activesidelink) => {
+    setOpenMto(true);
+    setcreateOpenMto(false)
+    setOpenSpec(false);
+    setOpenCustomSpec(false);
+    setOpenBranchTable(false);
+    setCreateBranchtable(false);
+    setReviewBranchtable(false);
+    setActiveTab(activesidelink)
+    setSpidOpen(false);
+    setReviewtag(false);
+    setRegisterTag(false);
+    setexpandGLobalModal(false);
+    setEquipment(false);
+    setrightSideNavVisible(false);
+    setbulkimport(false);
+    setLineList(false);
+    setExpandDocument(false)
+    setRegisterDocument(false);
+    setExpandTags(false);
+    setTagInfoTable(false);
+    setCommentExpand(false);
+    setEditCommentStatus(false);
+    setCommentReviewOpen(false);
+    setExpandTreeManangement(false);
+    setOpenTreeTable(false);
+    setiRoamercanvas(false);
+    setreviewdocmto(false)
+    setreviewareamto(true)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(true)
+  }
+
+  const handleReviewmtolinetable = (activesidelink) => {
     setOpenMto(true);
     setcreateOpenMto(false)
     setOpenSpec(false);
@@ -1101,10 +1351,84 @@ function Home() {
     setreviewtagmto(false)
     setreviewlinemto(true)
     setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(true)
+  }
+
+  const handleReviewmtomattable = (activesidelink) => {
+    setOpenMto(true);
+    setcreateOpenMto(false)
+    setOpenSpec(false);
+    setOpenCustomSpec(false);
+    setOpenBranchTable(false);
+    setCreateBranchtable(false);
+    setReviewBranchtable(false);
+    setActiveTab(activesidelink)
+    setSpidOpen(false);
+    setReviewtag(false);
+    setRegisterTag(false);
+    setexpandGLobalModal(false);
+    setEquipment(false);
+    setrightSideNavVisible(false);
+    setbulkimport(false);
+    setLineList(false);
+    setExpandDocument(false)
+    setRegisterDocument(false);
+    setExpandTags(false);
+    setTagInfoTable(false);
+    setCommentExpand(false);
+    setEditCommentStatus(false);
+    setCommentReviewOpen(false);
+    setExpandTreeManangement(false);
+    setOpenTreeTable(false);
+    setiRoamercanvas(false);
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(false)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(true)
+    setreviewmtotable(true)
+  }
+
+  const handleReviewmtotagtable = (activesidelink) => {
+    setOpenMto(true);
+    setcreateOpenMto(false)
+    setOpenSpec(false);
+    setOpenCustomSpec(false);
+    setOpenBranchTable(false);
+    setCreateBranchtable(false);
+    setReviewBranchtable(false);
+    setActiveTab(activesidelink)
+    setSpidOpen(false);
+    setReviewtag(false);
+    setRegisterTag(false);
+    setexpandGLobalModal(false);
+    setEquipment(false);
+    setrightSideNavVisible(false);
+    setbulkimport(false);
+    setLineList(false);
+    setExpandDocument(false)
+    setRegisterDocument(false);
+    setExpandTags(false);
+    setTagInfoTable(false);
+    setCommentExpand(false);
+    setEditCommentStatus(false);
+    setCommentReviewOpen(false);
+    setExpandTreeManangement(false);
+    setOpenTreeTable(false);
+    setiRoamercanvas(false);
+    setreviewdocmto(false)
+    setreviewareamto(false)
+    setreviewtagmto(true)
+    setreviewlinemto(false)
+    setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(true)
   }
   const handleReviewmtocretable = (activesidelink) => {
     setOpenMto(true);
-    setcreateOpenMto(true)
+
     setOpenSpec(false);
     setOpenCustomSpec(false);
     setOpenBranchTable(false);
@@ -1134,6 +1458,10 @@ function Home() {
     setreviewtagmto(false)
     setreviewlinemto(false)
     setcreateMtoMat(false)
+    setreviewmtomat(false)
+    setreviewmtotable(false)
+    setcreateOpenMto(true)
+
   }
 
   const handleExpandBranchmanagement = (tab) => {
@@ -1145,6 +1473,15 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateSpectable(false);
     setReviewSpectable(false);
+    setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
   }
 
@@ -1157,6 +1494,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
 
   }
 
@@ -1169,6 +1514,14 @@ function Home() {
     setCreateSpectable(false);
     setReviewSpectable(false);
     setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
   }
 
   const handleReviewBranchtable = () => {
@@ -1177,7 +1530,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateBranchtable(false);
     setOpenMto(false);
-
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
   }
   const handleReviewSpecTable = () => {
     setReviewSpectable(true);
@@ -1185,6 +1545,14 @@ function Home() {
     setOpenCustomSpec(false)
     setCreateSpectable(false);
     setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
   }
 
   useEffect(() => {
@@ -2844,7 +3212,41 @@ function Home() {
                         <div id="tagsSideLnk" class="tabInactive" >
                           <a class="sideLnk" onClick={() => handleReviewmtodoctable('mto')}>Review</a>
                         </div>
+
                       </li>
+                      {
+                        reviewmtotable && <>
+                          <li>
+                            <div id="tagsSideLnk" class="tabInactive" >
+                              <a class="sideLnk" onClick={() => handleReviewmtodoctable('mto')}>MTO Document Review</a>
+                            </div>
+
+                          </li>
+                          <li>
+                            <div id="tagsSideLnk" class="tabInactive" >
+                              <a class="sideLnk" onClick={() => handleReviewmtotagtable('mto')}>Area Review</a>
+                            </div>
+
+                          </li>
+                          <li>
+                            <div id="tagsSideLnk" class="tabInactive" >
+                              <a class="sideLnk" onClick={() => handleReviewmtoareatable('mto')}>Tag Review</a>
+                            </div>
+
+                          </li>
+                          <li>
+                            <div id="tagsSideLnk" class="tabInactive" >
+                              <a class="sideLnk" onClick={() => handleReviewmtolinetable('mto')}>Line List Review</a>
+                            </div>
+
+                          </li>
+                          <li>
+                            <div id="tagsSideLnk" class="tabInactive" >
+                              <a class="sideLnk" onClick={() => handleReviewmtomattable('mto')}>MTO Material Review</a>
+                            </div>
+                          </li>
+                        </>
+                      }
                       <li>
                         <div id="tagsSideLnk" class="tabInactive">
                           <a class="sideLnk">Report</a>
@@ -3089,7 +3491,8 @@ function Home() {
               {reviewtagmto && <ReviewMtoTag mtotag={mtotag} />}
               {reviewlinemto && <ReviewMtoLine mtolinelist={mtolinelist} />}
               {/* mtoarea={mtoarea} */}
-              {createMtoMat && <CreateMaterialList mtolinelist={mtolinelist} mtoarea={mtoarea} mtolinearea={mtolinearea} specmatDetails={specmatDetails} />}
+              {createMtoMat && <CreateMaterialList mtolinelist={mtolinelist} mtoarea={mtoarea} mtolinearea={mtolinearea} specmatDetails={specmatDetails} matdataarea={matdataarea} />}
+              {reviewmtomat && <MtoMaterialList matdataarea={matdataarea}></MtoMaterialList>}
               {
 
                 expanddocument && <Documenttable allDocuments={allDocuments} />

@@ -85,6 +85,8 @@ function LineList({ allLineList }) {
     saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'LineList.xlsx');
   };
 
+ 
+
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -96,7 +98,7 @@ function LineList({ allLineList }) {
   return (
     <div style={{ width: '100%', height: '100vh', backgroundColor: 'white', zIndex: '1', position: 'absolute' }}>
       <form>
-        
+
         <div className="table-container">
           <table className="linetable">
             <thead>
@@ -136,13 +138,13 @@ function LineList({ allLineList }) {
               </tr>
               <tr>
                 <th colSpan="29">
-          <input
-            type="text"
-            placeholder="Search by Tag"
-            value={searchQuery}
-            onChange={handleSearch}
-            style={{ width: '100%', padding: '5px' }}
-          />
+                  <input
+                    type="text"
+                    placeholder="Search by Tag"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    style={{ width: '100%', padding: '5px' }}
+                  />
                 </th>
               </tr>
             </thead>

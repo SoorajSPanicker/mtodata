@@ -1753,3 +1753,49 @@ div#specSearchResultDiv div input{
   width: 50px;
   text-align: center;
 }
+
+.tree-node {
+  border: 1px solid #c5bcbc63;
+  background: #30303014;
+  color: #7c9eb2;
+  width: max-content;
+}
+
+.tree-node-content {
+  margin: 5px;
+  border-radius: 10px;
+}
+
+.angular-ui-tree-handle {
+  text-decoration: none;
+  font-weight: bold;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  min-height: 20px;
+  line-height: 20px;
+}
+
+.angular-ui-tree-handle {
+  cursor: pointer;
+  background: #f8faff;
+  border: 1px solid #dae2ea;
+  color: #7c9eb2;
+  padding: 10px 10px;
+}
+
+.angular-ui-tree-handle:hover {
+  color: #438eb9;
+  background: #1b1c1d;
+  border-color: #dce2e8;
+}
+
+.delete-icon {
+  cursor: pointer !important;
+  color: #ff4d4d !important;  /* Red color for delete */
+  transition: color 0.2s;
+}
+
+.delete-icon:hover {
+  color: #ff0000 !important;
+}

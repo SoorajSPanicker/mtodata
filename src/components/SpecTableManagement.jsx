@@ -218,11 +218,12 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
                 geometricStandard: row[4],
                 edsVds: row[5],
                 endConn: row[6],
-                materialDescr: row[7],
-                mds: row[8],
-                rating: row[9],
-                schd: row[10],
-                notes: row[11]
+                materialDescr: row[8],
+                materialLgDescrip: row[9],
+                mds: row[10],
+                rating: row[11],
+                schd: row[12],
+                notes: row[13]
               });
             }
           });
@@ -247,11 +248,12 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
                 geometricStandard: row[4],
                 edsVds: row[5],
                 endConn: row[6],
-                materialDescr: row[7],
-                mds: row[8],
-                rating: row[9],
-                schd: row[10],
-                notes: row[11]
+                materialDescr: row[8],       // Changed from 7 to 8
+                materialLongDescr: row[9],   // Added material long description
+                mds: row[10],                // Changed from 8 to 10
+                rating: row[11],             // Changed from 9 to 11
+                schd: row[12],               // Changed from 10 to 12
+                notes: row[13]  
               });
             });
           });
@@ -267,11 +269,12 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
               geometricStandard: row[4],
               edsVds: row[5],
               endConn: row[6],
-              materialDescr: row[7],
-              mds: row[8],
-              rating: row[9],
-              schd: row[10],
-              notes: row[11]
+              materialDescr: row[8],       // Changed from 7 to 8
+              materialLongDescr: row[9],   // Added material long description
+              mds: row[10],                // Changed from 8 to 10
+              rating: row[11],             // Changed from 9 to 11
+              schd: row[12],               // Changed from 10 to 12
+              notes: row[13]     
             });
           });
         }
@@ -362,3 +365,5 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
 }
 
 export default SpecTableManagement;
+
+

@@ -3,11 +3,12 @@ import AreaSelect from './AreaSelect';
 import SpecMaterialSearch from './SpecMaterialSearch';
 
 
-function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails }) {
+function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails, matdataarea }) {
     const [selectarea, setselectarea] = useState(false)
     const [selectedTag, setSelectedTag] = useState('');
     const [selectedTagNo, setSelectedTagNo] = useState('');
     const [expandedItems, setExpandedItems] = useState({});
+    const [expandedmatItems, setExpandedmatItems] = useState({});
     const [selectspec, setselectspec] = useState(false);
     const [selectedSpec, setSelectedSpec] = useState('');
     const [mttagid, setmttagid] = useState('');
@@ -69,12 +70,28 @@ function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails 
     const hasExistingArea = (tag) => {
         return mtolinearea.some(area => area.tagnumber === tag);
     };
+
+    const hasExistingMat = (areaid) => {
+        return matdataarea.some(area => area.areaId === areaid);
+    };
     // Function to toggle expanded state for an item
     const toggleExpand = (tag) => {
         setExpandedItems(prev => ({
             ...prev,
             [tag]: !prev[tag]
         }));
+    };
+
+    const togglematExpand = (areaId) => {
+        setExpandedmatItems(prev => ({
+            ...prev,
+            [areaId]: !prev[areaId]
+        }));
+    };
+
+    const handlematdelete = (matId) => {
+        console.log('Deleting material with ID:', matId);
+        window.api.send('delete-material-data', matId);
     };
 
 
@@ -143,41 +160,99 @@ function CreateMaterialList({ mtolinelist, mtoarea, mtolinearea, specmatDetails 
                                 {mtolinearea
                                     .filter(areaItem => areaItem.tagnumber === item.tag)
                                     .map((areaItem, areaIndex) => (
-                                        <div
-                                            key={areaIndex}
-                                            className="border border-black p-2 mb-2"
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '10px',
-                                                width: 'fit-content'
-                                            }}
-                                        >
-                                            <p>Area: {areaItem.areaname}</p>
-                                            <i
-                                                className="fa-solid fa-circle-plus"
-                                                onClick={() => {
-                                                    console.log('Icon clicked');
-                                                    handleaddspec(item.pipingSpec, areaItem.mtotagId, areaItem.mtoareaId, areaItem.areaname, areaItem.tagnumber);
+                                        <div key={areaIndex}>
+                                            <div
+                                                className="border border-black p-2 mb-2"
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '10px',
+                                                    width: 'fit-content'
                                                 }}
-                                                style={{ cursor: 'pointer', zIndex: '1' }}
-                                            ></i>
-                                            <i
-                                                className="fa-solid fa-trash"
-                                                style={{ cursor: 'pointer', zIndex: '1' }}
-                                            ></i>
+                                            >
+                                                {hasExistingMat(areaItem.mtoareaId) && (
+                                                    <i
+                                                        className={`fa-solid ${expandedmatItems[areaItem.mtoareaId] ? 'fa-angle-down' : 'fa-angle-right'}`}
+                                                        onClick={() => togglematExpand(areaItem.mtoareaId)}
+                                                        style={{ cursor: 'pointer', zIndex: '1' }}
+                                                    ></i>
+                                                )}
+                                                <p>Area: {areaItem.areaname}</p>
+                                                <i
+                                                    className="fa-solid fa-circle-plus"
+                                                    onClick={() => {
+                                                        console.log('Icon clicked');
+                                                        handleaddspec(item.pipingSpec, areaItem.mtotagId, areaItem.mtoareaId, areaItem.areaname, areaItem.tagnumber);
+                                                    }}
+                                                    style={{ cursor: 'pointer', zIndex: '1' }}
+                                                ></i>
+                                                <i
+                                                    className="fa-solid fa-trash"
+                                                    style={{ cursor: 'pointer', zIndex: '1' }}
+                                                ></i>
+                                            </div>
+                                            {expandedmatItems[areaItem.mtoareaId] && (
+                                                <div>
+
+                                                    <div style={{ marginLeft: '30px', display: 'flex', minWidth: '800px' }}>
+                                                        <label style={{ flex: '2' }}>Item</label>
+                                                        <label style={{ flex: '1' }}>Size1</label>
+                                                        <label style={{ flex: '1' }}>Size2</label>
+                                                        {/* <label style={{ flex: '1' }}>Rating</label>
+                                                        <label style={{ flex: '1' }}>Schedule</label>
+                                                        <label style={{ flex: '3' }}>Description</label>
+                                                        <label style={{ flex: '1' }}>Unit Weight</label>
+                                                        <label style={{ flex: '1' }}>Total Weight</label> */}
+                                                        {/* <label style={{ width: '50px' }}>Qty</label> */}
+                                                        <label style={{ flex: '1' }}>Qty</label>
+                                                        <span style={{ width: '55px' }}></span>
+                                                    </div>
+
+                                                    <ol>
+                                                        {matdataarea.filter(matItem => matItem.tagId === item.mtotagId)
+                                                            .map((matItem, matIndex) => (
+                                                                <li key={matIndex}>
+                                                                    <div style={{ width: 'auto', minWidth: '800px' }} className="tree-node tree-node-content angular-ui-tree-handle">
+                                                                        <div style={{ display: 'flex' }}>
+                                                                            <label style={{ flex: '2', margin: 'auto' }}>{matItem.Item}</label>
+                                                                            <label style={{ flex: '1', margin: 'auto' }}>{matItem.Sizeone}</label>
+                                                                            <label style={{ flex: '1', margin: 'auto' }}>{matItem.Sizetwo}</label>
+                                                                            <label style={{ flex: '1', margin: 'auto' }}>{matItem.Qty}</label>
+                                                                            <span className="fg-space"></span>
+                                                                            {/* <a className="btn pull-right"> */}
+                                                                                <i
+                                                                                    className="fa fa-trash delete-icon"
+                                                                                    style={{
+                                                                                      
+                                                                                        zIndex: '1',
+                                                                                        fontSize: '20px'  // Added explicit size
+                                                                                    }}
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();  // Stop event bubbling
+                                                                                        handlematdelete(matItem.MatID);
+                                                                                    }}
+                                                                                ></i>
+                                                                            {/* </a> */}
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            ))}
+                                                    </ol>
+                                                    {/* onClick={handlematdelete(matItem.MatID)} */}
+                                                </div>
+                                            )}
                                         </div>
-                                    ))
-                                }
+                                    ))}
                             </div>
+
                         )}
                     </div>
                 ))}
             </div>
 
             {selectarea && <AreaSelect allAreasInTable={mtoarea} onClose={handleAreaSelectClose} showAreaDialog={selectarea} selectedTag={selectedTag} selectedTagNo={selectedTagNo} />}
-            {selectspec && <SpecMaterialSearch specmatDetails={specmatDetails} onClose={handleSpecSelectClose} selectedSpec={selectedSpec} mttagid={mttagid} mtareaid={mtareaid} mttagno={mttagno} mtareaname={mtareaname}  />}
-        </div>
+            {selectspec && <SpecMaterialSearch specmatDetails={specmatDetails} onClose={handleSpecSelectClose} selectedSpec={selectedSpec} mttagid={mttagid} mtareaid={mtareaid} mttagno={mttagno} mtareaname={mtareaname} />}
+        </div >
     );
 }
 

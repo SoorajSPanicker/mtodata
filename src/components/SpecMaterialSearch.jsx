@@ -38,7 +38,7 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec, mttagid, mt
     };
     useEffect(() => {
         console.log(materialval);
-
+        handlesearch();
     }, [materialval])
     useEffect(() => {
         console.log(sizeoneval);
@@ -81,12 +81,16 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec, mttagid, mt
             areaId: mtareaid,
             areaName: mtareaname,
             Qty: mtlqty,
-            Item: item,
-            Sizeone: sizeone,
-            Sizetwo: sizetwo
+            Item: materialval,
+            Sizeone: sizeoneval,
+            Sizetwo: sizetwoval
         }
         window.api.send('save-material-data', data);
         handleclose()
+    }
+
+    const handleclear = () => {
+        setSearchResults([])
     }
 
     return (
@@ -100,13 +104,32 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec, mttagid, mt
                             <label>SPEC : {selectedSpec}</label>
                         </div>
                         <div className="input-section">
-                            <select style={{ width: '189px' }} onChange={handleChange} required>
+                            {/* <select style={{ width: '189px' }} onChange={handleChange} required>
                                 <option value="">Select Area</option>
                                 <option>STANDARD</option>
                                 <option>NORSOK</option>
                                 <option>EQUINOR</option>
-                            </select>
+                            </select> */}
 
+
+                            <input
+                                id="size1"
+                                type="text"
+                                placeholder="Size1"
+
+                                style={{ width: '50px', textAlign: 'center' }}
+                                onChange={handlesizeone}
+                            />
+                            <span className="fg-space"></span>
+                            <input
+                                id="size2"
+                                type="text"
+                                placeholder="Size2"
+
+                                style={{ width: '50px' }}
+                                onChange={handlesizetwo}
+                            />
+                            <span className="fg-space"></span>
                             <input
                                 list="items"
                                 type="tel"
@@ -120,41 +143,29 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec, mttagid, mt
                                     <option key={index} value={item} />
                                 ))}
                             </datalist>
+                            <span className="fg-space"></span>
+                            <input placeholder="Qty" type="text" style={{ width: '50px' }} onChange={handleqtychange} />
 
-                            <input
-                                id="size1"
-                                type="text"
-                                placeholder="Size1"
-                                style={{ width: '50px', textAlign: 'center' }}
-                                onChange={handlesizeone}
-                            />
-                            <span className="fg-space"></span>
-                            <input
-                                id="size2"
-                                type="text"
-                                placeholder="Size2"
-                                style={{ width: '50px' }}
-                                onChange={handlesizetwo}
-                            />
-                            <span className="fg-space"></span>
-                            <button type="button" id="addMtoItem">
-                                <i className="fa fa-search" aria-hidden="true" onClick={handlesearch}></i>
-                            </button>
+                            <i className="fa fa-plus-square mx-3" style={{ color: 'blue' }} onClick={handlematsubmit}></i>
+
+                            {/* <button type="button" id="addMtoItem">
+                                <i className="fa fa-search"  onClick={handlesearch}></i>
+                            </button> */}
                         </div>
                         <div id="specSearchResultDiv">
                             {searchResults.map((result, index) => (
                                 <div key={index} className="mtoItemSearchListDiv">
-                                    <label style={{ flex: 2, paddingRight: '5px', color: 'black' }}>{result.itemType}</label>
-                                    <label style={{ flex: 1, paddingRight: '5px', color: 'black' }}>{result.size1}</label>
-                                    <label style={{ flex: 1, paddingRight: '5px', color: 'black' }}>{result.size2}</label>
+                                    <label style={{ flex: 2, paddingRight: '5px', color: 'black' }}>{result.materialLgDescrip}</label>
+                                    {/* <label style={{ flex: 1, paddingRight: '5px', color: 'black' }}>{result.size1}</label>
+                                    <label style={{ flex: 1, paddingRight: '5px', color: 'black' }}>{result.size2}</label> */}
                                     {/* <label style={{ flex: 1, paddingRight: '5px' }}>{result.UNIT || ''}</label>
                                     <label style={{ flex: 3, paddingRight: '5px' }}>{result.DESCRIPTION || ''}</label> */}
-                                    <div style={{ width: '100px', display: 'flex' }}>
-                                        <input placeholder="Qty" type="text" onChange={handleqtychange} />
-                                        <i className="fa fa-plus-square" onClick={() => handlematsubmit(result.itemType, result.size1, result.size2)}></i>
-                                    </div>
+
                                 </div>
                             ))}
+                        </div>
+                        <div style={{ marginLeft: '10px', marginRight: '10px' }} >
+                            <button type="button" onClick={handleclear}>Clear Result</button>
                         </div>
                     </div>
                 </div>
