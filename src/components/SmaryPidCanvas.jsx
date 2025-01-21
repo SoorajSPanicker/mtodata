@@ -2955,7 +2955,9 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             currentRectangle = null;
         };
 
-        tool.onMouseDown = (event) => {
+        tool.onMouseDown = function (event) {
+            if (isDrawing || isResizing) return;
+
             const isCtrlPressed = event.modifiers.control || event.modifiers.meta;
             const hitResult = paper.project.hitTest(event.point, {
                 tolerance: 8,
@@ -2967,47 +2969,53 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
                 if (hitResult.item.data.type === 'handle') {
                     isResizing = true;
                     selectedHandle = hitResult.item;
-                } else if (hitResult.item instanceof paper.Path.Rectangle) {
-                    if (!isCtrlPressed) {
-                        // Clear previous selection if Ctrl is not pressed
-                        selectedRectangles.forEach(rect => {
-                            if (rect !== hitResult.item) {
-                                highlightSelected(rect, false);
-                            }
-                        });
-                        selectedRectangles.clear();
-                    }
+                    return;
+                }
 
-                    currentRectangle = hitResult.item;
-                    selectedRectangles.add(currentRectangle);
-                    highlightSelected(currentRectangle, true);
-
-                    // Create handles only for the currently selected rectangle
-                    createHandles(currentRectangle);
-                } else {
+                if (hitResult.item.data.type === 'rectangle') {
+                    // If Ctrl is not pressed, clear previous selection
                     if (!isCtrlPressed) {
                         clearSelection();
                     }
+
+                    currentRectangle = hitResult.item;
+
+                    if (selectedRectangles.has(currentRectangle)) {
+                        // Deselect if already selected
+                        selectedRectangles.delete(currentRectangle);
+                        highlightSelected(currentRectangle, false);
+                        if (selectedRectangles.size === 0) {
+                            currentRectangle = null;
+                        }
+                    } else {
+                        // Select the rectangle
+                        selectedRectangles.add(currentRectangle);
+                        highlightSelected(currentRectangle, true);
+                        createHandles(currentRectangle);
+                    }
+                    return;
                 }
-            } else {
-                // Start drawing new rectangle only if clicking empty space
-                if (!isCtrlPressed) {
-                    clearSelection();
-                }
-                isDrawing = true;
-                startPoint = event.point;
-                currentRectangle = new paper.Path.Rectangle({
-                    from: startPoint,
-                    to: event.point,
-                    strokeColor: 'red',
-                    strokeWidth: 2 / paper.view.zoom,
-                    fillColor: new paper.Color(1, 0, 0, 0.3),
-                    data: { type: 'rectangle' }
-                });
             }
+
+            // Clicking on empty space
+            if (!isCtrlPressed) {
+                clearSelection();
+            }
+
+            // Start drawing new rectangle
+            isDrawing = true;
+            startPoint = event.point;
+            currentRectangle = new paper.Path.Rectangle({
+                from: startPoint,
+                to: event.point,
+                strokeColor: 'red',
+                strokeWidth: 2 / paper.view.zoom,
+                fillColor: new paper.Color(1, 0, 0, 0.3),
+                data: { type: 'rectangle' }
+            });
         };
 
-        tool.onMouseDrag = (event) => {
+        tool.onMouseDrag = function (event) {
             if (isDrawing && currentRectangle) {
                 currentRectangle.remove();
                 currentRectangle = new paper.Path.Rectangle({
@@ -3045,14 +3053,13 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             }
         };
 
-        tool.onMouseUp = (event) => {
+        tool.onMouseUp = function (event) {
             if (isDrawing) {
                 isDrawing = false;
                 if (currentRectangle) {
-                    // Keep the rectangle red when it's first created
+                    // Keep the new rectangle red
                     currentRectangle.strokeColor = 'red';
                     currentRectangle.strokeWidth = 2 / paper.view.zoom;
-                    // Don't add to selection when first created
                     currentRectangle = null;
                 }
             }
