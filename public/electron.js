@@ -237,7 +237,7 @@ function createDatabase() {
             //  ---------------Spec table------------------//
             db.run('CREATE TABLE IF NOT EXISTS MtoSpecTable(specId Text,Documentnumber TEXT,specName TEXT,Revision TEXT, RevisionDate TEXT,branchTable TEXT,type TEXT,  ExcelFileid TEXT,preparedBy TEXT,checkedBy TEXT, approvedBy TEXT, PRIMARY KEY(specId))')
 
-            db.run('CREATE TABLE IF NOT EXISTS MtoSpecMaterialTable(specMaterialId TEXT,specId TEXT, itemType TEXT, fittingType TEXT, size1 NUMBER, size2 NUMBER, GeometricStd TEXT, EDS_VDS TEXT, endConn TEXT, materialDescrip TEXT, materialLgDescrip TEXT, MDS TEXT, rating TEXT, SCHD TEXT, Notes TEXT, remarks TEXT, PRIMARY KEY(specMaterialId))')
+            db.run('CREATE TABLE IF NOT EXISTS MtoSpecMaterialTable(specMaterialId TEXT,specId TEXT, itemType TEXT, fittingType TEXT, size1 NUMBER, size2 NUMBER, GeometricStd TEXT, EDS_VDS TEXT, endConn TEXT, materialDescrip TEXT, materialLgDescrip TEXT, MDS TEXT, rating TEXT, thkSizeOne TEXT, thkSizeTwo TEXT, schdSizeOne TEXT, schdSizeTwo TEXT, Notes TEXT, remarks TEXT, PRIMARY KEY(specMaterialId))')
             // db.run('CREATE TABLE IF NOT EXISTS MtoSpecMaterialTable(specMaterialId text,specId text, ITEM TEXT,TYPE TEXT, RANGE_FROM TEXT, RANGE_TO TEXT, GEOMETRIC_STANDARD TEXT, EDS_VDS TEXT,END_CONN_1 TEXT, END_CONN_2 TEXT, MATERIAL_DESCR TEXT, MDS TEXT, RATING TEXT, SCHD TEXT, NOTES TEXT, PRIMARY KEY(specMaterialId))')
             // db.run('CREATE TABLE IF NOT EXISTS MtoSpecSizeTable(SizeId TEXT, specId TEXT , ND TEXT, OD TEXT, THICK TEXT, SCH TEXT ,WEIGHT TEXT, PRIMARY KEY(SizeId))')
             db.run('CREATE TABLE IF NOT EXISTS MtoSpecSizeTable(SizeId TEXT, specId TEXT , ND_inch TEXT, OD_mm TEXT, THK_mm TEXT, SCH TEXT ,WEIGHT TEXT, PRIMARY KEY(SizeId))')
@@ -251,7 +251,7 @@ function createDatabase() {
             // db.run('CREATE TABLE IF NOT EXISTS MtoDocumentTable(Mto_DocID TEXT, ProjID TEXT, M_DocNo TEXT, M_DocName TEXT, RevNo TEXT, RevDate TEXT, RevDes TEXT, RevPreBy TEXT, RevChecBy TEXT, RevAppBy TEXT, RevPrepDate TEXT,RevCheckDate TEXT,RevAppDate TEXT, ChecklistNo TEXT, MtoSta TEXT, Preocur TEXT, PRIMARY KEY(Mto_DocID))')
             // // db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT, fileNo TEXT, DocNo TEXT, TagNo TEXT, AreaNO TEXT, DisNo TEXT, SysNo TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
             db.run('CREATE TABLE IF NOT EXISTS MtoDocumentTable(Mto_DocID TEXT, ProjID TEXT, M_DocNo TEXT, M_DocName TEXT, RevNo TEXT, RevDate TEXT, RevDes TEXT, RevPreBy TEXT, RevChecBy TEXT, RevAppBy TEXT, RevPrepDate TEXT,RevCheckDate TEXT,RevAppDate TEXT, ChecklistNo TEXT, MtoSta TEXT, Preocur TEXT, PRIMARY KEY(Mto_DocID))')
-            db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT,fileId Text, fileNo TEXT,DocId TEXT, DocNo TEXT, tagId TEXT, tagNo Text, areaId TEXT , areaName TEXT,DiscId TEXT, DisName TEXT,SysID TEXT, SysName TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT,Sizeone TEXT,Sizetwo TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_Z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
+            db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT,fileId Text, fileNo TEXT,Drawings_PnPRelPathId TEXT, DocNo TEXT, tagId TEXT, tagNo Text, areaId TEXT , areaName TEXT,DiscId TEXT, DisName TEXT,SysID TEXT, SysName TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT,Sizeone TEXT,Sizetwo TEXT, thkSizeOne TEXT, thkSizeTwo TEXT, schdSizeOne TEXT, schdSizeTwo TEXT,SpecSize TEXT,Length TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_Z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
             db.run('CREATE TABLE IF NOT EXISTS MtoAreaTable(mtoareaId TEXT PRIMARY KEY, area TEXT, name TEXT)')
             db.run('CREATE TABLE IF NOT EXISTS MtoTagTable(mtotagId TEXT, number TEXT, name TEXT, PRIMARY KEY(number))')
 
@@ -9388,8 +9388,8 @@ app.whenReady().then(() => {
                         INSERT INTO MtoSpecMaterialTable (
                             specMaterialId, specId, itemType, fittingType, size1, size2,
                             GeometricStd, EDS_VDS, endConn, materialDescrip, materialLgDescrip, MDS, rating,
-                            SCHD, Notes
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+                            thkSizeOne,thkSizeTwo,schdSizeOne,schdSizeTwo, Notes
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?)
                     `);
                     statements.push(materialStmt);
 
@@ -9409,7 +9409,10 @@ app.whenReady().then(() => {
                             row.materialLongDescr,
                             row.mds,
                             row.rating,
-                            row.schd,
+                            row.THKsize1,
+                            row.THKsize2,
+                            row.schdsize1,
+                            row.schdsize2,
                             row.notes
                         ], (err) => {
                             if (err) reject(err);
@@ -10251,8 +10254,8 @@ app.whenReady().then(() => {
             const MatID = generateCustomID('Ml');
 
             projectDb.run(
-                'INSERT INTO MtoMaterialListTable (MatID , tagId, tagNo, areaId, areaName, Item, Sizeone, Sizetwo, Qty ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [MatID, data.tagId, data.tagNo, data.areaId, data.areaName, data.Item, data.Sizeone, data.Sizetwo, data.Qty],
+                'INSERT INTO MtoMaterialListTable (MatID , tagId, tagNo, areaId, areaName, Item, Sizeone, Sizetwo, thkSizeOne, thkSizeTwo, schdSizeOne, schdSizeTwo, Qty ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [MatID, data.tagId, data.tagNo, data.areaId, data.areaName, data.Item, data.Sizeone, data.Sizetwo, data.thkSizeOne, data.thkSizeTwo, data.schdSizeOne, data.schdSizeTwo, data.Qty],
                 function (err) {
                     if (err) {
                         console.error('Error inserting into MtoMaterialListTable:', err.message);

@@ -101,6 +101,7 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
     const [selectvalue, setselectvalue] = useState('')
     const [areainfo, setareainfo] = useState([])
     const [enableareadraw, setenableareadraw] = useState(false)
+    const [enablehigh, setenablehigh] = useState(false)
     const [savrectangles, setsavRectangles] = useState({});
 
     useEffect(() => {
@@ -816,6 +817,21 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
     }, [enableareadraw, canvas])
 
     useEffect(() => {
+        if (enablehigh && canvas) {
+            dlayerremove()
+            console.log("enter useEffect");
+            enablehighinteraction()
+        }
+
+        return () => {
+            if (canvas) {
+                disablehighinteraction()
+            }
+        }
+    }, [enablehigh, canvas])
+
+
+    useEffect(() => {
         console.log(linelist);
     }, [linelist])
 
@@ -1348,6 +1364,7 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
         setenablewinselect(false)
         setpanonoff(false)
         setenableareadraw(false)
+        setenablehigh(false)
         // paper.project.getItems({ selected: true }).forEach(item => {
         //     console.log("enter unselect");
         //     item.selected = false;
@@ -1361,6 +1378,7 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
         setenablewinselect(false)
         setpanonoff(false)
         setenableareadraw(false)
+        setenablehigh(false)
     }
 
     const handleeditpan = () => {
@@ -1450,6 +1468,7 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
         setenablesinselect(false)
         setenablescselect(false)
         setenableareadraw(false)
+        setenablehigh(false)
         // document.querySelectorAll('.button').forEach(button => {
         //     button.classList.remove('active');
         // });
@@ -1542,6 +1561,7 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
         e.preventDefault()
         setenablesinselect(true)
         setenableareadraw(false)
+        setenablehigh(false)
         console.log("taginfoend");
     }
 
@@ -1566,6 +1586,20 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
         // e.target.classList.add('active');
         setenablewinselect(true)
         setenableareadraw(false)
+        setenablehigh(false)
+    }
+
+    const handledrawhigh = (e) =>{
+        setenableselect(false)
+        setpanonoff(false)
+        setenablescselect(false)
+        setenablewinselect(false)
+        setenableareadraw(false)
+        setenablehigh(true)
+        paper.project.getItems({ selected: true }).forEach(item => {
+            console.log("enter unselect");
+            item.selected = false;
+        })
     }
 
     const handleareadraw = (e) => {
@@ -1574,6 +1608,7 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
         setenablescselect(false)
         setenablewinselect(false)
         setenableareadraw(true)
+        setenablehigh(false)
         paper.project.getItems({ selected: true }).forEach(item => {
             console.log("enter unselect");
             item.selected = false;
@@ -1595,6 +1630,11 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
     const enableareadrawinteraction = () => {
         startDrawingRectangles()
     }
+
+    const enablehighinteraction = () => {
+        startDrawingHigh()
+    }
+
 
     const disableareadrawinteraction = () => {
         // setenableareadraw(false)
@@ -1806,6 +1846,7 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
         console.log("flag tag connect");
         setenableflagtagselect(true)
         setenableareadraw(false)
+        setenablehigh(false)
         // setflagconmenu({ visible: false, x: 0, y: 0 })
 
     }
@@ -1962,6 +2003,7 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
         setenablesinselect(false)
         setenablescselect(false)
         setenableareadraw(false)
+        setenableareahigh(false)
         dlayerremove()
         paper.project.activeLayer.children.forEach(sitem => {
 
@@ -2320,6 +2362,201 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
         // Assuming all rectangles belong to the same document
     };
 
+    const startDrawingHigh = () => {
+        // Create a new layer for highlights if it doesn't exist
+        if (!drawingLayerRef.current) {
+            drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+        }
+        drawingLayerRef.current.activate();
+    
+        const tool = new paper.Tool();
+        let startPoint;
+        let currentRectangle = null;
+        let isDrawing = false;
+        let isResizing = false;
+        let selectedHandle = null;
+        let handles = [];
+    
+        // Function to create resize handles
+        const createHandles = (rectangle) => {
+            // Remove existing handles
+            handles.forEach(handle => handle.remove());
+            handles = [];
+    
+            const segments = rectangle.segments;
+            const handleSize = 8 / paper.view.zoom;
+    
+            // Create handles at each corner and midpoint
+            segments.forEach((segment, index) => {
+                const handle = new paper.Path.Circle({
+                    center: segment.point,
+                    radius: handleSize,
+                    fillColor: 'white',
+                    strokeColor: 'blue',
+                    strokeWidth: 1 / paper.view.zoom,
+                    data: { index: index }
+                });
+                handles.push(handle);
+            });
+    
+            // Create midpoint handles
+            for (let i = 0; i < segments.length; i++) {
+                const nextIndex = (i + 1) % segments.length;
+                const midpoint = segments[i].point.add(segments[nextIndex].point).divide(2);
+                const handle = new paper.Path.Circle({
+                    center: midpoint,
+                    radius: handleSize,
+                    fillColor: 'white',
+                    strokeColor: 'blue',
+                    strokeWidth: 1 / paper.view.zoom,
+                    data: { index: i + segments.length }
+                });
+                handles.push(handle);
+            }
+        };
+    
+        const updateHandlePositions = () => {
+            if (!currentRectangle) return;
+    
+            const segments = currentRectangle.segments;
+            const cornerHandles = handles.slice(0, 4);
+            const midpointHandles = handles.slice(4);
+    
+            // Update corner handles
+            cornerHandles.forEach((handle, index) => {
+                handle.position = segments[index].point;
+            });
+    
+            // Update midpoint handles
+            midpointHandles.forEach((handle, index) => {
+                const startIndex = index;
+                const endIndex = (index + 1) % 4;
+                const midpoint = segments[startIndex].point.add(segments[endIndex].point).divide(2);
+                handle.position = midpoint;
+            });
+        };
+    
+        tool.onMouseDown = (event) => {
+            const hitResult = paper.project.hitTest(event.point, {
+                tolerance: 8,
+                fill: true,
+                stroke: true
+            });
+    
+            if (hitResult && hitResult.item && handles.includes(hitResult.item)) {
+                // Start resizing if a handle is clicked
+                isResizing = true;
+                selectedHandle = hitResult.item;
+            } else if (!currentRectangle || !currentRectangle.bounds.contains(event.point)) {
+                // Start drawing new rectangle
+                isDrawing = true;
+                startPoint = event.point;
+                
+                if (currentRectangle) {
+                    handles.forEach(handle => handle.remove());
+                    handles = [];
+                }
+                
+                currentRectangle = new paper.Path.Rectangle({
+                    from: startPoint,
+                    to: event.point,
+                    strokeColor: 'red',
+                    strokeWidth: 2 / paper.view.zoom,
+                    fillColor: new paper.Color(1, 0, 0, 0.3)
+                });
+            }
+        };
+    
+        tool.onMouseDrag = (event) => {
+            if (isDrawing && currentRectangle) {
+                // Update rectangle size while drawing
+                currentRectangle.remove();
+                currentRectangle = new paper.Path.Rectangle({
+                    from: startPoint,
+                    to: event.point,
+                    strokeColor: 'red',
+                    strokeWidth: 2 / paper.view.zoom,
+                    fillColor: new paper.Color(1, 0, 0, 0.3)
+                });
+            } else if (isResizing && selectedHandle && currentRectangle) {
+                // Handle resizing logic
+                const handleIndex = selectedHandle.data.index;
+                const bounds = currentRectangle.bounds;
+                let newBounds = bounds.clone();
+    
+                if (handleIndex < 4) {
+                    // Corner handles
+                    switch (handleIndex) {
+                        case 0: // Top-left
+                            newBounds.topLeft = event.point;
+                            break;
+                        case 1: // Top-right
+                            newBounds.topRight = event.point;
+                            break;
+                        case 2: // Bottom-right
+                            newBounds.bottomRight = event.point;
+                            break;
+                        case 3: // Bottom-left
+                            newBounds.bottomLeft = event.point;
+                            break;
+                    }
+                } else {
+                    // Midpoint handles
+                    const edgeIndex = handleIndex - 4;
+                    switch (edgeIndex) {
+                        case 0: // Top edge
+                            newBounds.top = event.point.y;
+                            break;
+                        case 1: // Right edge
+                            newBounds.right = event.point.x;
+                            break;
+                        case 2: // Bottom edge
+                            newBounds.bottom = event.point.y;
+                            break;
+                        case 3: // Left edge
+                            newBounds.left = event.point.x;
+                            break;
+                    }
+                }
+    
+                currentRectangle.bounds = newBounds;
+                updateHandlePositions();
+            }
+        };
+    
+        tool.onMouseUp = (event) => {
+            if (isDrawing) {
+                isDrawing = false;
+                if (currentRectangle) {
+                    createHandles(currentRectangle);
+                }
+            }
+            isResizing = false;
+            selectedHandle = null;
+        };
+    
+        // Update handles when view is zoomed or panned
+        paper.view.onScale = () => {
+            if (currentRectangle) {
+                handles.forEach(handle => {
+                    handle.radius = 8 / paper.view.zoom;
+                    handle.strokeWidth = 1 / paper.view.zoom;
+                });
+                currentRectangle.strokeWidth = 2 / paper.view.zoom;
+            }
+        };
+    };
+    
+    const disablehighinteraction = () => {
+        if (paper.tool) {
+            paper.tool.remove();
+        }
+        if (drawingLayerRef.current) {
+            drawingLayerRef.current.remove();
+            drawingLayerRef.current = null;
+        }
+    };
+
     return (
         <div style={{position:'absolute',backgroundColor:'white',width:'100%',height:'90vh',zIndex:'1'}}>
             <canvas id="canvas" ref={canvasRef}  style={{ width: isSideNavOpen ? '83.5%' : '100%', marginLeft: isSideNavOpen ? '260px' : '0%', backgroundColor:'white', height: '90vh',top: '0', left: '0', right: '0', bottom: '0', overflow: 'hidden', zIndex: '1' }} ></canvas>
@@ -2451,10 +2688,13 @@ function Canvas({ svgcontent, mascontent, showcanvas, alltags, allspids, project
             {isbottomextend && <div className='bet w-50 rounded' style={{ left: isSideNavOpen ? '29%' : '24%' }}>
                 <i className="fa-solid fa-tag svgElem button " title='Assign Tag' onClick={handleassigntag} ></i>
                 <i className="fa-solid fa-arrows-turn-to-dots svgElem button" title='Flag assign' onClick={handleflagassign}></i>
+                {/* <i className="fa-solid fa-arrows-turn-to-dots svgElem button" title='Flag assign' onClick={handleflagassign}></i> */}
+                {/* <i className="fa-solid fa-highlighter svgElem button" title='Draw highlight' onClick={handledrawhigh}></i> */}
                 <i className="fa-solid fa-delete-left svgElem button" title='Flag Connection Delete' onClick={handleflagcondelete}></i>
                 <i className="fa-solid fa-pen-to-square svgElem button" title='Draw area' onClick={handleareadraw}></i>
                 <i className="fa-regular fa-window-restore svgElem button" title='Save area' onClick={handlesavearea}></i>
                 <i className="fa-solid fa-layer-group svgElem button" title='Show area' onClick={handleshowarea}></i>
+                
             </div>
             }
 

@@ -75,6 +75,9 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec, mttagid, mt
     }, [mtlqty])
 
     const handlematsubmit = (item, sizeone, sizetwo) => {
+       console.log(searchResults);
+       console.log(searchResults[0].thkSizeOne);
+       
         const data = {
             tagId: mttagid,
             tagNo: mttagno,
@@ -83,7 +86,11 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec, mttagid, mt
             Qty: mtlqty,
             Item: materialval,
             Sizeone: sizeoneval,
-            Sizetwo: sizetwoval
+            Sizetwo: sizetwoval,
+            thkSizeOne: searchResults[0].thkSizeOne,
+            thkSizeTwo: searchResults[0].thkSizeTwo,
+            schdSizeOne: searchResults[0].schdSizeOne,
+            schdSizeTwo: searchResults[0].schdSizeTwo
         }
         window.api.send('save-material-data', data);
         handleclose()
@@ -155,7 +162,7 @@ function SpecMaterialSearch({ specmatDetails, onClose, selectedSpec, mttagid, mt
                         <div id="specSearchResultDiv">
                             {searchResults.map((result, index) => (
                                 <div key={index} className="mtoItemSearchListDiv">
-                                    <label style={{ flex: 2, paddingRight: '5px', color: 'black' }}>{result.materialLgDescrip}</label>
+                                    <label style={{ flex: 2, paddingRight: '5px', color: 'black' }}>`{result.materialLgDescrip}, {result.thkSizeOne}, {result.thkSizeTwo}, {result.schdSizeOne}, {result.schdSizeTwo} `</label>
                                     {/* <label style={{ flex: 1, paddingRight: '5px', color: 'black' }}>{result.size1}</label>
                                     <label style={{ flex: 1, paddingRight: '5px', color: 'black' }}>{result.size2}</label> */}
                                     {/* <label style={{ flex: 1, paddingRight: '5px' }}>{result.UNIT || ''}</label>

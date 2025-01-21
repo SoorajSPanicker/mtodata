@@ -37,116 +37,7 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
     });
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (!file) {
-  //     setMessage('Please select a file');
-  //     return;
-  //   }
 
-  //   const reader = new FileReader();
-  //   reader.onload = async (e) => {
-  //     const data = new Uint8Array(e.target.result);
-  //     const workbook = XLSX.read(data, { type: 'array' });
-  //     const sheets = workbook.SheetNames;
-  //     const result = {};
-
-  //     sheets.forEach((sheet) => {
-  //       const worksheet = workbook.Sheets[sheet];
-  //       const sheetDataArray = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  //       result[sheet] = sheetDataArray;
-  //     });
-
-  //     setSheetData(result);
-
-  //     // const materialsSheet = result['materials'] || [];
-  //     // const sizeSheet = result['size'] || [];
-  //     // const tempPresSheet = result['Temppres'] || [];
-  //     // const combined = [];
-
-  //     // const ndInchRow = sizeSheet.find(row => row[0] === 'ND (inch)');
-  //     // const sizes = ndInchRow ? ndInchRow.slice(1).map(Number).sort((a, b) => a - b) : [];
-
-  //     // materialsSheet.slice(3).forEach(row => {
-  //     //   const itemType = row[0];
-  //     //   const fittingType = row[1];
-  //     //   const rangeFrom = parseFloat(row[2]);
-  //     //   const rangeTo = parseFloat(row[3]);
-
-  //     //   if (fittingType && fittingType.toLowerCase().includes('branch')) {
-  //     //     sizes.filter(size => size >= rangeFrom && size <= rangeTo).forEach(size1 => {
-  //     //       const branchSize2 = findSize2FromBranchTable(size1, itemType);
-  //     //       if (branchSize2) {
-  //     //         combined.push({
-  //     //           itemType,
-  //     //           fittingType,
-  //     //           size1,
-  //     //           size2: parseFloat(branchSize2),
-  //     //           geometricStandard: row[4],
-  //     //           edsVds: row[5],
-  //     //           endConn: row[6],
-  //     //           materialDescr: row[7],
-  //     //           mds: row[8],
-  //     //           rating: row[9],
-  //     //           schd: row[10],
-  //     //           notes: row[11]
-  //     //         });
-  //     //       }
-  //     //     });
-  //     //   } else if (fittingType && fittingType.toLowerCase().includes('reduce')) {
-  //     //     const halfRangeFrom = rangeTo / 2;
-  //     //     const size2Start = sizes.filter(size => size < halfRangeFrom).pop() || sizes[0];
-  //     //     const size2Range = sizes.filter(size => size >= size2Start && size <= rangeTo);
-
-  //     //     sizes.filter(size => size >= rangeFrom && size <= rangeTo).forEach(size1 => {
-  //     //       size2Range.forEach(size2 => {
-  //     //         combined.push({
-  //     //           itemType,
-  //     //           fittingType,
-  //     //           size1,
-  //     //           size2,
-  //     //           geometricStandard: row[4],
-  //     //           edsVds: row[5],
-  //     //           endConn: row[6],
-  //     //           materialDescr: row[7],
-  //     //           mds: row[8],
-  //     //           rating: row[9],
-  //     //           schd: row[10],
-  //     //           notes: row[11]
-  //     //         });
-  //     //       });
-  //     //     });
-  //     //   } else {
-  //     //     sizes.filter(size => size >= rangeFrom && size <= rangeTo).forEach(size => {
-  //     //       combined.push({
-  //     //         itemType,
-  //     //         fittingType,
-  //     //         size1: size,
-  //     //         size2: size,
-  //     //         geometricStandard: row[4],
-  //     //         edsVds: row[5],
-  //     //         endConn: row[6],
-  //     //         materialDescr: row[7],
-  //     //         mds: row[8],
-  //     //         rating: row[9],
-  //     //         schd: row[10],
-  //     //         notes: row[11]
-  //     //       });
-  //     //     });
-  //     //   }
-  //     // });
-
-  //     // setCombinedData(combined);
-
-  //     // try {
-  //     //   const response = await window.api.send('import-excel', result);
-  //     //   setMessage(response);
-  //     // } catch (error) {
-  //     //   setMessage('Error importing data: ' + error.message);
-  //     // }
-  //   };
-  //   reader.readAsArrayBuffer(file);
-  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
@@ -196,20 +87,36 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
       const sizes = ndInchRow ? ndInchRow.slice(1).map(Number).sort((a, b) => a - b) : [];
       console.log(ndInchRow);
       console.log(sizes);
-
-
       materialsSheet.slice(3).forEach(row => {
+        // First get the THK and SCH rows from size sheet
+        const ndInchRow = sizeSheet[0];  // First row with ND (inch)
+        const thkRow = sizeSheet[2];     // Third row with THK values
+        const schRow = sizeSheet[3];     // Fourth row with SCH values
+
         const itemType = row[0];
         const fittingType = row[1];
         const rangeFrom = parseFloat(row[2]);
         const rangeTo = parseFloat(row[3]);
 
+        // Function to get column values based on size
+        const getColumnValuesForSize = (size) => {
+          const columnIndex = ndInchRow.findIndex(val => val === size);
+          if (columnIndex !== -1) {
+            return {
+              thk: thkRow[columnIndex],
+              sch: schRow[columnIndex]
+            };
+          }
+          return { thk: '', sch: '' };
+        };
+
         if (fittingType && (fittingType.toLowerCase().includes('branch'))) {
-          console.log(fittingType);
           sizes.filter(size => size >= rangeFrom && size <= rangeTo).forEach(size1 => {
             const branchSize2 = findSize2FromBranchTable(size1, itemType);
-            console.log(branchSize2)
             if (branchSize2) {
+              const size1Values = getColumnValuesForSize(size1);
+              const size2Values = getColumnValuesForSize(parseFloat(branchSize2));
+
               combined.push({
                 itemType,
                 fittingType,
@@ -222,24 +129,25 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
                 materialLgDescrip: row[9],
                 mds: row[10],
                 rating: row[11],
-                schd: row[12],
+                THKsize1: size1Values.thk,
+                THKsize2: size2Values.thk,
+                schdsize1: size1Values.sch,
+                schdsize2: size2Values.sch,
                 notes: row[13]
               });
             }
           });
         }
         else if (fittingType && (fittingType.toLowerCase().includes('reduce'))) {
-          console.log(fittingType);
-
           const halfRangeFrom = rangeTo / 2;
-          console.log("halfRangeFrom", halfRangeFrom)
           const size2Start = sizes.filter(size => size < halfRangeFrom).pop() || sizes[0];
-          console.log("size2Start", size2Start)
           const size2Range = sizes.filter(size => size >= size2Start && size <= rangeTo);
-          console.log("size2Range", size2Range)
 
           sizes.filter(size => size >= rangeFrom && size <= rangeTo).forEach(size1 => {
             size2Range.forEach(size2 => {
+              const size1Values = getColumnValuesForSize(size1);
+              const size2Values = getColumnValuesForSize(size2);
+
               combined.push({
                 itemType: row[0],
                 fittingType,
@@ -248,19 +156,23 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
                 geometricStandard: row[4],
                 edsVds: row[5],
                 endConn: row[6],
-                materialDescr: row[8],       // Changed from 7 to 8
-                materialLongDescr: row[9],   // Added material long description
-                mds: row[10],                // Changed from 8 to 10
-                rating: row[11],             // Changed from 9 to 11
-                schd: row[12],               // Changed from 10 to 12
-                notes: row[13]  
+                materialDescr: row[8],
+                materialLongDescr: row[9],
+                mds: row[10],
+                rating: row[11],
+                THKsize1: size1Values.thk,
+                THKsize2: size2Values.thk,
+                schdsize1: size1Values.sch,
+                schdsize2: size2Values.sch,
+                notes: row[13]
               });
             });
           });
         }
         else {
-          // For other items, Size1 and Size2 are the same
           sizes.filter(size => size >= rangeFrom && size <= rangeTo).forEach(size => {
+            const sizeValues = getColumnValuesForSize(size);
+
             combined.push({
               itemType,
               fittingType,
@@ -269,16 +181,113 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
               geometricStandard: row[4],
               edsVds: row[5],
               endConn: row[6],
-              materialDescr: row[8],       // Changed from 7 to 8
-              materialLongDescr: row[9],   // Added material long description
-              mds: row[10],                // Changed from 8 to 10
-              rating: row[11],             // Changed from 9 to 11
-              schd: row[12],               // Changed from 10 to 12
-              notes: row[13]     
+              materialDescr: row[8],
+              materialLongDescr: row[9],
+              mds: row[10],
+              rating: row[11],
+              THKsize1: sizeValues.thk,
+              THKsize2: sizeValues.thk,
+              schdsize1: sizeValues.sch,
+              schdsize2: sizeValues.sch,
+              notes: row[13]
             });
           });
         }
       });
+
+      // materialsSheet.slice(3).forEach(row => {
+      //   const itemType = row[0];
+      //   const fittingType = row[1];
+      //   const rangeFrom = parseFloat(row[2]);
+      //   const rangeTo = parseFloat(row[3]);
+
+      //   if (fittingType && (fittingType.toLowerCase().includes('branch'))) {
+      //     console.log(fittingType);
+      //     sizes.filter(size => size >= rangeFrom && size <= rangeTo).forEach(size1 => {
+      //       const branchSize2 = findSize2FromBranchTable(size1, itemType);
+      //       console.log(branchSize2)
+      //       if (branchSize2) {
+      //         combined.push({
+      //           itemType,
+      //           fittingType,
+      //           size1,
+      //           size2: parseFloat(branchSize2),
+      //           geometricStandard: row[4],
+      //           edsVds: row[5],
+      //           endConn: row[6],
+      //           materialDescr: row[8],
+      //           materialLgDescrip: row[9],
+      //           mds: row[10],
+      //           rating: row[11],
+      //           // schd: row[12],               // Changed from 10 to 12
+      //           THK size1: ,
+      //           THK size2: ,
+      //           schd size1: ,
+      //           schd size2: ,
+      //           notes: row[13]
+      //         });
+      //       }
+      //     });
+      //   }
+      //   else if (fittingType && (fittingType.toLowerCase().includes('reduce'))) {
+      //     console.log(fittingType);
+
+      //     const halfRangeFrom = rangeTo / 2;
+      //     console.log("halfRangeFrom", halfRangeFrom)
+      //     const size2Start = sizes.filter(size => size < halfRangeFrom).pop() || sizes[0];
+      //     console.log("size2Start", size2Start)
+      //     const size2Range = sizes.filter(size => size >= size2Start && size <= rangeTo);
+      //     console.log("size2Range", size2Range)
+
+      //     sizes.filter(size => size >= rangeFrom && size <= rangeTo).forEach(size1 => {
+      //       size2Range.forEach(size2 => {
+      //         combined.push({
+      //           itemType: row[0],
+      //           fittingType,
+      //           size1: size1,
+      //           size2: size2,
+      //           geometricStandard: row[4],
+      //           edsVds: row[5],
+      //           endConn: row[6],
+      //           materialDescr: row[8],       // Changed from 7 to 8
+      //           materialLongDescr: row[9],   // Added material long description
+      //           mds: row[10],                // Changed from 8 to 10
+      //           rating: row[11],             // Changed from 9 to 11
+      //           // schd: row[12],               // Changed from 10 to 12
+      //           THK size1: ,
+      //           THK size2: ,
+      //           schd size1: ,
+      //           schd size2: ,
+      //           notes: row[13]
+      //         });
+      //       });
+      //     });
+      //   }
+      //   else {
+      //     // For other items, Size1 and Size2 are the same
+      //     sizes.filter(size => size >= rangeFrom && size <= rangeTo).forEach(size => {
+      //       combined.push({
+      //         itemType,
+      //         fittingType,
+      //         size1: size,
+      //         size2: size,
+      //         geometricStandard: row[4],
+      //         edsVds: row[5],
+      //         endConn: row[6],
+      //         materialDescr: row[8],       // Changed from 7 to 8
+      //         materialLongDescr: row[9],   // Added material long description
+      //         mds: row[10],                // Changed from 8 to 10
+      //         rating: row[11],             // Changed from 9 to 11
+      //         // schd: row[12],               // Changed from 10 to 12
+      //         THK size1: ,
+      //         THK size2: ,
+      //         schd size1: ,
+      //         schd size2: ,
+      //         notes: row[13]
+      //       });
+      //     });
+      //   }
+      // });
 
       // setCombinedData(combined);
       // result['materials'] = combined;  // Replace materials data with combined data
@@ -324,7 +333,7 @@ function SpecTableManagement({ branchTableDetails, branchTableDataDetails }) {
                     <label>Revision</label>
                     <input type="text" name='Revision' value={formData.Revision} onChange={handleChange} />
                     <label>Revision date</label>
-                    <input type="text" name='RevisionDate' value={formData.RevisionDate} onChange={handleChange} />
+                    <input type="date" name='RevisionDate' value={formData.RevisionDate} onChange={handleChange} />
                     <label>Choose Branch table</label>
                     <input
                       list="branchTableOptions"

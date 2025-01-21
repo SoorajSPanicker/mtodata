@@ -8,7 +8,7 @@ import Alert from './Alert';
 import * as XLSX from 'xlsx';
 import Comment from './Comment';
 
-function Canvas({ svgcontent, mascontent,alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel,setopenThreeCanvas,setiRoamercanvas,setOpenSpidCanvas,setSpidOpen,allCommentStatus,setrightSideNavVisible}) {
+function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible }) {
     const canvasRef = useRef(null);
     let canvas = canvasRef.current;
     const viewRef = useRef(null);
@@ -100,11 +100,12 @@ function Canvas({ svgcontent, mascontent,alltags, allspids, projectNo, isSideNav
     const [selectvalue, setselectvalue] = useState('')
     const [areainfo, setareainfo] = useState([])
     const [enableareadraw, setenableareadraw] = useState(false)
+    const [enablehigh, setenablehigh] = useState(false)
     const [savrectangles, setsavRectangles] = useState({});
     const [allowredrect, setallowredrect] = useState(false)
     const [istagtabdet, settagtabdet] = useState(false)
     const [istagtypedet, settagtypedet] = useState(false)
-    const [pidTagId,setPidTagId] = useState('');
+    const [pidTagId, setPidTagId] = useState('');
     useEffect(() => {
         console.log(flagsconn);
     }, [flagsconn])
@@ -143,15 +144,15 @@ function Canvas({ svgcontent, mascontent,alltags, allspids, projectNo, isSideNav
         console.log(isry);
     }, [isry])
 
-useEffect(()=>{
-    for (let i = 0; i < tagdocsel.length; i++) {
-        paper.project.getItems({ class: paper.Path, }).forEach(item => {
-            if (tagdocsel[i] == item._id) {
-                item.selected = true
-            }
-        });
-    }
-})
+    useEffect(() => {
+        for (let i = 0; i < tagdocsel.length; i++) {
+            paper.project.getItems({ class: paper.Path, }).forEach(item => {
+                if (tagdocsel[i] == item._id) {
+                    item.selected = true
+                }
+            });
+        }
+    })
     const importSVGWithOriginalIds = (svgString, isMasdoc) => {
         paper.project.importSVG(svgString, (importedSVG) => {
             importedSVG.getItems({ class: paper.Path }).forEach((item) => {
@@ -841,7 +842,7 @@ useEffect(()=>{
     }, [equlist])
 
     useEffect(() => {
-        console.log("allcomments",allComments)
+        console.log("allcomments", allComments)
         createLabels();
     }, [showComment, allComments]);
 
@@ -1366,6 +1367,7 @@ useEffect(()=>{
         setenablewinselect(false)
         setpanonoff(false)
         setenableareadraw(false)
+        setenablehigh(false)
         // paper.project.getItems({ selected: true }).forEach(item => {
         //     console.log("enter unselect");
         //     item.selected = false;
@@ -1379,6 +1381,7 @@ useEffect(()=>{
         setenablewinselect(false)
         setpanonoff(false)
         setenableareadraw(false)
+        setenablehigh(false)
     }
 
     const handleeditpan = () => {
@@ -1469,6 +1472,7 @@ useEffect(()=>{
         setenablesinselect(false)
         setenablescselect(false)
         setenableareadraw(false)
+        setenablehigh(false)
         // document.querySelectorAll('.button').forEach(button => {
         //     button.classList.remove('active');
         // });
@@ -1561,6 +1565,7 @@ useEffect(()=>{
         e.preventDefault()
         setenablesinselect(true)
         setenableareadraw(false)
+        setenablehigh(false)
         console.log("taginfoend");
     }
 
@@ -1585,6 +1590,7 @@ useEffect(()=>{
         // e.target.classList.add('active');
         setenablewinselect(true)
         setenableareadraw(false)
+        setenablehigh(false)
     }
 
     const handleareadraw = (e) => {
@@ -1593,6 +1599,7 @@ useEffect(()=>{
         setenablescselect(false)
         setenablewinselect(false)
         setenableareadraw(true)
+        setenablehigh(false)
         paper.project.getItems({ selected: true }).forEach(item => {
             console.log("enter unselect");
             item.selected = false;
@@ -1826,6 +1833,7 @@ useEffect(()=>{
         console.log("flag tag connect");
         setenableflagtagselect(true)
         setenableareadraw(false)
+        setenablehigh(false)
         // setflagconmenu({ visible: false, x: 0, y: 0 })
 
     }
@@ -1983,6 +1991,7 @@ useEffect(()=>{
         setenablesinselect(false)
         setenablescselect(false)
         setenableareadraw(false)
+        setenablehigh(false)
         dlayerremove()
         paper.project.activeLayer.children.forEach(sitem => {
 
@@ -2361,7 +2370,7 @@ useEffect(()=>{
         // Assuming all rectangles belong to the same document
     };
 
- 
+
 
     useEffect(() => {
         console.log(istagtabdet);
@@ -2381,309 +2390,990 @@ useEffect(()=>{
         settagtabdet(false)
     }
 
-    const handleGotothree = ()=>{
-        window.api.send('open-three-from-pid',pidTagId)
+    const handleGotothree = () => {
+        window.api.send('open-three-from-pid', pidTagId)
         setopenThreeCanvas(true);
-		setiRoamercanvas(true);
+        setiRoamercanvas(true);
         setOpenSpidCanvas(false);
         setSpidOpen(false);
         setrightSideNavVisible(true);
 
     }
-    
+    const handledrawhigh = (e) => {
+        setenableselect(false)
+        setpanonoff(false)
+        setenablescselect(false)
+        setenablewinselect(false)
+        setenableareadraw(false)
+        setenablehigh(true)
+        paper.project.getItems({ selected: true }).forEach(item => {
+            console.log("enter unselect");
+            item.selected = false;
+        })
+    }
+
+    useEffect(() => {
+        if (enablehigh && canvas) {
+            dlayerremove()
+            console.log("enter useEffect");
+            enablehighinteraction()
+        }
+
+        return () => {
+            if (canvas) {
+                disablehighinteraction()
+            }
+        }
+    }, [enablehigh, canvas])
+
+    const enablehighinteraction = () => {
+        startDrawingHigh()
+    }
+
+    // const startDrawingHigh = () => {
+    //     // Create a new layer for highlights if it doesn't exist
+    //     if (!drawingLayerRef.current) {
+    //         drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //     }
+    //     drawingLayerRef.current.activate();
+
+    //     const tool = new paper.Tool();
+    //     let startPoint;
+    //     let currentRectangle = null;
+    //     let isDrawing = false;
+    //     let isResizing = false;
+    //     let selectedHandle = null;
+    //     let handles = [];
+
+    //     // Function to create resize handles
+    //     const createHandles = (rectangle) => {
+    //         // Remove existing handles
+    //         handles.forEach(handle => handle.remove());
+    //         handles = [];
+
+    //         const segments = rectangle.segments;
+    //         const handleSize = 8 / paper.view.zoom;
+
+    //         // Create handles at each corner and midpoint
+    //         segments.forEach((segment, index) => {
+    //             const handle = new paper.Path.Circle({
+    //                 center: segment.point,
+    //                 radius: handleSize,
+    //                 fillColor: 'white',
+    //                 strokeColor: 'blue',
+    //                 strokeWidth: 1 / paper.view.zoom,
+    //                 data: { index: index }
+    //             });
+    //             handles.push(handle);
+    //         });
+
+    //         // Create midpoint handles
+    //         for (let i = 0; i < segments.length; i++) {
+    //             const nextIndex = (i + 1) % segments.length;
+    //             const midpoint = segments[i].point.add(segments[nextIndex].point).divide(2);
+    //             const handle = new paper.Path.Circle({
+    //                 center: midpoint,
+    //                 radius: handleSize,
+    //                 fillColor: 'white',
+    //                 strokeColor: 'blue',
+    //                 strokeWidth: 1 / paper.view.zoom,
+    //                 data: { index: i + segments.length }
+    //             });
+    //             handles.push(handle);
+    //         }
+    //     };
+
+    //     const updateHandlePositions = () => {
+    //         if (!currentRectangle) return;
+
+    //         const segments = currentRectangle.segments;
+    //         const cornerHandles = handles.slice(0, 4);
+    //         const midpointHandles = handles.slice(4);
+
+    //         // Update corner handles
+    //         cornerHandles.forEach((handle, index) => {
+    //             handle.position = segments[index].point;
+    //         });
+
+    //         // Update midpoint handles
+    //         midpointHandles.forEach((handle, index) => {
+    //             const startIndex = index;
+    //             const endIndex = (index + 1) % 4;
+    //             const midpoint = segments[startIndex].point.add(segments[endIndex].point).divide(2);
+    //             handle.position = midpoint;
+    //         });
+    //     };
+
+    //     tool.onMouseDown = (event) => {
+    //         const hitResult = paper.project.hitTest(event.point, {
+    //             tolerance: 8,
+    //             fill: true,
+    //             stroke: true
+    //         });
+
+    //         if (hitResult && hitResult.item && handles.includes(hitResult.item)) {
+    //             // Start resizing if a handle is clicked
+    //             isResizing = true;
+    //             selectedHandle = hitResult.item;
+    //         } else if (!currentRectangle || !currentRectangle.bounds.contains(event.point)) {
+    //             // Start drawing new rectangle
+    //             isDrawing = true;
+    //             startPoint = event.point;
+
+    //             if (currentRectangle) {
+    //                 handles.forEach(handle => handle.remove());
+    //                 handles = [];
+    //             }
+
+    //             currentRectangle = new paper.Path.Rectangle({
+    //                 from: startPoint,
+    //                 to: event.point,
+    //                 strokeColor: 'red',
+    //                 strokeWidth: 2 / paper.view.zoom,
+    //                 fillColor: new paper.Color(1, 0, 0, 0.3)
+    //             });
+    //         }
+    //     };
+
+    //     tool.onMouseDrag = (event) => {
+    //         if (isDrawing && currentRectangle) {
+    //             // Update rectangle size while drawing
+    //             currentRectangle.remove();
+    //             currentRectangle = new paper.Path.Rectangle({
+    //                 from: startPoint,
+    //                 to: event.point,
+    //                 strokeColor: 'red',
+    //                 strokeWidth: 2 / paper.view.zoom,
+    //                 fillColor: new paper.Color(1, 0, 0, 0.3)
+    //             });
+    //         } else if (isResizing && selectedHandle && currentRectangle) {
+    //             // Handle resizing logic
+    //             const handleIndex = selectedHandle.data.index;
+    //             const bounds = currentRectangle.bounds;
+    //             let newBounds = bounds.clone();
+
+    //             if (handleIndex < 4) {
+    //                 // Corner handles
+    //                 switch (handleIndex) {
+    //                     case 0: // Top-left
+    //                         newBounds.topLeft = event.point;
+    //                         break;
+    //                     case 1: // Top-right
+    //                         newBounds.topRight = event.point;
+    //                         break;
+    //                     case 2: // Bottom-right
+    //                         newBounds.bottomRight = event.point;
+    //                         break;
+    //                     case 3: // Bottom-left
+    //                         newBounds.bottomLeft = event.point;
+    //                         break;
+    //                 }
+    //             } else {
+    //                 // Midpoint handles
+    //                 const edgeIndex = handleIndex - 4;
+    //                 switch (edgeIndex) {
+    //                     case 0: // Top edge
+    //                         newBounds.top = event.point.y;
+    //                         break;
+    //                     case 1: // Right edge
+    //                         newBounds.right = event.point.x;
+    //                         break;
+    //                     case 2: // Bottom edge
+    //                         newBounds.bottom = event.point.y;
+    //                         break;
+    //                     case 3: // Left edge
+    //                         newBounds.left = event.point.x;
+    //                         break;
+    //                 }
+    //             }
+
+    //             currentRectangle.bounds = newBounds;
+    //             updateHandlePositions();
+    //         }
+    //     };
+
+    //     tool.onMouseUp = (event) => {
+    //         if (isDrawing) {
+    //             isDrawing = false;
+    //             if (currentRectangle) {
+    //                 createHandles(currentRectangle);
+    //             }
+    //         }
+    //         isResizing = false;
+    //         selectedHandle = null;
+    //     };
+
+    //     // Update handles when view is zoomed or panned
+    //     paper.view.onScale = () => {
+    //         if (currentRectangle) {
+    //             handles.forEach(handle => {
+    //                 handle.radius = 8 / paper.view.zoom;
+    //                 handle.strokeWidth = 1 / paper.view.zoom;
+    //             });
+    //             currentRectangle.strokeWidth = 2 / paper.view.zoom;
+    //         }
+    //     };
+    // };
+
+    // const disablehighinteraction = () => {
+    //     if (paper.tool) {
+    //         paper.tool.remove();
+    //     }
+    //     if (drawingLayerRef.current) {
+    //         drawingLayerRef.current.remove();
+    //         drawingLayerRef.current = null;
+    //     }
+    // };
+
+    // const startDrawingHigh = () => {
+    //     // Create a new layer for highlights if it doesn't exist
+    //     if (!drawingLayerRef.current) {
+    //         drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //     }
+    //     drawingLayerRef.current.activate();
+
+    //     const tool = new paper.Tool();
+    //     let startPoint;
+    //     let currentRectangle = null;
+    //     let isDrawing = false;
+    //     let isResizing = false;
+    //     let selectedHandle = null;
+    //     let handles = [];
+    //     let selectedRectangles = new Set();
+
+    //     const highlightSelected = (rectangle) => {
+    //         if (selectedRectangles.has(rectangle)) {
+    //             rectangle.strokeColor = 'blue';
+    //             rectangle.strokeWidth = 3 / paper.view.zoom;
+    //         } else {
+    //             rectangle.strokeColor = 'red';
+    //             rectangle.strokeWidth = 2 / paper.view.zoom;
+    //         }
+    //     };
+
+    //     // Function to create resize handles
+    //     const createHandles = (rectangle) => {
+    //         // Remove existing handles
+    //         handles.forEach(handle => handle.remove());
+    //         handles = [];
+
+    //         const segments = rectangle.segments;
+    //         const handleSize = 8 / paper.view.zoom;
+
+    //         // Create handles at each corner and midpoint
+    //         segments.forEach((segment, index) => {
+    //             const handle = new paper.Path.Circle({
+    //                 center: segment.point,
+    //                 radius: handleSize,
+    //                 fillColor: 'white',
+    //                 strokeColor: 'blue',
+    //                 strokeWidth: 1 / paper.view.zoom,
+    //                 data: { index: index, type: 'handle' }
+    //             });
+    //             handles.push(handle);
+    //         });
+
+    //         // Create midpoint handles
+    //         for (let i = 0; i < segments.length; i++) {
+    //             const nextIndex = (i + 1) % segments.length;
+    //             const midpoint = segments[i].point.add(segments[nextIndex].point).divide(2);
+    //             const handle = new paper.Path.Circle({
+    //                 center: midpoint,
+    //                 radius: handleSize,
+    //                 fillColor: 'white',
+    //                 strokeColor: 'blue',
+    //                 strokeWidth: 1 / paper.view.zoom,
+    //                 data: { index: i + segments.length, type: 'handle' }
+    //             });
+    //             handles.push(handle);
+    //         }
+    //     };
+
+    //     const updateHandlePositions = () => {
+    //         if (!currentRectangle) return;
+
+    //         const segments = currentRectangle.segments;
+    //         const cornerHandles = handles.slice(0, 4);
+    //         const midpointHandles = handles.slice(4);
+
+    //         // Update corner handles
+    //         cornerHandles.forEach((handle, index) => {
+    //             handle.position = segments[index].point;
+    //         });
+
+    //         // Update midpoint handles
+    //         midpointHandles.forEach((handle, index) => {
+    //             const startIndex = index;
+    //             const endIndex = (index + 1) % 4;
+    //             const midpoint = segments[startIndex].point.add(segments[endIndex].point).divide(2);
+    //             handle.position = midpoint;
+    //         });
+    //     };
+
+    //     const clearSelection = () => {
+    //         selectedRectangles.forEach(rect => {
+    //             highlightSelected(rect);
+    //         });
+    //         selectedRectangles.clear();
+    //         handles.forEach(handle => handle.remove());
+    //         handles = [];
+    //         currentRectangle = null;
+    //     };
+
+    //     tool.onMouseDown = (event) => {
+    //         const isCtrlPressed = event.modifiers.control || event.modifiers.meta; // meta for macOS
+    //         const hitResult = paper.project.hitTest(event.point, {
+    //             tolerance: 8,
+    //             fill: true,
+    //             stroke: true
+    //         });
+
+    //         if (hitResult) {
+    //             if (hitResult.item.data.type === 'handle') {
+    //                 // Start resizing if a handle is clicked
+    //                 isResizing = true;
+    //                 selectedHandle = hitResult.item;
+    //             } else if (hitResult.item instanceof paper.Path.Rectangle) {
+    //                 // Handle rectangle selection
+    //                 if (!isCtrlPressed) {
+    //                     clearSelection();
+    //                 }
+    //                 currentRectangle = hitResult.item;
+    //                 if (selectedRectangles.has(currentRectangle)) {
+    //                     selectedRectangles.delete(currentRectangle);
+    //                 } else {
+    //                     selectedRectangles.add(currentRectangle);
+    //                 }
+    //                 selectedRectangles.forEach(rect => {
+    //                     highlightSelected(rect);
+    //                 });
+    //                 if (selectedRectangles.size === 1) {
+    //                     createHandles(currentRectangle);
+    //                 }
+    //             } else {
+    //                 if (!isCtrlPressed) {
+    //                     clearSelection();
+    //                 }
+    //             }
+    //         } else {
+    //             // Start drawing new rectangle
+    //             if (!isCtrlPressed) {
+    //                 clearSelection();
+    //             }
+    //             isDrawing = true;
+    //             startPoint = event.point;
+    //             currentRectangle = new paper.Path.Rectangle({
+    //                 from: startPoint,
+    //                 to: event.point,
+    //                 strokeColor: 'red',
+    //                 strokeWidth: 2 / paper.view.zoom,
+    //                 fillColor: new paper.Color(1, 0, 0, 0.3),
+    //                 data: { type: 'rectangle' }
+    //             });
+    //         }
+    //     };
+
+    //     tool.onMouseDrag = (event) => {
+    //         if (isDrawing && currentRectangle) {
+    //             // Update rectangle size while drawing
+    //             currentRectangle.remove();
+    //             currentRectangle = new paper.Path.Rectangle({
+    //                 from: startPoint,
+    //                 to: event.point,
+    //                 strokeColor: 'red',
+    //                 strokeWidth: 2 / paper.view.zoom,
+    //                 fillColor: new paper.Color(1, 0, 0, 0.3),
+    //                 data: { type: 'rectangle' }
+    //             });
+    //         } else if (isResizing && selectedHandle && currentRectangle) {
+    //             // Handle resizing logic
+    //             const handleIndex = selectedHandle.data.index;
+    //             const bounds = currentRectangle.bounds;
+    //             let newBounds = bounds.clone();
+
+    //             if (handleIndex < 4) {
+    //                 // Corner handles
+    //                 switch (handleIndex) {
+    //                     case 0: // Top-left
+    //                         newBounds.topLeft = event.point;
+    //                         break;
+    //                     case 1: // Top-right
+    //                         newBounds.topRight = event.point;
+    //                         break;
+    //                     case 2: // Bottom-right
+    //                         newBounds.bottomRight = event.point;
+    //                         break;
+    //                     case 3: // Bottom-left
+    //                         newBounds.bottomLeft = event.point;
+    //                         break;
+    //                 }
+    //             } else {
+    //                 // Midpoint handles
+    //                 const edgeIndex = handleIndex - 4;
+    //                 switch (edgeIndex) {
+    //                     case 0: // Top edge
+    //                         newBounds.top = event.point.y;
+    //                         break;
+    //                     case 1: // Right edge
+    //                         newBounds.right = event.point.x;
+    //                         break;
+    //                     case 2: // Bottom edge
+    //                         newBounds.bottom = event.point.y;
+    //                         break;
+    //                     case 3: // Left edge
+    //                         newBounds.left = event.point.x;
+    //                         break;
+    //                 }
+    //             }
+
+    //             currentRectangle.bounds = newBounds;
+    //             updateHandlePositions();
+    //         }
+    //     };
+
+    //     tool.onMouseUp = (event) => {
+    //         if (isDrawing) {
+    //             isDrawing = false;
+    //             if (currentRectangle) {
+    //                 selectedRectangles.add(currentRectangle);
+    //                 highlightSelected(currentRectangle);
+    //                 createHandles(currentRectangle);
+    //             }
+    //         }
+    //         isResizing = false;
+    //         selectedHandle = null;
+    //     };
+
+    //     // Update handles when view is zoomed or panned
+    //     paper.view.onScale = () => {
+    //         handles.forEach(handle => {
+    //             handle.radius = 8 / paper.view.zoom;
+    //             handle.strokeWidth = 1 / paper.view.zoom;
+    //         });
+    //         selectedRectangles.forEach(rect => {
+    //             rect.strokeWidth = rect === currentRectangle ? 3 / paper.view.zoom : 2 / paper.view.zoom;
+    //         });
+    //     };
+    // };
+
+    // const disablehighinteraction = () => {
+    //     if (paper.tool) {
+    //         paper.tool.remove();
+    //     }
+    //     if (drawingLayerRef.current) {
+    //         drawingLayerRef.current.remove();
+    //         drawingLayerRef.current = null;
+    //     }
+    // };
+
+
+    const startDrawingHigh = () => {
+        if (!drawingLayerRef.current) {
+            drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+        }
+        drawingLayerRef.current.activate();
+
+        const tool = new paper.Tool();
+        let startPoint;
+        let currentRectangle = null;
+        let isDrawing = false;
+        let isResizing = false;
+        let selectedHandle = null;
+        let handles = [];
+        let selectedRectangles = new Set();
+
+        const highlightSelected = (rectangle, isSelected) => {
+            if (isSelected) {
+                rectangle.strokeColor = 'blue';
+                rectangle.strokeWidth = 3 / paper.view.zoom;
+            } else {
+                rectangle.strokeColor = 'red';
+                rectangle.strokeWidth = 2 / paper.view.zoom;
+            }
+        };
+
+        const createHandles = (rectangle) => {
+            handles.forEach(handle => handle.remove());
+            handles = [];
+
+            const segments = rectangle.segments;
+            const handleSize = 8 / paper.view.zoom;
+
+            segments.forEach((segment, index) => {
+                const handle = new paper.Path.Circle({
+                    center: segment.point,
+                    radius: handleSize,
+                    fillColor: 'white',
+                    strokeColor: 'blue',
+                    strokeWidth: 1 / paper.view.zoom,
+                    data: { index: index, type: 'handle' }
+                });
+                handles.push(handle);
+            });
+
+            for (let i = 0; i < segments.length; i++) {
+                const nextIndex = (i + 1) % segments.length;
+                const midpoint = segments[i].point.add(segments[nextIndex].point).divide(2);
+                const handle = new paper.Path.Circle({
+                    center: midpoint,
+                    radius: handleSize,
+                    fillColor: 'white',
+                    strokeColor: 'blue',
+                    strokeWidth: 1 / paper.view.zoom,
+                    data: { index: i + segments.length, type: 'handle' }
+                });
+                handles.push(handle);
+            }
+        };
+
+        const updateHandlePositions = () => {
+            if (!currentRectangle) return;
+
+            const segments = currentRectangle.segments;
+            const cornerHandles = handles.slice(0, 4);
+            const midpointHandles = handles.slice(4);
+
+            cornerHandles.forEach((handle, index) => {
+                handle.position = segments[index].point;
+            });
+
+            midpointHandles.forEach((handle, index) => {
+                const startIndex = index;
+                const endIndex = (index + 1) % 4;
+                const midpoint = segments[startIndex].point.add(segments[endIndex].point).divide(2);
+                handle.position = midpoint;
+            });
+        };
+
+        const clearSelection = () => {
+            selectedRectangles.forEach(rect => {
+                highlightSelected(rect, false);
+            });
+            selectedRectangles.clear();
+            handles.forEach(handle => handle.remove());
+            handles = [];
+            currentRectangle = null;
+        };
+
+        tool.onMouseDown = (event) => {
+            const isCtrlPressed = event.modifiers.control || event.modifiers.meta;
+            const hitResult = paper.project.hitTest(event.point, {
+                tolerance: 8,
+                fill: true,
+                stroke: true
+            });
+
+            if (hitResult) {
+                if (hitResult.item.data.type === 'handle') {
+                    isResizing = true;
+                    selectedHandle = hitResult.item;
+                } else if (hitResult.item instanceof paper.Path.Rectangle) {
+                    if (!isCtrlPressed) {
+                        // Clear previous selection if Ctrl is not pressed
+                        selectedRectangles.forEach(rect => {
+                            if (rect !== hitResult.item) {
+                                highlightSelected(rect, false);
+                            }
+                        });
+                        selectedRectangles.clear();
+                    }
+
+                    currentRectangle = hitResult.item;
+                    selectedRectangles.add(currentRectangle);
+                    highlightSelected(currentRectangle, true);
+
+                    // Create handles only for the currently selected rectangle
+                    createHandles(currentRectangle);
+                } else {
+                    if (!isCtrlPressed) {
+                        clearSelection();
+                    }
+                }
+            } else {
+                // Start drawing new rectangle only if clicking empty space
+                if (!isCtrlPressed) {
+                    clearSelection();
+                }
+                isDrawing = true;
+                startPoint = event.point;
+                currentRectangle = new paper.Path.Rectangle({
+                    from: startPoint,
+                    to: event.point,
+                    strokeColor: 'red',
+                    strokeWidth: 2 / paper.view.zoom,
+                    fillColor: new paper.Color(1, 0, 0, 0.3),
+                    data: { type: 'rectangle' }
+                });
+            }
+        };
+
+        tool.onMouseDrag = (event) => {
+            if (isDrawing && currentRectangle) {
+                currentRectangle.remove();
+                currentRectangle = new paper.Path.Rectangle({
+                    from: startPoint,
+                    to: event.point,
+                    strokeColor: 'red',
+                    strokeWidth: 2 / paper.view.zoom,
+                    fillColor: new paper.Color(1, 0, 0, 0.3),
+                    data: { type: 'rectangle' }
+                });
+            } else if (isResizing && selectedHandle && currentRectangle) {
+                const handleIndex = selectedHandle.data.index;
+                const bounds = currentRectangle.bounds;
+                let newBounds = bounds.clone();
+
+                if (handleIndex < 4) {
+                    switch (handleIndex) {
+                        case 0: newBounds.topLeft = event.point; break;
+                        case 1: newBounds.topRight = event.point; break;
+                        case 2: newBounds.bottomRight = event.point; break;
+                        case 3: newBounds.bottomLeft = event.point; break;
+                    }
+                } else {
+                    const edgeIndex = handleIndex - 4;
+                    switch (edgeIndex) {
+                        case 0: newBounds.top = event.point.y; break;
+                        case 1: newBounds.right = event.point.x; break;
+                        case 2: newBounds.bottom = event.point.y; break;
+                        case 3: newBounds.left = event.point.x; break;
+                    }
+                }
+
+                currentRectangle.bounds = newBounds;
+                updateHandlePositions();
+            }
+        };
+
+        tool.onMouseUp = (event) => {
+            if (isDrawing) {
+                isDrawing = false;
+                if (currentRectangle) {
+                    // Keep the rectangle red when it's first created
+                    currentRectangle.strokeColor = 'red';
+                    currentRectangle.strokeWidth = 2 / paper.view.zoom;
+                    // Don't add to selection when first created
+                    currentRectangle = null;
+                }
+            }
+            isResizing = false;
+            selectedHandle = null;
+        };
+
+        paper.view.onScale = () => {
+            handles.forEach(handle => {
+                handle.radius = 8 / paper.view.zoom;
+                handle.strokeWidth = 1 / paper.view.zoom;
+            });
+            paper.project.getItems({ class: paper.Path.Rectangle }).forEach(rect => {
+                rect.strokeWidth = selectedRectangles.has(rect) ? 3 / paper.view.zoom : 2 / paper.view.zoom;
+            });
+        };
+    };
+
+    const disablehighinteraction = () => {
+        if (paper.tool) {
+            paper.tool.remove();
+        }
+        if (drawingLayerRef.current) {
+            drawingLayerRef.current.remove();
+            drawingLayerRef.current = null;
+        }
+    };
 
     return (
         <>
-          <div style={{width:'100%',height:'90vh',position:'absolute',backgroundColor:'white' ,zIndex:'1'}}>
-            <canvas id="canvas" ref={canvasRef} style={{ width: isSideNavOpen ? '83.5%' : '100%', marginLeft: isSideNavOpen ? '260px' : '0%', position: 'absolute', height: '100%', overflow: 'hidden',backgroundColor:'white',zIndex:'0'}} ></canvas>
-            {mastertab && <div className='tmt rounded w-100 justify-content-around' style={{ left: isSideNavOpen ? '29%' : '24%' }}>
-                <i class="spidControl fa-regular fa-file button " title='Master Copy' onClick={toggleHighlightConndoc}></i>
-                <i class="spidControl fa-solid fa-file button " title='Smart Master' onClick={toggleHighlightMasdoc}></i>
-                <i class="spidControl fa-solid fa-copy button " title='Smart Master' onClick={copyExtraElements}></i>
-                <i class="spidControl fa-solid fa-copyright button" title='Smart Master' onClick={copySelectedItems}></i>
-               
-            </div>}
-            {functionactive && <div id='rightopt' style={{ right: taginfoshow ? '200px' : '0' }} >
-                <i class="spidControl fa-solid fa-circle-info  button " title='Tag Info' onClick={handletaginfo}></i>
-                <i class="spidControl fa fa-search-plus button" title='Zoomin' onClick={handleZoomIn} ></i>
-                <i class="spidControl fa fa-search-minus button" title='Zoomout' onClick={handleZoomOut}></i>
-                <i class="fa-solid fa-up-down-left-right button" title='Pan' onClick={handlepan}></i>
-                <i class="fa-solid fa-down-left-and-up-right-to-center button" title='Fit View' onClick={handlefitview}></i>
-                <i class="spidControl fa fa-upload button" title="Export" onClick={handleexportMenu}></i>
-                <i class="spidControl fa-solid fa-square  button " title='window select' onClick={handlewindowselect}></i>
-                <i class="spidControl fa-solid fa-arrow-pointer button" title='Selection' onClick={handleselect}></i>
-                <i class="spidControl fa fa-pencil button" title='Edit' onClick={handleeditpan}></i>
-                <li class="spidControl fa-regular fa-comment button" title='Show comment' onClick={handlecommentlabel}></li>
-                <li class="spidControl fa-solid fa-file-pen button" title='Edit comment' onClick={handlecommentedit}></li>
-            </div>}
+            <div style={{ width: '100%', height: '90vh', position: 'absolute', backgroundColor: 'white', zIndex: '1' }}>
+                <canvas id="canvas" ref={canvasRef} style={{ width: isSideNavOpen ? '83.5%' : '100%', marginLeft: isSideNavOpen ? '260px' : '0%', position: 'absolute', height: '100%', overflow: 'hidden', backgroundColor: 'white', zIndex: '0' }} ></canvas>
+                {mastertab && <div className='tmt rounded w-100 justify-content-around' style={{ left: isSideNavOpen ? '29%' : '24%' }}>
+                    <i class="spidControl fa-regular fa-file button " title='Master Copy' onClick={toggleHighlightConndoc}></i>
+                    <i class="spidControl fa-solid fa-file button " title='Smart Master' onClick={toggleHighlightMasdoc}></i>
+                    <i class="spidControl fa-solid fa-copy button " title='Smart Master' onClick={copyExtraElements}></i>
+                    <i class="spidControl fa-solid fa-copyright button" title='Smart Master' onClick={copySelectedItems}></i>
 
-            {mastercopyactive && <div id='rightopt' style={{ right: '0' }} >
-             
-                <i class="spidControl fa-solid fa-arrow-pointer button" title='Selection' onClick={handlescselect}></i>
-               
-            </div>}
+                </div>}
+                {functionactive && <div id='rightopt' style={{ right: taginfoshow ? '200px' : '0' }} >
+                    <i class="spidControl fa-solid fa-circle-info  button " title='Tag Info' onClick={handletaginfo}></i>
+                    <i class="spidControl fa fa-search-plus button" title='Zoomin' onClick={handleZoomIn} ></i>
+                    <i class="spidControl fa fa-search-minus button" title='Zoomout' onClick={handleZoomOut}></i>
+                    <i class="fa-solid fa-up-down-left-right button" title='Pan' onClick={handlepan}></i>
+                    <i class="fa-solid fa-down-left-and-up-right-to-center button" title='Fit View' onClick={handlefitview}></i>
+                    <i class="spidControl fa fa-upload button" title="Export" onClick={handleexportMenu}></i>
+                    <i class="spidControl fa-solid fa-square  button " title='window select' onClick={handlewindowselect}></i>
+                    <i class="spidControl fa-solid fa-arrow-pointer button" title='Selection' onClick={handleselect}></i>
+                    <i class="spidControl fa fa-pencil button" title='Edit' onClick={handleeditpan}></i>
+                    <li class="spidControl fa-regular fa-comment button" title='Show comment' onClick={handlecommentlabel}></li>
+                    <li class="spidControl fa-solid fa-file-pen button" title='Edit comment' onClick={handlecommentedit}></li>
+                </div>}
 
-           
+                {mastercopyactive && <div id='rightopt' style={{ right: '0' }} >
 
-            {taginfoshow && <div className='right pb-5' id='spidEditPane' style={{ height: '100%', width: '200px', backgroundColor: 'black' }}>
-                <button className='btn btn-light' onClick={handletaginfoClose}><i className="fa-solid fa-xmark mx-2"></i></button>
-               
-                {equlist && Object.keys(equlist).length > 0 && (
-                    <div style={{ color: 'white' }}>
-                        <p>Equipment Info</p>
-                        {Object.entries(equlist).map(([key, value]) => (
-                            <li key={key} style={{ textAlign: 'left', paddingLeft: 0, marginLeft: 0, listStylePosition: 'inside' }}>
-                                <strong>{key}:</strong> {value}
-                            </li>
-                        ))}
-                    </div>
-                )}
-                {linelist && Object.keys(linelist).length > 0 && (
-                    <div style={{ color: 'white' }}>
-                        <p>Line Info</p>
-                        {Object.entries(linelist).map(([key, value]) => (
-                            <li key={key} style={{ textAlign: 'left', paddingLeft: 0, marginLeft: 0, listStylePosition: 'inside' }}>
-                                <strong>{key}:</strong> {value}
-                            </li>
-                        ))}
-                    </div>
-                )}
+                    <i class="spidControl fa-solid fa-arrow-pointer button" title='Selection' onClick={handlescselect}></i>
 
-              
-            </div>}
+                </div>}
 
-            {commentinfotable && <div className='right' id='spidEditPane' style={{ height: '100%', width: '200px', backgroundColor: 'black' }}>
-                <div className='w-100' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <button className='btn btn-light' onClick={handleclosecommentinfo}><i className="fa-solid fa-xmark"></i></button>
-                    <div className="btn btn-light" onClick={() => deletecomment(commentinfo.number)}><i className="fa-solid fa-trash"></i></div>
-                    {(commentinfo.status != 'closed') && (
-                        isEditing ? (
-                            <div className="btn btn-dark" onClick={() => handleSaveButtonClick(commentinfo.number)}>
-                                <i className="fa-solid fa-save"></i>
-                            </div>
-                        ) : (
-                            <div className="btn btn-dark" onClick={() => handleEditButtonClick(commentinfo.number)}>
-                                <i className="fa-solid fa-pencil"></i>
-                            </div>
-                        )
+
+
+                {taginfoshow && <div className='right pb-5' id='spidEditPane' style={{ height: '100%', width: '200px', backgroundColor: 'black' }}>
+                    <button className='btn btn-light' onClick={handletaginfoClose}><i className="fa-solid fa-xmark mx-2"></i></button>
+
+                    {equlist && Object.keys(equlist).length > 0 && (
+                        <div style={{ color: 'white' }}>
+                            <p>Equipment Info</p>
+                            {Object.entries(equlist).map(([key, value]) => (
+                                <li key={key} style={{ textAlign: 'left', paddingLeft: 0, marginLeft: 0, listStylePosition: 'inside' }}>
+                                    <strong>{key}:</strong> {value}
+                                </li>
+                            ))}
+                        </div>
                     )}
+                    {linelist && Object.keys(linelist).length > 0 && (
+                        <div style={{ color: 'white' }}>
+                            <p>Line Info</p>
+                            {Object.entries(linelist).map(([key, value]) => (
+                                <li key={key} style={{ textAlign: 'left', paddingLeft: 0, marginLeft: 0, listStylePosition: 'inside' }}>
+                                    <strong>{key}:</strong> {value}
+                                </li>
+                            ))}
+                        </div>
+                    )}
+
+
+                </div>}
+
+                {commentinfotable && <div className='right' id='spidEditPane' style={{ height: '100%', width: '200px', backgroundColor: 'black' }}>
+                    <div className='w-100' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <button className='btn btn-light' onClick={handleclosecommentinfo}><i className="fa-solid fa-xmark"></i></button>
+                        <div className="btn btn-light" onClick={() => deletecomment(commentinfo.number)}><i className="fa-solid fa-trash"></i></div>
+                        {(commentinfo.status != 'closed') && (
+                            isEditing ? (
+                                <div className="btn btn-dark" onClick={() => handleSaveButtonClick(commentinfo.number)}>
+                                    <i className="fa-solid fa-save"></i>
+                                </div>
+                            ) : (
+                                <div className="btn btn-dark" onClick={() => handleEditButtonClick(commentinfo.number)}>
+                                    <i className="fa-solid fa-pencil"></i>
+                                </div>
+                            )
+                        )}
+                    </div>
+
+                    <div style={{ color: 'white' }}>
+                        <h6>Comment Info</h6>
+                        <p>Comment No: {commentinfo.number}</p>
+                        {/* <p>Comment: {commentinfo.comment}</p> */}
+
+                        <p>Comment: {isEditing ? (<input onChange={e => setcommentedit(e.target.value)} type="text" value={commentedit} />) : (commentinfo.comment)}</p>
+
+                        <p>Date: {commentinfo.createddate}</p>
+                        <p>Created: {commentinfo.createdby}</p>
+                        {/* <p>Status: {commentinfo.statusname}</p> */}
+
+                        <p>Status:
+                            {isEditing ? (
+                                <select value={commentinfo.statusname || ''} onChange={e => setstatusedit(e.target.value)} style={{ width: '100%' }}>
+                                    <option value="" disabled>
+                                        Choose type
+                                    </option>
+                                    {commentdet.map(option => (
+                                        <option key={option.commentId} value={option.statusname}>{option.statusname}</option>
+                                    ))}
+                                </select>
+                            ) : (
+                                commentinfo.statusname
+                            )}
+                        </p>
+
+
+                        {/* <p>Priority: {commentinfo.priority}</p> */}
+
+                        <p>Priority:
+                            {isEditing ? (
+                                <div class="priority" value={priorityedit} onChange={(e) => setpriorityedit(e.target.value)}>
+
+                                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                        <input type="radio" id="priority1" name="priority" value="1" />
+                                        <label for="priority1" style={{ marginRight: '5px' }}>1</label>
+                                        <input type="radio" id="priority2" name="priority" value="2" />
+                                        <label for="priority2" style={{ margin: '0 5px' }}>2</label>
+                                        <input type="radio" id="priority3" name="priority" value="3" />
+                                        <label for="priority3" style={{ marginLeft: '5px' }}>3</label>
+                                    </div>
+
+                                </div>
+                            ) : (commentinfo.priority)}
+                        </p>
+                    </div>
                 </div>
+                }
+                {isbottomextend && <div className='bet w-50 rounded' style={{ left: isSideNavOpen ? '29%' : '24%' }}>
+                    <i className="fa-solid fa-tag svgElem button " title='Assign Tag' onClick={handleassigntag} ></i>
+                    <i className="fa-solid fa-arrows-turn-to-dots svgElem button" title='Flag assign' onClick={handleflagassign}></i>
+                    <i className="fa-solid fa-delete-left svgElem button" title='Flag Connection Delete' onClick={handleflagcondelete}></i>
+                    <i className="fa-solid fa-pen-to-square svgElem button" title='Draw area' onClick={handleareadraw}></i>
+                    <i className="fa-regular fa-window-restore svgElem button" title='Save area' onClick={handlesavearea}></i>
+                    <i className="fa-solid fa-layer-group svgElem button" title='Show area' onClick={handleshowarea}></i>
+                    <i className="fa-solid fa-highlighter svgElem button" title='Draw highlight' onClick={handledrawhigh}></i>
+                </div>
+                }
 
-                <div style={{ color: 'white' }}>
-                    <h6>Comment Info</h6>
-                    <p>Comment No: {commentinfo.number}</p>
-                    {/* <p>Comment: {commentinfo.comment}</p> */}
+                {taginfomenu.visible && (
+                    <ul className="context-menu" style={{ width: '180px', top: taginfomenu.y, left: taginfomenu.x }}>
+                        <li onClick={handletinfomodel}>Tag info</li>
+                    </ul>
+                )}
 
-                    <p>Comment: {isEditing ? (<input onChange={e => setcommentedit(e.target.value)} type="text" value={commentedit} />) : (commentinfo.comment)}</p>
+                {flagconmenu.visible && (
+                    <ul className="context-menu" style={{
+                        width: '180px',
+                        top: flagconmenu.y + 'px', // Position menu from the top
+                        left: flagconmenu.x + 'px'  // Position menu from the left
+                    }}>
+                        <li onClick={handleassigntag}>Tag assign</li>
+                        <li onClick={handledeletetag}>Tag delete</li>
+                        <li onClick={handleflagassign}>Flag assign</li>
+                        <li onClick={handleflagcondelete}>Delete flag Connection</li>
+                        <li onClick={handleflagconnection}>Connect flag doc</li>
+                        <li onClick={handleflagsubmit}>Connect flags</li>
+                        <li onClick={handleflagtag}>Connect adjcent tag</li>
+                        <li onClick={handleaddcomment}>Add comment</li>
+                        <li onClick={handleGotothree}>Go to 3D</li>
 
-                    <p>Date: {commentinfo.createddate}</p>
-                    <p>Created: {commentinfo.createdby}</p>
-                    {/* <p>Status: {commentinfo.statusname}</p> */}
+                    </ul>
+                )}
 
-                    <p>Status:
-                        {isEditing ? (
-                            <select value={commentinfo.statusname || ''} onChange={e => setstatusedit(e.target.value)} style={{ width: '100%' }}>
-                                <option value="" disabled>
-                                    Choose type
-                                </option>
-                                {commentdet.map(option => (
-                                    <option key={option.commentId} value={option.statusname}>{option.statusname}</option>
+
+
+
+                <Modal show={tagassishow} onHide={handletagassiClose}>
+                    <Modal.Header className="title-dialog" closeButton>
+                        <Modal.Title style={{ color: 'white' }}>Assign Tag</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div className='d-flex justify-content-center mb-5'>
+                            <p>Select Tag</p>
+                            <select value={tagid} onChange={handleChange}>
+                                <option value="">Select:-</option>
+                                {alltags.map((i) => (
+                                    <option key={i.number} value={i.number}>
+                                        {i.number}
+                                    </option>
                                 ))}
                             </select>
-                        ) : (
-                            commentinfo.statusname
-                        )}
-                    </p>
+                        </div>
+                    </Modal.Body>
+                    <Modal.Footer className='footing'>
+                        <Button variant="secondary" onClick={handletagassiClose}>
+                            Close
+                        </Button>
+                        <Button variant="primary" onClick={(e) => handleeletagassign(e)}>
+                            Submit
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+
+                <Modal show={areashows} onHide={handleareaassiclose}>
+                    <Modal.Header className="title-dialog" closeButton>
+                        <Modal.Title style={{ color: 'white' }}>Assign Area</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div className='d-flex justify-content-center mb-5'>
+                            <p>Select Area Number</p>
+                            <select value={selectvalue} onChange={handleareachange}>
+                                <option value="">Select:-</option>
+                                {allareas.map((i) => (
+                                    <option key={i.areaNumber} value={i.areaNumber}>
+                                        {i.areaNumber}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </Modal.Body>
+                    <Modal.Footer className='footing'>
+                        <Button variant="secondary" onClick={handleareaassiclose}>
+                            Close
+                        </Button>
+                        <Button variant="primary" type='button' onClick={(e) => handlesavelayer(e)}  >
+                            {/* onClick={(e) => handlesavelayer(e)} */}
+                            Submit
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+
+                <Modal show={flagassishow} onHide={handleflagassiClose}>
+                    <Modal.Header className="title-dialog" closeButton>
+                        <Modal.Title style={{ color: 'white' }}>Assign Flag Details</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div className='d-flex justify-content-center mb-5'>
+                            <p>Select Connecting file:- </p>
+                            <select value={flagcdocnum} onChange={handleflagcdocChange}>
+                                <option value="">Select:-</option>
+                                {allspids.map((project, index) => {
+                                    if (project.number !== docdetnum) {
+                                        return (
+                                            <option key={project.number} value={project.number}>
+                                                {project.number}
+                                            </option>
+                                        );
+                                    } else {
+                                        return null; // Exclude the option
+                                    }
+                                })}
+                            </select>
+                        </div>
+                    </Modal.Body>
+                    <Modal.Footer className='footing'>
+                        <Button variant="secondary" onClick={handleflagassiClose}>
+                            Close
+                        </Button>
+                        <Button variant="primary" onClick={handleflagassidetails}>
+                            Submit
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
 
 
-                    {/* <p>Priority: {commentinfo.priority}</p> */}
+                {customAlert && (
+                    <Alert
+                        message={modalMessage}
+                        onAlertClose={() => setCustomAlert(false)}
+                    />
+                )}
 
-                    <p>Priority:
-                        {isEditing ? (
-                            <div class="priority" value={priorityedit} onChange={(e) => setpriorityedit(e.target.value)}>
-                              
-                                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                    <input type="radio" id="priority1" name="priority" value="1" />
-                                    <label for="priority1" style={{ marginRight: '5px' }}>1</label>
-                                    <input type="radio" id="priority2" name="priority" value="2" />
-                                    <label for="priority2" style={{ margin: '0 5px' }}>2</label>
-                                    <input type="radio" id="priority3" name="priority" value="3" />
-                                    <label for="priority3" style={{ marginLeft: '5px' }}>3</label>
-                                </div>
+                {exportmenu && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: '400px',
+                            right: '2%',
+                            backgroundColor: 'lightgray',
+                            padding: '20px',
+                            zIndex: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            borderBlockColor: 'black',
+                            color: 'black'
+                        }}
+                    >
+                        {/* Close button */}
+                        <button onClick={handlecloseexport}><i class="fa-solid fa-xmark"></i></button>
 
-                            </div>
-                        ) : (commentinfo.priority)}
-                    </p>
-                </div>
+                        {/* Tag info */}
+                        <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column' }}>
+                            <li className='btn' onClick={handleexId}>Export Id</li>
+                            <li className='btn' onClick={handleextext}>Export Text</li>
+                        </ul>
+                    </div>
+                )}
+
             </div>
-            }
-            {isbottomextend && <div className='bet w-50 rounded' style={{ left: isSideNavOpen ? '29%' : '24%' }}>
-                <i className="fa-solid fa-tag svgElem button " title='Assign Tag' onClick={handleassigntag} ></i>
-                <i className="fa-solid fa-arrows-turn-to-dots svgElem button" title='Flag assign' onClick={handleflagassign}></i>
-                <i className="fa-solid fa-delete-left svgElem button" title='Flag Connection Delete' onClick={handleflagcondelete}></i>
-                <i className="fa-solid fa-pen-to-square svgElem button" title='Draw area' onClick={handleareadraw}></i>
-                <i className="fa-regular fa-window-restore svgElem button" title='Save area' onClick={handlesavearea}></i>
-                <i className="fa-solid fa-layer-group svgElem button" title='Show area' onClick={handleshowarea}></i>
-            </div>
-            }
 
-            {taginfomenu.visible && (
-                <ul className="context-menu" style={{width:'180px',  top: taginfomenu.y, left: taginfomenu.x }}>
-                    <li onClick={handletinfomodel}>Tag info</li>
-                </ul>
-            )}
-
-            {flagconmenu.visible && (
-                <ul className="context-menu"  style={{
-                    width: '180px',
-                    top: flagconmenu.y + 'px', // Position menu from the top
-                    left: flagconmenu.x + 'px'  // Position menu from the left
-                  }}>
-                    <li onClick={handleassigntag}>Tag assign</li>
-                    <li onClick={handledeletetag}>Tag delete</li>
-                    <li onClick={handleflagassign}>Flag assign</li>
-                    <li onClick={handleflagcondelete}>Delete flag Connection</li>
-                    <li onClick={handleflagconnection}>Connect flag doc</li>
-                    <li onClick={handleflagsubmit}>Connect flags</li>
-                    <li onClick={handleflagtag}>Connect adjcent tag</li>
-                    <li onClick={handleaddcomment}>Add comment</li>
-                    <li onClick={handleGotothree}>Go to 3D</li>
-
-                </ul>
-            )}
-
-           
-
-
-            <Modal show={tagassishow} onHide={handletagassiClose}>
-                <Modal.Header className="title-dialog" closeButton>
-                    <Modal.Title style={{ color: 'white' }}>Assign Tag</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className='d-flex justify-content-center mb-5'>
-                        <p>Select Tag</p>
-                        <select value={tagid} onChange={handleChange}>
-                            <option value="">Select:-</option>
-                            {alltags.map((i) => (
-                                <option key={i.number} value={i.number}>
-                                    {i.number}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer className='footing'>
-                    <Button variant="secondary" onClick={handletagassiClose}>
-                        Close
-                    </Button>
-                    <Button variant="primary" onClick={(e) => handleeletagassign(e)}>
-                        Submit
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={areashows} onHide={handleareaassiclose}>
-                <Modal.Header className="title-dialog" closeButton>
-                    <Modal.Title style={{ color: 'white' }}>Assign Area</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className='d-flex justify-content-center mb-5'>
-                        <p>Select Area Number</p>
-                        <select value={selectvalue} onChange={handleareachange}>
-                            <option value="">Select:-</option>
-                            {allareas.map((i) => (
-                                <option key={i.areaNumber} value={i.areaNumber}>
-                                    {i.areaNumber}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer className='footing'>
-                    <Button variant="secondary" onClick={handleareaassiclose}>
-                        Close
-                    </Button>
-                    <Button variant="primary" type='button' onClick={(e) => handlesavelayer(e)}  >
-                        {/* onClick={(e) => handlesavelayer(e)} */}
-                        Submit
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={flagassishow} onHide={handleflagassiClose}>
-                <Modal.Header className="title-dialog" closeButton>
-                    <Modal.Title style={{ color: 'white' }}>Assign Flag Details</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className='d-flex justify-content-center mb-5'>
-                        <p>Select Connecting file:- </p>
-                        <select value={flagcdocnum} onChange={handleflagcdocChange}>
-                            <option value="">Select:-</option>
-                            {allspids.map((project, index) => {
-                                if (project.number !== docdetnum) {
-                                    return (
-                                        <option key={project.number} value={project.number}>
-                                            {project.number}
-                                        </option>
-                                    );
-                                } else {
-                                    return null; // Exclude the option
-                                }
-                            })}
-                        </select>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer className='footing'>
-                    <Button variant="secondary" onClick={handleflagassiClose}>
-                        Close
-                    </Button>
-                    <Button variant="primary" onClick={handleflagassidetails}>
-                        Submit
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-          
-            {customAlert && (
-                <Alert
-                    message={modalMessage}
-                    onAlertClose={() => setCustomAlert(false)}
-                />
-            )}
-
-            {exportmenu && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: '400px',
-                        right: '2%',
-                        backgroundColor: 'lightgray',
-                        padding: '20px',
-                        zIndex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        borderBlockColor: 'black',
-                        color: 'black'
-                    }}
-                >
-                    {/* Close button */}
-                    <button onClick={handlecloseexport}><i class="fa-solid fa-xmark"></i></button>
-
-                    {/* Tag info */}
-                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column' }}>
-                        <li className='btn' onClick={handleexId}>Export Id</li>
-                        <li className='btn' onClick={handleextext}>Export Text</li>
-                    </ul>
-                </div>
-            )}
-
-        </div>
-
-        {isaddcomment && <Comment onClose={handleclosecomment} isOpen={handleaddcomment} content={commcontent} x={isrx} y={isry} allCommentStatus={allCommentStatus}
- commentdet={commentdet} docdetnum={docdetnum} ></Comment>}
-        {/* {editcomment && <CommentStatus onstop={handleclosecommentstatus} commentdet={commentdet}></CommentStatus>} */}
+            {isaddcomment && <Comment onClose={handleclosecomment} isOpen={handleaddcomment} content={commcontent} x={isrx} y={isry} allCommentStatus={allCommentStatus}
+                commentdet={commentdet} docdetnum={docdetnum} ></Comment>}
+            {/* {editcomment && <CommentStatus onstop={handleclosecommentstatus} commentdet={commentdet}></CommentStatus>} */}
         </>
-      
+
     )
 }
 

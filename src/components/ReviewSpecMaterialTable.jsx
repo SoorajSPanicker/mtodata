@@ -171,7 +171,10 @@ function ReviewSpecMaterialTable({ specsizeDetails, specmatDetails, spectempDeta
                   <th>Material Long Descr</th>
                   <th>MDS</th>
                   <th>Rating</th>
-                  <th>SCHD.</th>
+                  <th>Wall Thickness S1</th>
+                  <th>Wall Thickness S2</th>
+                  <th>Schedule S1</th>
+                  <th>Schedule S2</th>
                   <th>Notes</th>
                   <th>Remarks</th>
                   <th className="tableActionCell">
@@ -193,7 +196,10 @@ function ReviewSpecMaterialTable({ specsizeDetails, specmatDetails, spectempDeta
                     <td>{row.materialLgDescrip}</td>
                     <td>{row.MDS}</td>
                     <td>{row.rating}</td>
-                    <td>{row.SCHD}</td>
+                    <td>{row.thkSizeOne}</td>
+                    <td>{row.thkSizeTwo}</td>
+                    <td>{row.schdSizeOne}</td>
+                    <td>{row.schdSizeTwo}</td>
                     <td>{row.Notes}</td>
                     <td>{row.remarks}</td>
                     <td>

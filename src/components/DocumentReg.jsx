@@ -73,13 +73,13 @@ function DocumentReg() {
             path: file.path
           };
           console.log(data);
-          setDocumentFiles('')
-        window.api.send('dwg-svg-converter',data)
-        window.api.receive('dxf-conversion-success', (data) => {
-            console.log(data);
-            setConvertedFileName(data.convertedFileName);
-            setConvertedFilePath(data.convertedFilePath);          
-        });
+        //   setDocumentFiles('')
+        // window.api.send('dwg-svg-converter',data)
+        // window.api.receive('dxf-conversion-success', (data) => {
+        //     console.log(data);
+        //     setConvertedFileName(data.convertedFileName);
+        //     setConvertedFilePath(data.convertedFilePath);          
+        // });
     };
 
     const handleRegisterDocument = (e) => {

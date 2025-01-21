@@ -2261,10 +2261,19 @@ function Home() {
   })
 
   useEffect(() => {
+    console.log(branchTableDetails);
+
+  }, [branchTableDetails])
+
+  useEffect(() => {
     window.api.receive('branch-table-data-response', (data) => {
       setBranchTableDataDetails(data);
     })
   })
+  useEffect(() => {
+    console.log(branchTableDataDetails);
+
+  }, [branchTableDataDetails])
 
   useEffect(() => {
     window.api.receive('specsize-table-response', (data) => {

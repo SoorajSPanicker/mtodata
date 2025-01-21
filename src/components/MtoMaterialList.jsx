@@ -175,6 +175,12 @@ function MtoMaterialList({ matdataarea }) {
                                 <th>Material</th>
                                 <th>Sizeone</th>
                                 <th>Sizetwo</th>
+                                <th>Wall Thickness S1</th>
+                                <th>Wall Thickness S2</th>
+                                <th>Schedule S1</th>
+                                <th>Schedule S2</th>
+                                <th>Spec Size</th>
+                                <th>Length</th>
                                 <th>Qty</th>
                                 <th>Unit</th>
                                 <th>Unit_Weight</th>
@@ -221,6 +227,12 @@ function MtoMaterialList({ matdataarea }) {
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('Material', e.target.value)} type="text" value={editedLineData.Material || ''} /> : mat.Material}</td>
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('Sizeone', e.target.value)} type="text" value={editedLineData.Sizeone || ''} /> : mat.Sizeone}</td>
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('Sizetwo', e.target.value)} type="text" value={editedLineData.Sizetwo || ''} /> : mat.Sizetwo}</td>
+                                    <td>{editedRowIndex === index ? <input onChange={e => handleChange('thkSizeOne', e.target.value)} type="text" value={editedLineData.thkSizeOne || ''} /> : mat.thkSizeOne}</td>
+                                    <td>{editedRowIndex === index ? <input onChange={e => handleChange('thkSizeTwo', e.target.value)} type="text" value={editedLineData.thkSizeTwo || ''} /> : mat.thkSizeTwo}</td>
+                                    <td>{editedRowIndex === index ? <input onChange={e => handleChange('schdSizeOne', e.target.value)} type="text" value={editedLineData.schdSizeOne || ''} /> : mat.schdSizeOne}</td>
+                                    <td>{editedRowIndex === index ? <input onChange={e => handleChange('schdSizeTwo', e.target.value)} type="text" value={editedLineData.schdSizeTwo || ''} /> : mat.schdSizeTwo}</td>
+                                    <td>{editedRowIndex === index ? <input onChange={e => handleChange('SpecSize', e.target.value)} type="text" value={editedLineData.SpecSize || ''} /> : mat.SpecSize}</td>
+                                    <td>{editedRowIndex === index ? <input onChange={e => handleChange('Length', e.target.value)} type="text" value={editedLineData.Length || ''} /> : mat.Length}</td>
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('Qty', e.target.value)} type="text" value={editedLineData.Qty || ''} /> : mat.Qty}</td>
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('Unit', e.target.value)} type="text" value={editedLineData.Unit || ''} /> : mat.Unit}</td>
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('Unit_Weight', e.target.value)} type="text" value={editedLineData.Unit_Weight || ''} /> : mat.Unit_Weight}</td>

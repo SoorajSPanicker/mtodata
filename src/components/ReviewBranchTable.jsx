@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 
 function ReviewBranchTable({branchTableDetails,branchTableDataDetails}) {
@@ -17,6 +17,15 @@ function ReviewBranchTable({branchTableDetails,branchTableDataDetails}) {
       convertOriginal();
     }
   };
+  useEffect(()=>{
+console.log(branchTableDetails);
+
+  },[branchTableDetails])
+
+  useEffect(()=>{
+console.log(branchTableDataDetails);
+
+  },[branchTableDataDetails])
 
   const handleOpenBranchTable = (branchName, branchId) => {
     setBranchName(branchName)
