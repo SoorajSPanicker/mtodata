@@ -2867,20 +2867,251 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     // };
 
 
+    // const startDrawingHigh = () => {
+    //     if (!drawingLayerRef.current) {
+    //         drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //     }
+    //     drawingLayerRef.current.activate();
+
+    //     const tool = new paper.Tool();
+    //     let startPoint;
+    //     let currentRectangle = null;
+    //     let isDrawing = false;
+    //     let isResizing = false;
+    //     let selectedHandle = null;
+    //     let handles = [];
+    //     let selectedRectangles = new Set();
+
+    //     const highlightSelected = (rectangle, isSelected) => {
+    //         if (isSelected) {
+    //             rectangle.strokeColor = 'blue';
+    //             rectangle.strokeWidth = 3 / paper.view.zoom;
+    //         } else {
+    //             rectangle.strokeColor = 'red';
+    //             rectangle.strokeWidth = 2 / paper.view.zoom;
+    //         }
+    //     };
+
+    //     const createHandles = (rectangle) => {
+    //         handles.forEach(handle => handle.remove());
+    //         handles = [];
+
+    //         const segments = rectangle.segments;
+    //         const handleSize = 8 / paper.view.zoom;
+
+    //         segments.forEach((segment, index) => {
+    //             const handle = new paper.Path.Circle({
+    //                 center: segment.point,
+    //                 radius: handleSize,
+    //                 fillColor: 'white',
+    //                 strokeColor: 'blue',
+    //                 strokeWidth: 1 / paper.view.zoom,
+    //                 data: { index: index, type: 'handle' }
+    //             });
+    //             handles.push(handle);
+    //         });
+
+    //         for (let i = 0; i < segments.length; i++) {
+    //             const nextIndex = (i + 1) % segments.length;
+    //             const midpoint = segments[i].point.add(segments[nextIndex].point).divide(2);
+    //             const handle = new paper.Path.Circle({
+    //                 center: midpoint,
+    //                 radius: handleSize,
+    //                 fillColor: 'white',
+    //                 strokeColor: 'blue',
+    //                 strokeWidth: 1 / paper.view.zoom,
+    //                 data: { index: i + segments.length, type: 'handle' }
+    //             });
+    //             handles.push(handle);
+    //         }
+    //     };
+
+    //     const updateHandlePositions = () => {
+    //         if (!currentRectangle) return;
+
+    //         const segments = currentRectangle.segments;
+    //         const cornerHandles = handles.slice(0, 4);
+    //         const midpointHandles = handles.slice(4);
+
+    //         cornerHandles.forEach((handle, index) => {
+    //             handle.position = segments[index].point;
+    //         });
+
+    //         midpointHandles.forEach((handle, index) => {
+    //             const startIndex = index;
+    //             const endIndex = (index + 1) % 4;
+    //             const midpoint = segments[startIndex].point.add(segments[endIndex].point).divide(2);
+    //             handle.position = midpoint;
+    //         });
+    //     };
+
+    //     const clearSelection = () => {
+    //         selectedRectangles.forEach(rect => {
+    //             highlightSelected(rect, false);
+    //         });
+    //         selectedRectangles.clear();
+    //         handles.forEach(handle => handle.remove());
+    //         handles = [];
+    //         currentRectangle = null;
+    //     };
+
+    //     tool.onMouseDown = function (event) {
+    //         if (isDrawing || isResizing) return;
+
+    //         const isCtrlPressed = event.modifiers.control || event.modifiers.meta;
+    //         const hitResult = paper.project.hitTest(event.point, {
+    //             tolerance: 8,
+    //             fill: true,
+    //             stroke: true
+    //         });
+
+    //         if (hitResult) {
+    //             if (hitResult.item.data.type === 'handle') {
+    //                 isResizing = true;
+    //                 selectedHandle = hitResult.item;
+    //                 return;
+    //             }
+
+    //             if (hitResult.item.data.type === 'rectangle') {
+    //                 // If Ctrl is not pressed, clear previous selection
+    //                 if (!isCtrlPressed) {
+    //                     clearSelection();
+    //                 }
+
+    //                 currentRectangle = hitResult.item;
+
+    //                 if (selectedRectangles.has(currentRectangle)) {
+    //                     // Deselect if already selected
+    //                     selectedRectangles.delete(currentRectangle);
+    //                     highlightSelected(currentRectangle, false);
+    //                     if (selectedRectangles.size === 0) {
+    //                         currentRectangle = null;
+    //                     }
+    //                 } else {
+    //                     // Select the rectangle
+    //                     selectedRectangles.add(currentRectangle);
+    //                     highlightSelected(currentRectangle, true);
+    //                     createHandles(currentRectangle);
+    //                 }
+    //                 return;
+    //             }
+    //         }
+
+    //         // Clicking on empty space
+    //         if (!isCtrlPressed) {
+    //             clearSelection();
+    //         }
+
+    //         // Start drawing new rectangle
+    //         isDrawing = true;
+    //         startPoint = event.point;
+    //         currentRectangle = new paper.Path.Rectangle({
+    //             from: startPoint,
+    //             to: event.point,
+    //             strokeColor: 'red',
+    //             strokeWidth: 2 / paper.view.zoom,
+    //             fillColor: new paper.Color(1, 0, 0, 0.3),
+    //             data: { type: 'rectangle' }
+    //         });
+    //     };
+
+    //     tool.onMouseDrag = function (event) {
+    //         if (isDrawing && currentRectangle) {
+    //             currentRectangle.remove();
+    //             currentRectangle = new paper.Path.Rectangle({
+    //                 from: startPoint,
+    //                 to: event.point,
+    //                 strokeColor: 'red',
+    //                 strokeWidth: 2 / paper.view.zoom,
+    //                 fillColor: new paper.Color(1, 0, 0, 0.3),
+    //                 data: { type: 'rectangle' }
+    //             });
+    //         } else if (isResizing && selectedHandle && currentRectangle) {
+    //             const handleIndex = selectedHandle.data.index;
+    //             const bounds = currentRectangle.bounds;
+    //             let newBounds = bounds.clone();
+
+    //             if (handleIndex < 4) {
+    //                 switch (handleIndex) {
+    //                     case 0: newBounds.topLeft = event.point; break;
+    //                     case 1: newBounds.topRight = event.point; break;
+    //                     case 2: newBounds.bottomRight = event.point; break;
+    //                     case 3: newBounds.bottomLeft = event.point; break;
+    //                 }
+    //             } else {
+    //                 const edgeIndex = handleIndex - 4;
+    //                 switch (edgeIndex) {
+    //                     case 0: newBounds.top = event.point.y; break;
+    //                     case 1: newBounds.right = event.point.x; break;
+    //                     case 2: newBounds.bottom = event.point.y; break;
+    //                     case 3: newBounds.left = event.point.x; break;
+    //                 }
+    //             }
+
+    //             currentRectangle.bounds = newBounds;
+    //             updateHandlePositions();
+    //         }
+    //     };
+
+    //     tool.onMouseUp = function (event) {
+    //         if (isDrawing) {
+    //             isDrawing = false;
+    //             if (currentRectangle) {
+    //                 // Keep the new rectangle red
+    //                 currentRectangle.strokeColor = 'red';
+    //                 currentRectangle.strokeWidth = 2 / paper.view.zoom;
+    //                 currentRectangle = null;
+    //             }
+    //         }
+    //         isResizing = false;
+    //         selectedHandle = null;
+    //     };
+
+    //     paper.view.onScale = () => {
+    //         handles.forEach(handle => {
+    //             handle.radius = 8 / paper.view.zoom;
+    //             handle.strokeWidth = 1 / paper.view.zoom;
+    //         });
+    //         paper.project.getItems({ class: paper.Path.Rectangle }).forEach(rect => {
+    //             rect.strokeWidth = selectedRectangles.has(rect) ? 3 / paper.view.zoom : 2 / paper.view.zoom;
+    //         });
+    //     };
+    // };
+
+    // const disablehighinteraction = () => {
+    //     if (paper.tool) {
+    //         paper.tool.remove();
+    //     }
+    //     if (drawingLayerRef.current) {
+    //         drawingLayerRef.current.remove();
+    //         drawingLayerRef.current = null;
+    //     }
+    // };
+
     const startDrawingHigh = () => {
+        // Create a new layer for highlights if it doesn't exist
         if (!drawingLayerRef.current) {
             drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
         }
         drawingLayerRef.current.activate();
 
         const tool = new paper.Tool();
-        let startPoint;
+        let startPoint = null;
         let currentRectangle = null;
         let isDrawing = false;
         let isResizing = false;
         let selectedHandle = null;
         let handles = [];
         let selectedRectangles = new Set();
+
+        // Prevent default right-click menu
+        const canvas = document.getElementById('canvas');
+        canvas.addEventListener('contextmenu', (e) => {
+            if (selectedRectangles.size > 1) {
+                e.preventDefault();
+                showContextMenu(e.clientX, e.clientY);
+            }
+        });
 
         const highlightSelected = (rectangle, isSelected) => {
             if (isSelected) {
@@ -2893,12 +3124,14 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
         };
 
         const createHandles = (rectangle) => {
+            // Remove existing handles
             handles.forEach(handle => handle.remove());
             handles = [];
 
             const segments = rectangle.segments;
             const handleSize = 8 / paper.view.zoom;
 
+            // Create corner handles
             segments.forEach((segment, index) => {
                 const handle = new paper.Path.Circle({
                     center: segment.point,
@@ -2911,6 +3144,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
                 handles.push(handle);
             });
 
+            // Create midpoint handles
             for (let i = 0; i < segments.length; i++) {
                 const nextIndex = (i + 1) % segments.length;
                 const midpoint = segments[i].point.add(segments[nextIndex].point).divide(2);
@@ -2924,6 +3158,104 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
                 });
                 handles.push(handle);
             }
+        };
+
+        tool.onMouseDown = (event) => {
+            const isCtrlPressed = event.modifiers.control || event.modifiers.meta;
+
+            if (event.event.button === 2) return; // Ignore right clicks
+
+            const hitResult = paper.project.hitTest(event.point, {
+                fill: true,
+                stroke: true,
+                handles: true,
+                tolerance: 8
+            });
+
+            if (hitResult && hitResult.item) {
+                if (hitResult.item.data && hitResult.item.data.type === 'handle') {
+                    isResizing = true;
+                    selectedHandle = hitResult.item;
+                } else if (hitResult.item.data && hitResult.item.data.type === 'rectangle') {
+                    if (!isCtrlPressed) {
+                        clearSelection();
+                    }
+                    currentRectangle = hitResult.item;
+                    selectedRectangles.add(currentRectangle);
+                    highlightSelected(currentRectangle, true);
+                    if (selectedRectangles.size === 1) {
+                        createHandles(currentRectangle);
+                    }
+                }
+            } else {
+                if (!isCtrlPressed) {
+                    clearSelection();
+                }
+                isDrawing = true;
+                startPoint = event.point;
+                currentRectangle = new paper.Path.Rectangle({
+                    from: startPoint,
+                    to: event.point,
+                    strokeColor: 'red',
+                    strokeWidth: 2 / paper.view.zoom,
+                    fillColor: new paper.Color(1, 0, 0, 0.3),
+                    data: { type: 'rectangle' }
+                });
+            }
+        };
+
+        tool.onMouseDrag = (event) => {
+            if (isDrawing && startPoint) {
+                if (currentRectangle) {
+                    currentRectangle.remove();
+                }
+                currentRectangle = new paper.Path.Rectangle({
+                    from: startPoint,
+                    to: event.point,
+                    strokeColor: 'red',
+                    strokeWidth: 2 / paper.view.zoom,
+                    fillColor: new paper.Color(1, 0, 0, 0.3),
+                    data: { type: 'rectangle' }
+                });
+            } else if (isResizing && selectedHandle && currentRectangle) {
+                const handleIndex = selectedHandle.data.index;
+                const bounds = currentRectangle.bounds;
+                let newBounds = bounds.clone();
+
+                if (handleIndex < 4) {
+                    // Corner handles
+                    switch (handleIndex) {
+                        case 0: newBounds.topLeft = event.point; break;
+                        case 1: newBounds.topRight = event.point; break;
+                        case 2: newBounds.bottomRight = event.point; break;
+                        case 3: newBounds.bottomLeft = event.point; break;
+                    }
+                } else {
+                    // Edge handles
+                    const edgeIndex = handleIndex - 4;
+                    switch (edgeIndex) {
+                        case 0: newBounds.top = event.point.y; break;
+                        case 1: newBounds.right = event.point.x; break;
+                        case 2: newBounds.bottom = event.point.y; break;
+                        case 3: newBounds.left = event.point.x; break;
+                    }
+                }
+                currentRectangle.bounds = newBounds;
+                updateHandlePositions();
+            }
+        };
+
+        tool.onMouseUp = (event) => {
+            if (isDrawing) {
+                isDrawing = false;
+                startPoint = null;
+                if (currentRectangle) {
+                    currentRectangle.data.type = 'rectangle';
+                    currentRectangle = null;
+                }
+            }
+            isResizing = false;
+            selectedHandle = null;
         };
 
         const updateHandlePositions = () => {
@@ -2955,125 +3287,49 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             currentRectangle = null;
         };
 
-        tool.onMouseDown = function (event) {
-            if (isDrawing || isResizing) return;
+        const showContextMenu = (x, y) => {
+            const menu = document.createElement('div');
+            menu.className = 'context-menu';
+            menu.style.position = 'absolute';
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+            menu.style.backgroundColor = 'white';
+            menu.style.color ='black'
+            menu.style.border = '1px solid #ccc';
+            menu.style.padding = '8px';
+            menu.style.borderRadius = '4px';
+            menu.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            menu.style.zIndex = '1000';
 
-            const isCtrlPressed = event.modifiers.control || event.modifiers.meta;
-            const hitResult = paper.project.hitTest(event.point, {
-                tolerance: 8,
-                fill: true,
-                stroke: true
-            });
+            const groupOption = document.createElement('div');
+            groupOption.textContent = 'Group markings';
+            groupOption.style.cursor = 'pointer';
+            groupOption.style.padding = '4px 8px';
+            groupOption.onclick = handleGroupMarkings;
 
-            if (hitResult) {
-                if (hitResult.item.data.type === 'handle') {
-                    isResizing = true;
-                    selectedHandle = hitResult.item;
-                    return;
+            menu.appendChild(groupOption);
+            document.body.appendChild(menu);
+
+            const closeMenu = (e) => {
+                if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('mousedown', closeMenu);
                 }
-
-                if (hitResult.item.data.type === 'rectangle') {
-                    // If Ctrl is not pressed, clear previous selection
-                    if (!isCtrlPressed) {
-                        clearSelection();
-                    }
-
-                    currentRectangle = hitResult.item;
-
-                    if (selectedRectangles.has(currentRectangle)) {
-                        // Deselect if already selected
-                        selectedRectangles.delete(currentRectangle);
-                        highlightSelected(currentRectangle, false);
-                        if (selectedRectangles.size === 0) {
-                            currentRectangle = null;
-                        }
-                    } else {
-                        // Select the rectangle
-                        selectedRectangles.add(currentRectangle);
-                        highlightSelected(currentRectangle, true);
-                        createHandles(currentRectangle);
-                    }
-                    return;
-                }
-            }
-
-            // Clicking on empty space
-            if (!isCtrlPressed) {
-                clearSelection();
-            }
-
-            // Start drawing new rectangle
-            isDrawing = true;
-            startPoint = event.point;
-            currentRectangle = new paper.Path.Rectangle({
-                from: startPoint,
-                to: event.point,
-                strokeColor: 'red',
-                strokeWidth: 2 / paper.view.zoom,
-                fillColor: new paper.Color(1, 0, 0, 0.3),
-                data: { type: 'rectangle' }
-            });
+            };
+            document.addEventListener('mousedown', closeMenu);
         };
 
-        tool.onMouseDrag = function (event) {
-            if (isDrawing && currentRectangle) {
-                currentRectangle.remove();
-                currentRectangle = new paper.Path.Rectangle({
-                    from: startPoint,
-                    to: event.point,
-                    strokeColor: 'red',
-                    strokeWidth: 2 / paper.view.zoom,
-                    fillColor: new paper.Color(1, 0, 0, 0.3),
-                    data: { type: 'rectangle' }
-                });
-            } else if (isResizing && selectedHandle && currentRectangle) {
-                const handleIndex = selectedHandle.data.index;
-                const bounds = currentRectangle.bounds;
-                let newBounds = bounds.clone();
-
-                if (handleIndex < 4) {
-                    switch (handleIndex) {
-                        case 0: newBounds.topLeft = event.point; break;
-                        case 1: newBounds.topRight = event.point; break;
-                        case 2: newBounds.bottomRight = event.point; break;
-                        case 3: newBounds.bottomLeft = event.point; break;
-                    }
-                } else {
-                    const edgeIndex = handleIndex - 4;
-                    switch (edgeIndex) {
-                        case 0: newBounds.top = event.point.y; break;
-                        case 1: newBounds.right = event.point.x; break;
-                        case 2: newBounds.bottom = event.point.y; break;
-                        case 3: newBounds.left = event.point.x; break;
-                    }
-                }
-
-                currentRectangle.bounds = newBounds;
-                updateHandlePositions();
-            }
+        const handleGroupMarkings = () => {
+            const selectedArray = Array.from(selectedRectangles);
+            console.log('Grouping rectangles:', selectedArray);
+            // Add your grouping logic here
         };
 
-        tool.onMouseUp = function (event) {
-            if (isDrawing) {
-                isDrawing = false;
-                if (currentRectangle) {
-                    // Keep the new rectangle red
-                    currentRectangle.strokeColor = 'red';
-                    currentRectangle.strokeWidth = 2 / paper.view.zoom;
-                    currentRectangle = null;
-                }
-            }
-            isResizing = false;
-            selectedHandle = null;
-        };
-
-        paper.view.onScale = () => {
+        paper.view.onFrame = () => {
+            // Update handle sizes on zoom
             handles.forEach(handle => {
                 handle.radius = 8 / paper.view.zoom;
                 handle.strokeWidth = 1 / paper.view.zoom;
-            });
-            paper.project.getItems({ class: paper.Path.Rectangle }).forEach(rect => {
-                rect.strokeWidth = selectedRectangles.has(rect) ? 3 / paper.view.zoom : 2 / paper.view.zoom;
             });
         };
     };
