@@ -210,6 +210,7 @@ function Home() {
   const [mtolinelist, setmtolinelist] = useState([])
   const [mtolinearea, setmtolinearea] = useState([])
   const [matdataarea, setmatdataarea] = useState([])
+  const [markdet, setmarkdet] = useState([])
 
 
   // useEffect(() => {
@@ -266,6 +267,21 @@ function Home() {
   //         .catch(error => console.error('Error updating usage:', error));
   //     }
   // }, []);
+
+  useEffect(() => {
+    window.api.receive('group-markings-saved', (data) => {
+        console.log("Group markings saved:", data);
+        setmarkdet(data);
+        setCustomAlert(true);
+        setModalMessage('Group markings saved successfully');
+    });
+}, []);
+
+useEffect(()=>{
+ console.log(markdet);
+ 
+},[markdet])
+
 
   useEffect(() => {
     window.api.receive('appValidity', (data) => {
@@ -3538,7 +3554,7 @@ function Home() {
 
 
               {
-                spidopen && <Spid allDocuments={allDocuments} openSpidCanvas={openSpidCanvas} alltags={alltags} svgcontent={svgcontent} allspids={allspids} allareas={allareas} setOpenSpidCanvas={setOpenSpidCanvas} setopenThreeCanvas={setopenThreeCanvas} setiRoamercanvas={setiRoamercanvas} setSpidOpen={setSpidOpen} allCommentStatus={allCommentStatus} allComments={allComments} tagdocsel={tagdocsel} setrightSideNavVisible={setrightSideNavVisible} setsvgcontent={setsvgcontent} />
+                spidopen && <Spid allDocuments={allDocuments} openSpidCanvas={openSpidCanvas} alltags={alltags} svgcontent={svgcontent} allspids={allspids} allareas={allareas} setOpenSpidCanvas={setOpenSpidCanvas} setopenThreeCanvas={setopenThreeCanvas} setiRoamercanvas={setiRoamercanvas} setSpidOpen={setSpidOpen} allCommentStatus={allCommentStatus} allComments={allComments} tagdocsel={tagdocsel} setrightSideNavVisible={setrightSideNavVisible} setsvgcontent={setsvgcontent} markdet={markdet} />
               }
               {
                 assignTagUnassigned && <AssignUnassignedTag assignTagUnassigned={assignTagUnassigned} onClose={handleCloseAreaDialog} setselectunassigned={setselectunassigned} selectAllUnassignedModels={selectAllUnassignedModels} setselectAllUnassignedModels={setselectAllUnassignedModels} unassignedmodel={unassignedmodel} setunassignedmodel={setunassignedmodel} unassignedCheckboxStates={unassignedCheckboxStates} setUnassignedCheckboxStates={setUnassignedCheckboxStates} />

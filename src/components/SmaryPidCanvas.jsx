@@ -7,8 +7,9 @@ import './spidCanvas.css'
 import Alert from './Alert';
 import * as XLSX from 'xlsx';
 import Comment from './Comment';
+import { v4 as uuidv4 } from 'uuid';
 
-function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible }) {
+function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible ,markdet }) {
     const canvasRef = useRef(null);
     let canvas = canvasRef.current;
     const viewRef = useRef(null);
@@ -106,6 +107,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     const [istagtabdet, settagtabdet] = useState(false)
     const [istagtypedet, settagtypedet] = useState(false)
     const [pidTagId, setPidTagId] = useState('');
+    
     useEffect(() => {
         console.log(flagsconn);
     }, [flagsconn])
@@ -2329,6 +2331,48 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
 
     }
 
+    const recreateGroupMarkings = (savedData) => {
+        if (!drawingLayerRef.current) {
+            drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+        }
+        drawingLayerRef.current.activate();
+    
+        // Now iterate directly over savedData since it's an array of rectangles
+        savedData.forEach(rectData => {
+            // Calculate current dimensions based on canvas size using X and Y instead of x and y
+            const currentX = parseFloat(rectData.X) * paper.view.size.width;
+            const currentY = parseFloat(rectData.Y) * paper.view.size.height;
+            const currentWidth = parseFloat(rectData.width) * paper.view.size.width;
+            const currentHeight = parseFloat(rectData.height) * paper.view.size.height;
+    
+            // Create new rectangle with calculated dimensions
+            const rectangle = new paper.Path.Rectangle({
+                point: [currentX, currentY],
+                size: [currentWidth, currentHeight],
+                strokeColor: rectData.strokeColor,
+                fillColor: new paper.Color(rectData.fillColor),
+                strokeWidth: parseFloat(rectData.strokeWidth) / paper.view.zoom,
+                data: { 
+                    type: 'rectangle',
+                    markId: rectData.markId,
+                    rectId: rectData.rectId
+                }
+            });
+    
+            drawingLayerRef.current.addChild(rectangle);
+        });
+    
+        paper.view.draw();
+    };
+    useEffect(() => {
+        console.log(markdet);
+
+    }, [markdet])
+
+    const handleshowmarkup = () => {
+        recreateGroupMarkings(markdet);
+    }
+
     const loadAndDrawRectangle = (savedDataArray) => {
         // drawingLayerRef.current = new paper.Layer({ name: 'drawingLayer' });
         if (!Array.isArray(savedDataArray) || savedDataArray.length === 0 || !drawingLayerRef.current) return;
@@ -3088,6 +3132,12 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     //     }
     // };
 
+    const generateCustomID = (prefix) => {
+        const uuid = uuidv4();
+        const uniqueID = prefix + uuid.replace(/-/g, '').slice(0, 6);
+        return uniqueID;
+    };
+
     const startDrawingHigh = () => {
         // Create a new layer for highlights if it doesn't exist
         if (!drawingLayerRef.current) {
@@ -3294,7 +3344,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             menu.style.left = x + 'px';
             menu.style.top = y + 'px';
             menu.style.backgroundColor = 'white';
-            menu.style.color ='black'
+            menu.style.color = 'black'
             menu.style.border = '1px solid #ccc';
             menu.style.padding = '8px';
             menu.style.borderRadius = '4px';
@@ -3320,9 +3370,53 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
         };
 
         const handleGroupMarkings = () => {
+            // const selectedArray = Array.from(selectedRectangles);
+            // console.log('Grouping rectangles:', selectedArray);
+            // // Add your grouping logic here
             const selectedArray = Array.from(selectedRectangles);
-            console.log('Grouping rectangles:', selectedArray);
-            // Add your grouping logic here
+
+            // Create an array to store rectangle data
+            const rectangleData = selectedArray.map(rect => {
+                const bounds = rect.bounds;
+                // Generate a unique rectId for each rectangle
+                const rectId = generateCustomID('Rect');
+                // Store the rectangle data relative to canvas size
+                const data = {
+                    rectId,
+                    // Store normalized coordinates (0-1 range)
+                    x: bounds.x / paper.view.size.width,
+                    y: bounds.y / paper.view.size.height,
+                    width: bounds.width / paper.view.size.width,
+                    height: bounds.height / paper.view.size.height,
+                    // Store absolute coordinates
+                    absoluteX: bounds.x,
+                    absoluteY: bounds.y,
+                    absoluteWidth: bounds.width,
+                    absoluteHeight: bounds.height,
+                    // Store current zoom level for reference
+                    zoomLevel: paper.view.zoom,
+                    // Store any additional data needed
+                    fillColor: rect.fillColor.toCSS(true),
+                    strokeColor: rect.strokeColor.toCSS(true),
+                    strokeWidth: rect.strokeWidth
+                };
+
+                return data;
+            });
+            console.log(rectangleData);
+
+
+            // Send data to backend
+            window.api.send('save-group-markings', rectangleData);
+            // groupId: Date.now(), // or any unique identifier
+            // docId: sindocid // or any other relevant document identifier
+
+            if (drawingLayerRef.current !== null) {
+                drawingLayerRef.current.remove()
+            }
+            // Close the context menu
+            const menu = document.querySelector('.context-menu');
+            if (menu) menu.remove();
         };
 
         paper.view.onFrame = () => {
@@ -3333,6 +3427,9 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             });
         };
     };
+
+   
+   
 
     const disablehighinteraction = () => {
         if (paper.tool) {
@@ -3477,6 +3574,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
                     <i className="fa-regular fa-window-restore svgElem button" title='Save area' onClick={handlesavearea}></i>
                     <i className="fa-solid fa-layer-group svgElem button" title='Show area' onClick={handleshowarea}></i>
                     <i className="fa-solid fa-highlighter svgElem button" title='Draw highlight' onClick={handledrawhigh}></i>
+                    <i className="fa-solid fa-layer-group svgElem button" title='Show markup' onClick={handleshowmarkup}></i>
                 </div>
                 }
 

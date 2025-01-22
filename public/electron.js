@@ -263,6 +263,9 @@ function createDatabase() {
                 + 'testMedium TEXT, testMediumPhase TEXT, massFlow REAL, volFlow REAL, density REAL, velocity REAL, paintSystem TEXT, ndtGroup TEXT,'
                 + 'chemCleaning TEXT, pwht TEXT, sysname TEXT, PRIMARY KEY(tag))')
             db.run('CREATE TABLE IF NOT EXISTS MtoSystemTable(mtosysId TEXT PRIMARY KEY, sys TEXT, name TEXT)')
+
+            // ------------------------- P&ID MTO--------------------------------------
+            db.run('CREATE TABLE IF NOT EXISTS MarkingDetailsTable(markId TEXT, rectId TEXT, X TEXT, Y TEXT, width TEXT, height TEXT, absoluteX TEXT, absoluteY TEXT, absoluteWidth TEXT, absoluteHeight TEXT, zoomLevel TEXT, fillColor TEXT, strokeColor TEXT, strokeWidth TEXT, PRIMARY KEY(rectId))')
         }
     });
     databasePath = path.join(selectedFolderPath, 'database.db');
@@ -1388,6 +1391,15 @@ app.whenReady().then(() => {
 
                         console.log('Data in the MtoMaterialListTable table:', rows);
                         mainWindow.webContents.send('material-data-save', rows);
+                    });
+                    db.all("SELECT * FROM MarkingDetailsTable", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from Tree table:', err.message);
+                            return;
+                        }
+        
+                        console.log('Data in the MarkingDetailsTable table:', rows);
+                        mainWindow.webContents.send('group-markings-saved', rows);
                     });
 
                 });
@@ -10673,6 +10685,49 @@ app.whenReady().then(() => {
             });
         });
     });
+
+    ipcMain.on('save-group-markings', (event, datas) => {
+
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            const markId = generateCustomID('Mark');
+            datas.forEach(data => {
+                projectDb.run(
+                    'INSERT INTO MarkingDetailsTable (markId , rectId, X, Y, width, height, absoluteX, absoluteY, absoluteWidth, absoluteHeight, zoomLevel, fillColor, strokeColor, strokeWidth  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [markId, data.rectId, data.x, data.y, data.width, data.height, data.absoluteX, data.absoluteY, data.absoluteWidth, data.absoluteHeight, data.zoomLevel, data.fillColor, data.strokeColor, data.strokeWidth],
+                    function (err) {
+                        if (err) {
+                            console.error('Error inserting into MarkingDetailsTable:', err.message);
+                            return;
+                        }
+                        console.log(`Row inserted with X: ${data.X}`);
+                    }
+
+                );
+            })
+
+            projectDb.all("SELECT * FROM MarkingDetailsTable", (err, rows) => {
+                if (err) {
+                    console.error('Error fetching data from Tree table:', err.message);
+                    return;
+                }
+
+                console.log('Data in the MarkingDetailsTable table:', rows);
+                mainWindow.webContents.send('group-markings-saved', rows);
+            });
+        })
+
+    })
 
 
 });

@@ -6,7 +6,7 @@ import Alert from './Alert';
 import DeleteConfirm from './DeleteConfirm';
 
 
-function Spid({allDocuments,openSpidCanvas,setOpenSpidCanvas,alltags,allspids,svgcontent,allareas,setopenThreeCanvas,setiRoamercanvas,setSpidOpen,allCommentStatus,allComments,tagdocsel,setsvgcontent}) {
+function Spid({allDocuments,openSpidCanvas,setOpenSpidCanvas,alltags,allspids,svgcontent,allareas,setopenThreeCanvas,setiRoamercanvas,setSpidOpen,allCommentStatus,allComments,tagdocsel,setsvgcontent,markdet}) {
   const [openRegisterDocument,setOpenRegisterDocument] = useState(false)
   const [documentnumber,setDocumentNumber] = useState('')
   
@@ -54,7 +54,11 @@ function Spid({allDocuments,openSpidCanvas,setOpenSpidCanvas,alltags,allspids,sv
 
     });
   }, [])
- 
+
+  useEffect(()=>{
+    console.log(markdet);
+    
+   },[markdet])
 
   const onCloseRegister=()=>{
     setOpenRegisterDocument(false);
@@ -145,7 +149,7 @@ useEffect(() => {
   return (
     <div style={{zIndex:'1',position:'absolute', width:'100%',height:'90vh',backgroundColor:'#33334c',color:'white'}}>
       {
-        openSpidCanvas ? (<Canvas alltags={alltags} openSpidCanvas={openSpidCanvas} svgcontent={svgcontent} setsvgcontent={setsvgcontent} allspids={allspids}  mascontent={mascontent}  allareas={allareas} sindocid={sindocid} setopenThreeCanvas={setopenThreeCanvas} setiRoamercanvas ={setiRoamercanvas} setOpenSpidCanvas={setOpenSpidCanvas} setSpidOpen={setSpidOpen} allCommentStatus={allCommentStatus} allComments={allComments} tagdocsel={tagdocsel}/>          
+        openSpidCanvas ? (<Canvas alltags={alltags} openSpidCanvas={openSpidCanvas} svgcontent={svgcontent} setsvgcontent={setsvgcontent} allspids={allspids}  mascontent={mascontent}  allareas={allareas} sindocid={sindocid} setopenThreeCanvas={setopenThreeCanvas} setiRoamercanvas ={setiRoamercanvas} setOpenSpidCanvas={setOpenSpidCanvas} setSpidOpen={setSpidOpen} allCommentStatus={allCommentStatus} allComments={allComments} tagdocsel={tagdocsel} markdet={markdet}/>          
         ):(     <div>
           <div className="head" style={{display:'flex' , justifyContent:'space-between', alignItems:'center',padding:'7px'}}>
           <h3 style={{fontWeight:'bold'}}>Smart P&IDs</h3>
