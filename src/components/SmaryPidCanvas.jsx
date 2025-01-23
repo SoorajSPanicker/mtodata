@@ -235,12 +235,30 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             drawsavedarea();
         }
     }, [masdoc]);
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        paper.setup(canvas);
+
+        // Add zoom handler after setup
+        paper.view.onZoom = function (event) {
+            if (drawingLayerRef.current) {
+                drawingLayerRef.current.children.forEach(child => {
+                    if (child.data && child.data.type === 'rectangle') {
+                        child.strokeWidth = (child.strokeWidth * child.data.originalZoom) / paper.view.zoom;
+                    }
+                });
+            }
+        };
+    }, []);
 
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
         paper.setup(canvas);
+
 
         if (conndoc) {
             paper.project.clear();
@@ -2228,67 +2246,106 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     }, [allowredrect])
 
 
+    // const startDrawingRectangles = () => {
+    //     console.log(allowredrect);
+    //     if (allowredrect == true) {
+    //         console.log(tagdocsel);
+    //         for (let i = 0; i < tagdocsel.length; i++) {
+    //             paper.project.getItems({ class: paper.Path, }).forEach(item => {
+    //                 if (tagdocsel[i] == item._id) {
+    //                     item.selected = true
+    //                 }
+    //             });
+    //         }
+
+    //         drawingLayerRef.current = new paper.Layer({ name: 'drawingLayer' });
+    //         drawingLayerRef.current.activate();
+    //         const tool = new paper.Tool();
+    //         let startPoint;
+    //         let hasDragged = false;
+
+    //         tool.onMouseDown = function (event) {
+    //             startPoint = event.point;
+    //             if (currentRectangleRef.current) {
+    //                 currentRectangleRef.current.remove();
+    //             }
+    //             setRectangles({});
+    //             hasDragged = false;
+    //         };
+
+    //         tool.onMouseDrag = function (event) {
+    //             if (currentRectangleRef.current) {
+    //                 currentRectangleRef.current.remove();
+    //             }
+
+    //             const rectangle = new paper.Path.Rectangle(startPoint, event.point);
+    //             rectangle.strokeColor = 'red';
+    //             rectangle.fillColor = new paper.Color(1, 0, 0, 0.3);
+    //             rectangle.strokeWidth = 2 / paper.view.zoom;
+
+    //             drawingLayerRef.current.addChild(rectangle);
+    //             currentRectangleRef.current = rectangle;
+    //             hasDragged = true;
+    //         };
+
+    //         tool.onMouseUp = function (event) {
+    //             if (currentRectangleRef.current) {
+    //                 if (hasDragged) {
+    //                     const bounds = currentRectangleRef.current.bounds;
+    //                     setRectangles({
+    //                         topLeft: bounds.topLeft,
+    //                         bottomRight: bounds.bottomRight,
+    //                         x: bounds.topLeft.x,
+    //                         y: bounds.topLeft.y,
+    //                         width: bounds.width,
+    //                         height: bounds.height
+    //                     });
+    //                 } else {
+    //                     // Mouse was clicked without dragging, clear the rectangles
+    //                     setRectangles({});
+    //                 }
+    //             }
+    //         };
+    //     }
+    // };
+
     const startDrawingRectangles = () => {
-        console.log(allowredrect);
-        if (allowredrect == true) {
-            console.log(tagdocsel);
-            for (let i = 0; i < tagdocsel.length; i++) {
-                paper.project.getItems({ class: paper.Path, }).forEach(item => {
-                    if (tagdocsel[i] == item._id) {
-                        item.selected = true
-                    }
-                });
+        if (!drawingLayerRef.current) {
+            drawingLayerRef.current = new paper.Layer({ name: 'drawingLayer' });
+        }
+
+        const tool = new paper.Tool();
+        let startPoint = null;
+        let currentRectangle = null;
+
+        tool.onMouseDown = (event) => {
+            startPoint = event.point;
+            currentRectangle = null;
+        };
+
+        tool.onMouseDrag = (event) => {
+            if (currentRectangle) {
+                currentRectangle.remove();
             }
 
-            drawingLayerRef.current = new paper.Layer({ name: 'drawingLayer' });
-            drawingLayerRef.current.activate();
-            const tool = new paper.Tool();
-            let startPoint;
-            let hasDragged = false;
+            currentRectangle = new paper.Path.Rectangle({
+                from: startPoint,
+                to: event.point,
+                strokeColor: 'red',
+                fillColor: new paper.Color(1, 0, 0, 0.3),
+                strokeWidth: 2 / paper.view.zoom // Scale stroke width with zoom
+            });
 
-            tool.onMouseDown = function (event) {
-                startPoint = event.point;
-                if (currentRectangleRef.current) {
-                    currentRectangleRef.current.remove();
-                }
-                setRectangles({});
-                hasDragged = false;
-            };
+            drawingLayerRef.current.addChild(currentRectangle);
+        };
 
-            tool.onMouseDrag = function (event) {
-                if (currentRectangleRef.current) {
-                    currentRectangleRef.current.remove();
-                }
-
-                const rectangle = new paper.Path.Rectangle(startPoint, event.point);
-                rectangle.strokeColor = 'red';
-                rectangle.fillColor = new paper.Color(1, 0, 0, 0.3);
-                rectangle.strokeWidth = 2 / paper.view.zoom;
-
-                drawingLayerRef.current.addChild(rectangle);
-                currentRectangleRef.current = rectangle;
-                hasDragged = true;
-            };
-
-            tool.onMouseUp = function (event) {
-                if (currentRectangleRef.current) {
-                    if (hasDragged) {
-                        const bounds = currentRectangleRef.current.bounds;
-                        setRectangles({
-                            topLeft: bounds.topLeft,
-                            bottomRight: bounds.bottomRight,
-                            x: bounds.topLeft.x,
-                            y: bounds.topLeft.y,
-                            width: bounds.width,
-                            height: bounds.height
-                        });
-                    } else {
-                        // Mouse was clicked without dragging, clear the rectangles
-                        setRectangles({});
-                    }
-                }
-            };
-        }
+        tool.onMouseUp = () => {
+            if (currentRectangle) {
+                currentRectangle.data.type = 'rectangle';
+                currentRectangle.data.originalZoom = paper.view.zoom;
+                currentRectangle = null;
+            }
+        };
     };
 
     const handlesavelayer = async (e) => {
@@ -2408,56 +2465,94 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     // };
 
 
+    // const recreateGroupMarkings = (savedData) => {
+    //     if (!drawingLayerRef.current) {
+    //         drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //     }
+    //     drawingLayerRef.current.activate();
+
+    //     savedData.forEach(rectData => {
+    //         // Parse serialized data
+    //         const projectCoords = JSON.parse(rectData.projectCoords);
+    //         const viewState = JSON.parse(rectData.viewState);
+
+    //         // Create rectangle using project coordinates
+    //         const topLeft = new paper.Point(
+    //             projectCoords.x,
+    //             projectCoords.y
+    //         );
+
+    //         // Determine fill color with transparency for reddish shades
+    //         const fillColor = new paper.Color(rectData.fillColor);
+    //         if (fillColor.red > 0.8 && fillColor.green < 0.2 && fillColor.blue < 0.2) {
+    //             fillColor.alpha = 0.5; // Set transparency for reddish colors
+    //         }
+
+    //         const rectangle = new paper.Path.Rectangle({
+    //             point: topLeft,
+    //             size: new paper.Size(
+    //                 projectCoords.width,
+    //                 projectCoords.height
+    //             ),
+    //             strokeColor: rectData.strokeColor,
+    //             fillColor: fillColor, // Use the adjusted fill color
+    //             strokeWidth: rectData.strokeWidth * paper.view.zoom, // Scale stroke width
+    //             data: {
+    //                 type: 'rectangle',
+    //                 markId: rectData.markId,
+    //                 rectId: rectData.rectId,
+    //                 originalZoom: viewState.zoom // Use original zoom from parsed data
+    //             }
+    //         });
+
+    //         // Ensure no blue highlight appears on selection
+    //         rectangle.selected = false;
+
+    //         drawingLayerRef.current.addChild(rectangle);
+    //     });
+
+    //     paper.view.draw();
+    // };
+
     const recreateGroupMarkings = (savedData) => {
         if (!drawingLayerRef.current) {
             drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
         }
+        drawingLayerRef.current.removeChildren();
         drawingLayerRef.current.activate();
 
         savedData.forEach(rectData => {
-            // Parse serialized data
-            const projectCoords = JSON.parse(rectData.projectCoords);
-            const viewState = JSON.parse(rectData.viewState);
+            try {
+                const projectCoords = JSON.parse(rectData.projectCoords);
+                const viewState = JSON.parse(rectData.viewState);
 
-            // Create rectangle using project coordinates
-            const topLeft = new paper.Point(
-                projectCoords.x,
-                projectCoords.y
-            );
+                // Parse Point arrays correctly
+                const topLeft = new paper.Point(projectCoords.topLeft[1], projectCoords.topLeft[2]);
+                const bottomRight = new paper.Point(projectCoords.bottomRight[1], projectCoords.bottomRight[2]);
 
-            // Determine fill color with transparency for reddish shades
-            const fillColor = new paper.Color(rectData.fillColor);
-            if (fillColor.red > 0.8 && fillColor.green < 0.2 && fillColor.blue < 0.2) {
-                fillColor.alpha = 0.5; // Set transparency for reddish colors
+                const rectangle = new paper.Path.Rectangle({
+                    from: topLeft,
+                    to: bottomRight,
+                    strokeColor: rectData.strokeColor,
+                    fillColor: new paper.Color(rectData.fillColor).multiply(0.5),
+                    strokeWidth: rectData.strokeWidth / paper.view.zoom,
+                    data: {
+                        type: 'rectangle',
+                        markId: rectData.markId,
+                        rectId: rectData.rectId,
+                        originalZoom: viewState.zoom
+                    }
+                });
+
+                rectangle.strokeWidth = (rectData.strokeWidth / viewState.zoom) * paper.view.zoom;
+                drawingLayerRef.current.addChild(rectangle);
+            } catch (error) {
+                console.error('Error recreating rectangle:', error);
             }
-
-            const rectangle = new paper.Path.Rectangle({
-                point: topLeft,
-                size: new paper.Size(
-                    projectCoords.width,
-                    projectCoords.height
-                ),
-                strokeColor: rectData.strokeColor,
-                fillColor: fillColor, // Use the adjusted fill color
-                strokeWidth: rectData.strokeWidth * paper.view.zoom, // Scale stroke width
-                data: {
-                    type: 'rectangle',
-                    markId: rectData.markId,
-                    rectId: rectData.rectId,
-                    originalZoom: viewState.zoom // Use original zoom from parsed data
-                }
-            });
-
-            // Ensure no blue highlight appears on selection
-            rectangle.selected = false;
-
-            drawingLayerRef.current.addChild(rectangle);
         });
 
         paper.view.draw();
     };
-
-
     useEffect(() => {
         console.log(markdet);
 
@@ -3445,13 +3540,25 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             menu.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
             menu.style.zIndex = '1000';
 
+            // Option 1: Group Markings
             const groupOption = document.createElement('div');
             groupOption.textContent = 'Group markings';
             groupOption.style.cursor = 'pointer';
             groupOption.style.padding = '4px 8px';
             groupOption.onclick = handleGroupMarkings;
 
+            // Option 2: Add MTO
+            const addMTOOption = document.createElement('div');
+            addMTOOption.textContent = 'Add MTO';
+            addMTOOption.style.cursor = 'pointer';
+            addMTOOption.style.padding = '4px 8px';
+            addMTOOption.onclick = () => {
+                console.log('Add MTO option clicked');
+                // Add your specific functionality for "Add MTO" here
+            };
+
             menu.appendChild(groupOption);
+            menu.appendChild(addMTOOption);
             document.body.appendChild(menu);
 
             const closeMenu = (e) => {
@@ -3514,52 +3621,92 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
         // };
 
 
+        // const handleGroupMarkings = () => {
+        //     const selectedArray = Array.from(selectedRectangles);
+
+        //     const rectangleData = selectedArray.map(rect => {
+        //         const bounds = rect.bounds;
+        //         const rectId = generateCustomID('Rect');
+
+        //         // Convert bounds to project coordinates
+        //         const topLeft = paper.view.viewToProject(bounds.topLeft);
+        //         const bottomRight = paper.view.viewToProject(bounds.bottomRight);
+
+        //         const data = {
+        //             rectId,
+        //             projectCoords: JSON.stringify({
+        //                 x: topLeft.x,
+        //                 y: topLeft.y,
+        //                 width: bottomRight.x - topLeft.x,
+        //                 height: bottomRight.y - topLeft.y
+        //             }),
+        //             viewState: JSON.stringify({
+        //                 zoom: paper.view.zoom,
+        //                 center: {
+        //                     x: paper.view.center.x,
+        //                     y: paper.view.center.y
+        //                 }
+        //             }),
+        //             fillColor: rect.fillColor.toCSS(true),
+        //             strokeColor: rect.strokeColor.toCSS(true),
+        //             strokeWidth: rect.strokeWidth / paper.view.zoom
+        //         };
+
+        //         return data;
+        //     });
+
+        //     console.log(rectangleData);
+        //     window.api.send('save-group-markings', rectangleData);
+
+        //     // if (drawingLayerRef.current !== null) {
+        //     //     drawingLayerRef.current.remove();
+        //     // }
+
+        //     const menu = document.querySelector('.context-menu');
+        //     if (menu) menu.remove();
+        //     setenablehigh(false)
+        // };
+
         const handleGroupMarkings = () => {
             const selectedArray = Array.from(selectedRectangles);
 
             const rectangleData = selectedArray.map(rect => {
-                const bounds = rect.bounds;
                 const rectId = generateCustomID('Rect');
 
-                // Convert bounds to project coordinates
-                const topLeft = paper.view.viewToProject(bounds.topLeft);
-                const bottomRight = paper.view.viewToProject(bounds.bottomRight);
+                // Get the rectangle bounds in project coordinates
+                const bounds = rect.bounds;
+                const projectTopLeft = paper.view.projectToView(bounds.topLeft);
+                const projectBottomRight = paper.view.projectToView(bounds.bottomRight);
 
+                // Store both project and view coordinates
                 const data = {
                     rectId,
+                    // Store original project coordinates
                     projectCoords: JSON.stringify({
-                        x: topLeft.x,
-                        y: topLeft.y,
-                        width: bottomRight.x - topLeft.x,
-                        height: bottomRight.y - topLeft.y
+                        topLeft: bounds.topLeft,
+                        bottomRight: bounds.bottomRight,
+                        width: bounds.width,
+                        height: bounds.height
                     }),
+                    // Store current view state
                     viewState: JSON.stringify({
                         zoom: paper.view.zoom,
-                        center: {
-                            x: paper.view.center.x,
-                            y: paper.view.center.y
-                        }
+                        center: paper.view.center,
+                        matrix: paper.view.matrix.values // Store complete transformation matrix
                     }),
                     fillColor: rect.fillColor.toCSS(true),
                     strokeColor: rect.strokeColor.toCSS(true),
-                    strokeWidth: rect.strokeWidth / paper.view.zoom
+                    strokeWidth: rect.strokeWidth
                 };
 
                 return data;
             });
 
-            console.log(rectangleData);
             window.api.send('save-group-markings', rectangleData);
-
-            // if (drawingLayerRef.current !== null) {
-            //     drawingLayerRef.current.remove();
-            // }
-
             const menu = document.querySelector('.context-menu');
             if (menu) menu.remove();
-            setenablehigh(false)
+            // setenablehigh(false)
         };
-
 
 
         paper.view.onFrame = () => {
