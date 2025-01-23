@@ -9,7 +9,7 @@ import * as XLSX from 'xlsx';
 import Comment from './Comment';
 import { v4 as uuidv4 } from 'uuid';
 
-function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible ,markdet }) {
+function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible, markdet }) {
     const canvasRef = useRef(null);
     let canvas = canvasRef.current;
     const viewRef = useRef(null);
@@ -107,7 +107,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     const [istagtabdet, settagtabdet] = useState(false)
     const [istagtypedet, settagtypedet] = useState(false)
     const [pidTagId, setPidTagId] = useState('');
-    
+
     useEffect(() => {
         console.log(flagsconn);
     }, [flagsconn])
@@ -2331,39 +2331,133 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
 
     }
 
+    // const recreateGroupMarkings = (savedData) => {
+    //     if (!drawingLayerRef.current) {
+    //         drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //     }
+    //     drawingLayerRef.current.activate();
+
+    //     // Now iterate directly over savedData since it's an array of rectangles
+    //     savedData.forEach(rectData => {
+    //         // Calculate current dimensions based on canvas size using X and Y instead of x and y
+    //         const currentX = parseFloat(rectData.X) * paper.view.size.width;
+    //         const currentY = parseFloat(rectData.Y) * paper.view.size.height;
+    //         const currentWidth = parseFloat(rectData.width) * paper.view.size.width;
+    //         const currentHeight = parseFloat(rectData.height) * paper.view.size.height;
+
+    //         // Create new rectangle with calculated dimensions
+    //         const rectangle = new paper.Path.Rectangle({
+    //             point: [currentX, currentY],
+    //             size: [currentWidth, currentHeight],
+    //             strokeColor: rectData.strokeColor,
+    //             fillColor: new paper.Color(rectData.fillColor),
+    //             strokeWidth: parseFloat(rectData.strokeWidth) / paper.view.zoom,
+    //             data: {
+    //                 type: 'rectangle',
+    //                 markId: rectData.markId,
+    //                 rectId: rectData.rectId
+    //             }
+    //         });
+
+    //         drawingLayerRef.current.addChild(rectangle);
+    //     });
+
+    //     paper.view.draw();
+    // };
+
+
+    // const recreateGroupMarkings = (savedData) => {
+    //     if (!drawingLayerRef.current) {
+    //         drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //     }
+    //     drawingLayerRef.current.activate();
+
+    //     savedData.forEach(rectData => {
+    //         // Parse serialized data
+    //         const projectCoords = JSON.parse(rectData.projectCoords);
+    //         const viewState = JSON.parse(rectData.viewState);
+
+    //         // Create rectangle using project coordinates
+    //         const topLeft = new paper.Point(
+    //             projectCoords.x,
+    //             projectCoords.y
+    //         );
+
+    //         const rectangle = new paper.Path.Rectangle({
+    //             point: topLeft,
+    //             size: new paper.Size(
+    //                 projectCoords.width,
+    //                 projectCoords.height
+    //             ),
+    //             strokeColor: rectData.strokeColor,
+    //             fillColor: new paper.Color(rectData.fillColor),
+    //             // Scale stroke width based on current zoom relative to original zoom
+    //             strokeWidth: (rectData.strokeWidth * paper.view.zoom),
+    //             data: { 
+    //                 type: 'rectangle',
+    //                 markId: rectData.markId,
+    //                 rectId: rectData.rectId,
+    //                 originalZoom: viewState.zoom  // Use original zoom from parsed data
+    //             }
+    //         });
+
+    //         drawingLayerRef.current.addChild(rectangle);
+    //     });
+
+    //     paper.view.draw();
+    // };
+
+
     const recreateGroupMarkings = (savedData) => {
         if (!drawingLayerRef.current) {
             drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
         }
         drawingLayerRef.current.activate();
-    
-        // Now iterate directly over savedData since it's an array of rectangles
+
         savedData.forEach(rectData => {
-            // Calculate current dimensions based on canvas size using X and Y instead of x and y
-            const currentX = parseFloat(rectData.X) * paper.view.size.width;
-            const currentY = parseFloat(rectData.Y) * paper.view.size.height;
-            const currentWidth = parseFloat(rectData.width) * paper.view.size.width;
-            const currentHeight = parseFloat(rectData.height) * paper.view.size.height;
-    
-            // Create new rectangle with calculated dimensions
+            // Parse serialized data
+            const projectCoords = JSON.parse(rectData.projectCoords);
+            const viewState = JSON.parse(rectData.viewState);
+
+            // Create rectangle using project coordinates
+            const topLeft = new paper.Point(
+                projectCoords.x,
+                projectCoords.y
+            );
+
+            // Determine fill color with transparency for reddish shades
+            const fillColor = new paper.Color(rectData.fillColor);
+            if (fillColor.red > 0.8 && fillColor.green < 0.2 && fillColor.blue < 0.2) {
+                fillColor.alpha = 0.5; // Set transparency for reddish colors
+            }
+
             const rectangle = new paper.Path.Rectangle({
-                point: [currentX, currentY],
-                size: [currentWidth, currentHeight],
+                point: topLeft,
+                size: new paper.Size(
+                    projectCoords.width,
+                    projectCoords.height
+                ),
                 strokeColor: rectData.strokeColor,
-                fillColor: new paper.Color(rectData.fillColor),
-                strokeWidth: parseFloat(rectData.strokeWidth) / paper.view.zoom,
-                data: { 
+                fillColor: fillColor, // Use the adjusted fill color
+                strokeWidth: rectData.strokeWidth * paper.view.zoom, // Scale stroke width
+                data: {
                     type: 'rectangle',
                     markId: rectData.markId,
-                    rectId: rectData.rectId
+                    rectId: rectData.rectId,
+                    originalZoom: viewState.zoom // Use original zoom from parsed data
                 }
             });
-    
+
+            // Ensure no blue highlight appears on selection
+            rectangle.selected = false;
+
             drawingLayerRef.current.addChild(rectangle);
         });
-    
+
         paper.view.draw();
     };
+
+
     useEffect(() => {
         console.log(markdet);
 
@@ -3369,55 +3463,104 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             document.addEventListener('mousedown', closeMenu);
         };
 
+        // const handleGroupMarkings = () => {
+        //     // const selectedArray = Array.from(selectedRectangles);
+        //     // console.log('Grouping rectangles:', selectedArray);
+        //     // // Add your grouping logic here
+        //     const selectedArray = Array.from(selectedRectangles);
+
+        //     // Create an array to store rectangle data
+        //     const rectangleData = selectedArray.map(rect => {
+        //         const bounds = rect.bounds;
+        //         // Generate a unique rectId for each rectangle
+        //         const rectId = generateCustomID('Rect');
+        //         // Store the rectangle data relative to canvas size
+        //         const data = {
+        //             rectId,
+        //             // Store normalized coordinates (0-1 range)
+        //             x: bounds.x / paper.view.size.width,
+        //             y: bounds.y / paper.view.size.height,
+        //             width: bounds.width / paper.view.size.width,
+        //             height: bounds.height / paper.view.size.height,
+        //             // Store absolute coordinates
+        //             absoluteX: bounds.x,
+        //             absoluteY: bounds.y,
+        //             absoluteWidth: bounds.width,
+        //             absoluteHeight: bounds.height,
+        //             // Store current zoom level for reference
+        //             zoomLevel: paper.view.zoom,
+        //             // Store any additional data needed
+        //             fillColor: rect.fillColor.toCSS(true),
+        //             strokeColor: rect.strokeColor.toCSS(true),
+        //             strokeWidth: rect.strokeWidth
+        //         };
+
+        //         return data;
+        //     });
+        //     console.log(rectangleData);
+
+
+        //     // Send data to backend
+        //     window.api.send('save-group-markings', rectangleData);
+        //     // groupId: Date.now(), // or any unique identifier
+        //     // docId: sindocid // or any other relevant document identifier
+
+        //     if (drawingLayerRef.current !== null) {
+        //         drawingLayerRef.current.remove()
+        //     }
+        //     // Close the context menu
+        //     const menu = document.querySelector('.context-menu');
+        //     if (menu) menu.remove();
+        // };
+
+
         const handleGroupMarkings = () => {
-            // const selectedArray = Array.from(selectedRectangles);
-            // console.log('Grouping rectangles:', selectedArray);
-            // // Add your grouping logic here
             const selectedArray = Array.from(selectedRectangles);
 
-            // Create an array to store rectangle data
             const rectangleData = selectedArray.map(rect => {
                 const bounds = rect.bounds;
-                // Generate a unique rectId for each rectangle
                 const rectId = generateCustomID('Rect');
-                // Store the rectangle data relative to canvas size
+
+                // Convert bounds to project coordinates
+                const topLeft = paper.view.viewToProject(bounds.topLeft);
+                const bottomRight = paper.view.viewToProject(bounds.bottomRight);
+
                 const data = {
                     rectId,
-                    // Store normalized coordinates (0-1 range)
-                    x: bounds.x / paper.view.size.width,
-                    y: bounds.y / paper.view.size.height,
-                    width: bounds.width / paper.view.size.width,
-                    height: bounds.height / paper.view.size.height,
-                    // Store absolute coordinates
-                    absoluteX: bounds.x,
-                    absoluteY: bounds.y,
-                    absoluteWidth: bounds.width,
-                    absoluteHeight: bounds.height,
-                    // Store current zoom level for reference
-                    zoomLevel: paper.view.zoom,
-                    // Store any additional data needed
+                    projectCoords: JSON.stringify({
+                        x: topLeft.x,
+                        y: topLeft.y,
+                        width: bottomRight.x - topLeft.x,
+                        height: bottomRight.y - topLeft.y
+                    }),
+                    viewState: JSON.stringify({
+                        zoom: paper.view.zoom,
+                        center: {
+                            x: paper.view.center.x,
+                            y: paper.view.center.y
+                        }
+                    }),
                     fillColor: rect.fillColor.toCSS(true),
                     strokeColor: rect.strokeColor.toCSS(true),
-                    strokeWidth: rect.strokeWidth
+                    strokeWidth: rect.strokeWidth / paper.view.zoom
                 };
 
                 return data;
             });
+
             console.log(rectangleData);
-
-
-            // Send data to backend
             window.api.send('save-group-markings', rectangleData);
-            // groupId: Date.now(), // or any unique identifier
-            // docId: sindocid // or any other relevant document identifier
 
-            if (drawingLayerRef.current !== null) {
-                drawingLayerRef.current.remove()
-            }
-            // Close the context menu
+            // if (drawingLayerRef.current !== null) {
+            //     drawingLayerRef.current.remove();
+            // }
+
             const menu = document.querySelector('.context-menu');
             if (menu) menu.remove();
+            setenablehigh(false)
         };
+
+
 
         paper.view.onFrame = () => {
             // Update handle sizes on zoom
@@ -3428,8 +3571,8 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
         };
     };
 
-   
-   
+
+
 
     const disablehighinteraction = () => {
         if (paper.tool) {

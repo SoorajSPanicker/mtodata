@@ -265,7 +265,8 @@ function createDatabase() {
             db.run('CREATE TABLE IF NOT EXISTS MtoSystemTable(mtosysId TEXT PRIMARY KEY, sys TEXT, name TEXT)')
 
             // ------------------------- P&ID MTO--------------------------------------
-            db.run('CREATE TABLE IF NOT EXISTS MarkingDetailsTable(markId TEXT, rectId TEXT, X TEXT, Y TEXT, width TEXT, height TEXT, absoluteX TEXT, absoluteY TEXT, absoluteWidth TEXT, absoluteHeight TEXT, zoomLevel TEXT, fillColor TEXT, strokeColor TEXT, strokeWidth TEXT, PRIMARY KEY(rectId))')
+            // db.run('CREATE TABLE IF NOT EXISTS MarkingDetailsTable(markId TEXT, rectId TEXT, X TEXT, Y TEXT, width TEXT, height TEXT, absoluteX TEXT, absoluteY TEXT, absoluteWidth TEXT, absoluteHeight TEXT, zoomLevel TEXT, fillColor TEXT, strokeColor TEXT, strokeWidth TEXT, PRIMARY KEY(rectId))')
+            db.run('CREATE TABLE IF NOT EXISTS MarkingDetailsTable(markId TEXT,  rectId TEXT ,projectCoords TEXT , viewState TEXT, fillColor TEXT , strokeColor TEXT, strokeWidth REAL, PRIMARY KEY(rectId))')
         }
     });
     databasePath = path.join(selectedFolderPath, 'database.db');
@@ -1397,7 +1398,7 @@ app.whenReady().then(() => {
                             console.error('Error fetching data from Tree table:', err.message);
                             return;
                         }
-        
+
                         console.log('Data in the MarkingDetailsTable table:', rows);
                         mainWindow.webContents.send('group-markings-saved', rows);
                     });
@@ -10699,12 +10700,27 @@ app.whenReady().then(() => {
                 console.error('Error opening project database:', err.message);
                 return;
             }
-
+            // db.run('CREATE TABLE IF NOT EXISTS MarkingDetailsTable(markId TEXT,  rectId TEXT ,projectCoords TEXT , viewState TEXT, fillColor TEXT , strokeColor TEXT, strokeWidth REAL, PRIMARY KEY(rectId))')
             const markId = generateCustomID('Mark');
+            // datas.forEach(data => {
+            //     projectDb.run(
+            //         'INSERT INTO MarkingDetailsTable (markId , rectId, X, Y, width, height, absoluteX, absoluteY, absoluteWidth, absoluteHeight, zoomLevel, fillColor, strokeColor, strokeWidth  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            //         [markId, data.rectId, data.x, data.y, data.width, data.height, data.absoluteX, data.absoluteY, data.absoluteWidth, data.absoluteHeight, data.zoomLevel, data.fillColor, data.strokeColor, data.strokeWidth],
+            //         function (err) {
+            //             if (err) {
+            //                 console.error('Error inserting into MarkingDetailsTable:', err.message);
+            //                 return;
+            //             }
+            //             console.log(`Row inserted with X: ${data.X}`);
+            //         }
+
+            //     );
+            // })
+
             datas.forEach(data => {
                 projectDb.run(
-                    'INSERT INTO MarkingDetailsTable (markId , rectId, X, Y, width, height, absoluteX, absoluteY, absoluteWidth, absoluteHeight, zoomLevel, fillColor, strokeColor, strokeWidth  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    [markId, data.rectId, data.x, data.y, data.width, data.height, data.absoluteX, data.absoluteY, data.absoluteWidth, data.absoluteHeight, data.zoomLevel, data.fillColor, data.strokeColor, data.strokeWidth],
+                    'INSERT INTO MarkingDetailsTable (markId , rectId, projectCoords, viewState, fillColor, strokeColor, strokeWidth  ) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                    [markId, data.rectId, data.projectCoords, data.viewState, data.fillColor, data.strokeColor, data.strokeWidth],
                     function (err) {
                         if (err) {
                             console.error('Error inserting into MarkingDetailsTable:', err.message);
@@ -10715,6 +10731,7 @@ app.whenReady().then(() => {
 
                 );
             })
+
 
             projectDb.all("SELECT * FROM MarkingDetailsTable", (err, rows) => {
                 if (err) {
