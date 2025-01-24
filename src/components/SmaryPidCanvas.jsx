@@ -8,8 +8,13 @@ import Alert from './Alert';
 import * as XLSX from 'xlsx';
 import Comment from './Comment';
 import { v4 as uuidv4 } from 'uuid';
+import PidMatAdd from './PidMatAdd';
+import MtoPidArea from './MtoPidArea';
 
-function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible, markdet }) {
+
+
+
+function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible, markdet, specmatDetails, recteletag, allAreasInTable }) {
     const canvasRef = useRef(null);
     let canvas = canvasRef.current;
     const viewRef = useRef(null);
@@ -18,6 +23,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     const drawingLayerRef = useRef(null);
     let svgGroup
     const temarrRef = useRef([]);
+    const recttagRef = useRef([]);
     let selectionRectangle;
     let startPoint;
     const originalPosition = new Point(761, 368);
@@ -107,6 +113,21 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     const [istagtabdet, settagtabdet] = useState(false)
     const [istagtypedet, settagtypedet] = useState(false)
     const [pidTagId, setPidTagId] = useState('');
+   
+    const [matarea, setmatarea] = useState(false)
+    const [recttagcol, setrecttagcol] = useState([])
+
+    useEffect(()=>{
+        console.log(allAreasInTable);
+    },[allAreasInTable])
+
+    useEffect(() => {
+        console.log(recteletag);
+        temarrRef.current.push(recteletag);
+        console.log(temarrRef.current);
+
+    }, [recteletag])
+
 
     useEffect(() => {
         console.log(flagsconn);
@@ -2514,6 +2535,47 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     //     paper.view.draw();
     // };
 
+    // const recreateGroupMarkings = (savedData) => {
+    //     if (!drawingLayerRef.current) {
+    //         drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //     }
+    //     drawingLayerRef.current.removeChildren();
+    //     drawingLayerRef.current.activate();
+
+    //     savedData.forEach(rectData => {
+    //         try {
+    //             const projectCoords = JSON.parse(rectData.projectCoords);
+    //             const viewState = JSON.parse(rectData.viewState);
+
+    //             // Parse Point arrays correctly
+    //             const topLeft = new paper.Point(projectCoords.topLeft[1], projectCoords.topLeft[2]);
+    //             const bottomRight = new paper.Point(projectCoords.bottomRight[1], projectCoords.bottomRight[2]);
+
+    //             const rectangle = new paper.Path.Rectangle({
+    //                 from: topLeft,
+    //                 to: bottomRight,
+    //                 strokeColor: rectData.strokeColor,
+    //                 fillColor: new paper.Color(rectData.fillColor).multiply(0.5),
+    //                 strokeWidth: rectData.strokeWidth / paper.view.zoom,
+    //                 data: {
+    //                     type: 'rectangle',
+    //                     markId: rectData.markId,
+    //                     rectId: rectData.rectId,
+    //                     originalZoom: viewState.zoom
+    //                 }
+    //             });
+
+    //             rectangle.strokeWidth = (rectData.strokeWidth / viewState.zoom) * paper.view.zoom;
+    //             drawingLayerRef.current.addChild(rectangle);
+    //         } catch (error) {
+    //             console.error('Error recreating rectangle:', error);
+    //         }
+    //     });
+
+    //     paper.view.draw();
+    // };
+
+
     const recreateGroupMarkings = (savedData) => {
         if (!drawingLayerRef.current) {
             drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
@@ -2544,6 +2606,13 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
                     }
                 });
 
+                // Check for tagged elements within rectangle bounds
+                paper.project.getItems({ class: paper.Path }).forEach(item => {
+                    if (item.data.fromMasdoc && rectangle.bounds.intersects(item.bounds)) {
+                        window.api.send('fetch-element-tag', item._id);
+                    }
+                });
+
                 rectangle.strokeWidth = (rectData.strokeWidth / viewState.zoom) * paper.view.zoom;
                 drawingLayerRef.current.addChild(rectangle);
             } catch (error) {
@@ -2553,6 +2622,17 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
 
         paper.view.draw();
     };
+
+    // Add effect to handle tag data response
+    useEffect(() => {
+        window.api.receive('element-tag-fetched', (data) => {
+            console.log("Tagged element found in rectangle:", data);
+            // Handle the tag data as needed (e.g. display it, store it, etc.)
+        });
+    }, []);
+
+
+
     useEffect(() => {
         console.log(markdet);
 
@@ -3552,10 +3632,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             addMTOOption.textContent = 'Add MTO';
             addMTOOption.style.cursor = 'pointer';
             addMTOOption.style.padding = '4px 8px';
-            addMTOOption.onclick = () => {
-                console.log('Add MTO option clicked');
-                // Add your specific functionality for "Add MTO" here
-            };
+            addMTOOption.onclick = handleaddmto;
 
             menu.appendChild(groupOption);
             menu.appendChild(addMTOOption);
@@ -3709,6 +3786,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
         };
 
 
+
         paper.view.onFrame = () => {
             // Update handle sizes on zoom
             handles.forEach(handle => {
@@ -3718,6 +3796,24 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
         };
     };
 
+    const handleaddmto = () => {
+        console.log('enter handleaddmto');
+
+        const menu = document.querySelector('.context-menu');
+        if (menu) menu.remove();
+        // setmatadd(true)
+        setmatarea(true)
+
+    }
+
+    useEffect(() => {
+        console.log(matarea);
+
+    }, [matarea])
+
+    const handleclose = () => {
+        setmatadd(false)
+    }
 
 
 
@@ -3730,6 +3826,11 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             drawingLayerRef.current = null;
         }
     };
+
+    useEffect(() => {
+        console.log(specmatDetails);
+
+    }, [specmatDetails])
 
     return (
         <>
@@ -4023,6 +4124,9 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             {isaddcomment && <Comment onClose={handleclosecomment} isOpen={handleaddcomment} content={commcontent} x={isrx} y={isry} allCommentStatus={allCommentStatus}
                 commentdet={commentdet} docdetnum={docdetnum} ></Comment>}
             {/* {editcomment && <CommentStatus onstop={handleclosecommentstatus} commentdet={commentdet}></CommentStatus>} */}
+           
+            {matarea && <MtoPidArea allAreasInTable={allAreasInTable}></MtoPidArea>}
+
         </>
 
     )

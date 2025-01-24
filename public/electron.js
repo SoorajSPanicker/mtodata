@@ -10746,6 +10746,43 @@ app.whenReady().then(() => {
 
     })
 
+    ipcMain.on('fetch-element-tag', (event, elementId) => {
+        console.log("Received request to search document by number");
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            projectDb.get('SELECT * FROM Elements WHERE elementId = ?', [elementId], (err, row) => {
+                if (err) {
+                    console.error('Error querying the database:', err.message);
+                    // event.sender.send('doc-found', { success: false, message: 'Error querying the database' });
+                    return;
+                }
+
+                if (row) {
+                    console.log(`Element details: ${row}`);
+                    // event.sender.send('doc-found', { success: true, filePath: filePath });
+                    mainWindow.webContents.send('element-tag-fetched', row);
+                } else {
+                    console.error('Element not found in Elements table');
+                    // event.sender.send('doc-found', { success: false, message: 'File not found in Documents folder' });
+                }
+                // } 
+                // else {
+                //     console.error('Document not found in database');
+                //     event.sender.send('doc-found', { success: false, message: 'Document not found in database' });
+                // }
+            });
+        });
+    });
+
 
 });
 app.on('window-all-closed', () => {

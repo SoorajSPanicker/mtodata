@@ -211,6 +211,7 @@ function Home() {
   const [mtolinearea, setmtolinearea] = useState([])
   const [matdataarea, setmatdataarea] = useState([])
   const [markdet, setmarkdet] = useState([])
+  const [recteletag, setrecteletag] = useState([])
 
 
   // useEffect(() => {
@@ -269,18 +270,29 @@ function Home() {
   // }, []);
 
   useEffect(() => {
-    window.api.receive('group-markings-saved', (data) => {
-        console.log("Group markings saved:", data);
-        setmarkdet(data);
-        setCustomAlert(true);
-        setModalMessage('Group markings saved successfully');
+    window.api.receive('element-tag-fetched', (data) => {
+      console.log("Tagged element found in rectangle:", data);
+      setrecteletag(data)
     });
-}, []);
+  }, []);
+  useEffect(() => {
+    console.log(recteletag);
 
-useEffect(()=>{
- console.log(markdet);
- 
-},[markdet])
+  }, [recteletag])
+
+  useEffect(() => {
+    window.api.receive('group-markings-saved', (data) => {
+      console.log("Group markings saved:", data);
+      setmarkdet(data);
+      // setCustomAlert(true);
+      // setModalMessage('Group markings saved successfully');
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log(markdet);
+
+  }, [markdet])
 
 
   useEffect(() => {
@@ -3554,7 +3566,7 @@ useEffect(()=>{
 
 
               {
-                spidopen && <Spid allDocuments={allDocuments} openSpidCanvas={openSpidCanvas} alltags={alltags} svgcontent={svgcontent} allspids={allspids} allareas={allareas} setOpenSpidCanvas={setOpenSpidCanvas} setopenThreeCanvas={setopenThreeCanvas} setiRoamercanvas={setiRoamercanvas} setSpidOpen={setSpidOpen} allCommentStatus={allCommentStatus} allComments={allComments} tagdocsel={tagdocsel} setrightSideNavVisible={setrightSideNavVisible} setsvgcontent={setsvgcontent} markdet={markdet} />
+                spidopen && <Spid allDocuments={allDocuments} openSpidCanvas={openSpidCanvas} alltags={alltags} svgcontent={svgcontent} allspids={allspids} allareas={allareas} setOpenSpidCanvas={setOpenSpidCanvas} setopenThreeCanvas={setopenThreeCanvas} setiRoamercanvas={setiRoamercanvas} setSpidOpen={setSpidOpen} allCommentStatus={allCommentStatus} allComments={allComments} tagdocsel={tagdocsel} setrightSideNavVisible={setrightSideNavVisible} setsvgcontent={setsvgcontent} markdet={markdet} specmatDetails={specmatDetails} recteletag={recteletag} allAreasInTable={allAreasInTable}/>
               }
               {
                 assignTagUnassigned && <AssignUnassignedTag assignTagUnassigned={assignTagUnassigned} onClose={handleCloseAreaDialog} setselectunassigned={setselectunassigned} selectAllUnassignedModels={selectAllUnassignedModels} setselectAllUnassignedModels={setselectAllUnassignedModels} unassignedmodel={unassignedmodel} setunassignedmodel={setunassignedmodel} unassignedCheckboxStates={unassignedCheckboxStates} setUnassignedCheckboxStates={setUnassignedCheckboxStates} />
