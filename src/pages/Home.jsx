@@ -273,6 +273,14 @@ function Home() {
     window.api.receive('element-tag-fetched', (data) => {
       console.log("Tagged element found in rectangle:", data);
       setrecteletag(data)
+      // if (data && data.tagNumber) {
+      //   const taggedElement = recttagRef.current.find(info => info.elementId === data.elementId);
+      //   if (taggedElement) {
+      //     console.log(taggedElement);
+      //     taggedElement.tagNumber = data.tagNumber;
+      //     // setrecttagcol([...recttagcol, taggedElement]);
+      //   }
+      // }
     });
   }, []);
   useEffect(() => {
@@ -3566,7 +3574,7 @@ function Home() {
 
 
               {
-                spidopen && <Spid allDocuments={allDocuments} openSpidCanvas={openSpidCanvas} alltags={alltags} svgcontent={svgcontent} allspids={allspids} allareas={allareas} setOpenSpidCanvas={setOpenSpidCanvas} setopenThreeCanvas={setopenThreeCanvas} setiRoamercanvas={setiRoamercanvas} setSpidOpen={setSpidOpen} allCommentStatus={allCommentStatus} allComments={allComments} tagdocsel={tagdocsel} setrightSideNavVisible={setrightSideNavVisible} setsvgcontent={setsvgcontent} markdet={markdet} specmatDetails={specmatDetails} recteletag={recteletag} allAreasInTable={allAreasInTable}/>
+                spidopen && <Spid allDocuments={allDocuments} openSpidCanvas={openSpidCanvas} alltags={alltags} svgcontent={svgcontent} allspids={allspids} allareas={allareas} setOpenSpidCanvas={setOpenSpidCanvas} setopenThreeCanvas={setopenThreeCanvas} setiRoamercanvas={setiRoamercanvas} setSpidOpen={setSpidOpen} allCommentStatus={allCommentStatus} allComments={allComments} tagdocsel={tagdocsel} setrightSideNavVisible={setrightSideNavVisible} setsvgcontent={setsvgcontent} markdet={markdet} specmatDetails={specmatDetails} recteletag={recteletag} allAreasInTable={allAreasInTable} />
               }
               {
                 assignTagUnassigned && <AssignUnassignedTag assignTagUnassigned={assignTagUnassigned} onClose={handleCloseAreaDialog} setselectunassigned={setselectunassigned} selectAllUnassignedModels={selectAllUnassignedModels} setselectAllUnassignedModels={setselectAllUnassignedModels} unassignedmodel={unassignedmodel} setunassignedmodel={setunassignedmodel} unassignedCheckboxStates={unassignedCheckboxStates} setUnassignedCheckboxStates={setUnassignedCheckboxStates} />
