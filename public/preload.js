@@ -23,7 +23,7 @@ contextBridge.exposeInMainWorld('api', {
             // PID
         'save-doc-data', 'fetch-sin-doc', 'save-ele-tag','fetch-sin-ele','save-area-data','fetch-tag-ele', 'fetch-info-tag', 'fetch-sin-docdetails', 'save-flag-ele','fetch-con-doc', 'fetch-condoc-path', 'create-new-window', 'fetch-sin-flag','fetch-doc-flag', 'update-flag-table', 'double-sin-flag', 'sin-flag-conflag','unflag-ele-flag', 'update-unflag-table','fetch-flag-tag', 'update-flag-tag','is-element-tag', 'sel-tag-ele', 'del-ele-tag','ele-tag-type', 'ele-flag-sel','flag-dou-sel','update-doc-table','insert-master-table', 'check-master','fetch-master-doc', 'copy-to-master', 'backup-masdoc','update-masdoc', 'save-svg', 'check-file-exists', 'load-svg', 'read-svg-file','save-layer','show-doc-area','is-ele-tag','save-areatag-rel','tag-doc-con','tag-doc-det','update-check-sta','open-three-from-pid','open-pid-from-three','tag-doc-det','dwg-svg-converter','save-group-markings','fetch-element-tag',
         // MTO
-        'branchtabledata','import-excel','save-custom-spec','spec-excel-data','update-customspec-table','Mto-doc-save', 'Mto-area-save', 'Mto-tag-save', 'update-mtolinelist-table', 'save-mtoline-area', 'save-material-data', 'update-matdataarea-table', 'delete-material-data','import-mtodataline-list'
+        'branchtabledata','import-excel','save-custom-spec','spec-excel-data','update-customspec-table','Mto-doc-save', 'Mto-area-save', 'Mto-tag-save', 'update-mtolinelist-table', 'save-mtoline-area', 'save-material-data', 'update-matdataarea-table', 'delete-material-data','import-mtodataline-list', 'save-mat-submit'
 
     
     ]; // Add 'fetch-data' for reading data 'save-data', 'fetch-data', 

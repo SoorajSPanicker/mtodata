@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PidMatAdd from './PidMatAdd';
 
 
-function MtoPidArea({ allAreasInTable, specmatDetails }) {
+function MtoPidArea({ allAreasInTable, specmatDetails, selectedRectTagData, sindocid, masterid }) {
     const [isDragging, setIsDragging] = useState(false);
     const [position, setPosition] = useState({ x: 100, y: 100 });
     const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -19,9 +19,24 @@ function MtoPidArea({ allAreasInTable, specmatDetails }) {
     }, [specmatDetails])
 
     useEffect(() => {
+        console.log(selectedRectTagData);
+
+    }, [selectedRectTagData])
+
+    useEffect(() => {
         console.log(allAreasInTable);
 
     }, [allAreasInTable])
+
+    useEffect(() => {
+        console.log(sindocid);
+
+    }, [sindocid])
+
+    useEffect(() => {
+        console.log(masterid);
+
+    }, [masterid])
 
     const handleMouseDown = (e) => {
         if (isMinimized || isMaximized) return;
@@ -76,6 +91,7 @@ function MtoPidArea({ allAreasInTable, specmatDetails }) {
 
     const handlematpage = () => {
         setmatadd(true)
+        // handleClose();
     }
     return (
         <div
@@ -87,7 +103,8 @@ function MtoPidArea({ allAreasInTable, specmatDetails }) {
                 height: isMaximized ? "100vh" : isMinimized ? "50px" : "200px",
                 position: "absolute",
                 cursor: isDragging ? "grabbing" : "default",
-                zIndex: 3
+                zIndex: 3,
+                color:'black'
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -95,7 +112,8 @@ function MtoPidArea({ allAreasInTable, specmatDetails }) {
             onMouseLeave={handleMouseUp}
         >
             <div className="popup-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px' }}>
-                <p>Draggable Popup</p>
+                {/* <p>Draggable Popup</p> */}
+                <p>Area Select</p>
                 <div className="popup-controls">
                     <button onClick={handleMinimize}>_</button>
                     <button onClick={handleMaximize}>{isMaximized ? "❐" : "□"}</button>
@@ -123,7 +141,7 @@ function MtoPidArea({ allAreasInTable, specmatDetails }) {
                 <button type='submit' onClick={handlematpage}>Next</button>
 
             </div>
-            {matadd && <PidMatAdd name={name} areaid={areaid} specmatDetails={specmatDetails} />}
+            {matadd && <PidMatAdd name={name} areaid={areaid} specmatDetails={specmatDetails} sindocid={sindocid} masterid={masterid} selectedRectTagData={selectedRectTagData}/>}
             {/* onClose={handleclose} */}
         </div>
 

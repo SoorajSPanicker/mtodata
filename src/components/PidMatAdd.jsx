@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import _ from 'lodash';
 
-function PidMatAdd({ specmatDetails, name, areaid }) {
+function PidMatAdd({ specmatDetails, name, areaid, sindocid, masterid, selectedRectTagData }) {
     const [materialval, setmaterialval] = useState('');
     const [sizeoneval, setsizeoneval] = useState('');
     const [sizetwoval, setsizetwoval] = useState('');
@@ -69,9 +70,46 @@ function PidMatAdd({ specmatDetails, name, areaid }) {
         setmtlqty(e.target.value)
     }
     useEffect(() => {
+        console.log(masterid);
+
+    }, [masterid])
+    useEffect(() => {
         console.log(mtlqty);
 
     }, [mtlqty])
+
+    const handlematsubmit = () => {
+        console.log(searchResults);
+        console.log(searchResults[0].thkSizeOne);
+    
+        // Iterate through selectedRectTagData
+        selectedRectTagData.forEach(rectTag => {
+            // Create the data object for each rectTag
+            const data = {
+                tagNo: rectTag.tagNo,
+                areaId: areaid,           // Use existing areaId variable
+                areaName: name,           // Use existing area name variable
+                Qty: mtlqty,              // Use existing quantity value
+                Item: materialval,        // Use existing material value
+                Sizeone: sizeoneval,      // Use existing size one value
+                Sizetwo: sizetwoval,      // Use existing size two value
+                thkSizeOne: searchResults[0].thkSizeOne,
+                thkSizeTwo: searchResults[0].thkSizeTwo,
+                schdSizeOne: searchResults[0].schdSizeOne,
+                schdSizeTwo: searchResults[0].schdSizeTwo,
+                markId: rectTag.markId,   // Assign markId from rectTag
+                rectId: rectTag.rectId,   // Assign rectId from rectTag
+                DocNo: masterid           // Use existing master document ID
+            };
+    
+            // Log the data object (optional, for debugging purposes)
+            console.log(data);
+    
+            // Send data to the backend or perform the desired operation
+            window.api.send('save-mat-submit', data);
+        });
+    };
+    
 
     return (
         <div style={{ backgroundColor: 'red' }}>
@@ -134,13 +172,13 @@ function PidMatAdd({ specmatDetails, name, areaid }) {
                             </button> */}
                         </div>
                         <div id="specSearchResultDiv">
-                            {/* {searchResults.map((result, index) => (
+                            {searchResults.map((result, index) => (
                                 <div key={index} className="mtoItemSearchListDiv">
                                     <label style={{ flex: 2, paddingRight: '5px', color: 'black' }}>`{result.materialLgDescrip}, {result.thkSizeOne}, {result.thkSizeTwo}, {result.schdSizeOne}, {result.schdSizeTwo} `</label>
                                    
 
                                 </div>
-                            ))} */}
+                            ))}
                         </div>
                         <div style={{ marginLeft: '10px', marginRight: '10px' }} >
                             <button type="button" >Clear Result</button>

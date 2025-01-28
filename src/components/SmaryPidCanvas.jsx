@@ -12,7 +12,7 @@ import PidMatAdd from './PidMatAdd';
 import MtoPidArea from './MtoPidArea';
 
 
-function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible, markdet, specmatDetails, recteletag, allAreasInTable }) {
+function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible, markdet, specmatDetails, recteletag, allAreasInTable, masterid }) {
     const canvasRef = useRef(null);
     let canvas = canvasRef.current;
     const viewRef = useRef(null);
@@ -114,17 +114,41 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
 
     const [matarea, setmatarea] = useState(false)
     const [recttagcol, setrecttagcol] = useState([])
+    const [selectedRectTagData, setSelectedRectTagData] = useState([]);
+
+    useEffect(() => {
+        console.log(masterid);
+    }, [masterid])
 
     useEffect(() => {
         console.log(allAreasInTable);
     }, [allAreasInTable])
 
     useEffect(() => {
-        console.log(recteletag);
-        temarrRef.current.push(recteletag);
-        console.log(temarrRef.current);
+        console.log(sindocid);
 
-    }, [recteletag])
+    }, [sindocid])
+
+    useEffect(() => {
+        console.log(selectedRectTagData);
+
+    }, [selectedRectTagData])
+
+    useEffect(() => {
+        if (recteletag && Object.keys(recteletag).length > 0) { // Check if recteletag exists and is not empty
+            console.log("recteletag:", recteletag);
+            if (recteletag && recteletag.tagNumber) {
+                const taggedElement = recttagRef.current.find(info => info.elementId === recteletag.elementId);
+                if (taggedElement) {
+                    taggedElement.tagNo = recteletag.tagNumber;
+                    // taggedElement.tagNumber = recteletag.tagNumber;
+                    // setrecttagcol([...recttagcol, taggedElement]);
+                    temarrRef.current.push(taggedElement);
+                }
+            }
+            console.log("temarrRef.current:", temarrRef.current);
+        }
+    }, [recteletag]);
 
 
     useEffect(() => {
@@ -2622,12 +2646,228 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     // };
 
 
+    // const recreateGroupMarkings = (savedData) => {
+    //     if (!drawingLayerRef.current) {
+    //         drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //     }
+    //     drawingLayerRef.current.removeChildren();
+    //     drawingLayerRef.current.activate();
+
+    //     savedData.forEach(rectData => {
+    //         try {
+    //             const projectCoords = JSON.parse(rectData.projectCoords);
+    //             const viewState = JSON.parse(rectData.viewState);
+
+    //             const topLeft = new paper.Point(projectCoords.topLeft[1], projectCoords.topLeft[2]);
+    //             const bottomRight = new paper.Point(projectCoords.bottomRight[1], projectCoords.bottomRight[2]);
+
+    //             const rectangle = new paper.Path.Rectangle({
+    //                 from: topLeft,
+    //                 to: bottomRight,
+    //                 strokeColor: rectData.strokeColor,
+    //                 fillColor: new paper.Color(rectData.fillColor).multiply(0.5),
+    //                 strokeWidth: rectData.strokeWidth / paper.view.zoom,
+    //                 data: {
+    //                     type: 'rectangle',
+    //                     markId: rectData.markId,
+    //                     rectId: rectData.rectId,
+    //                     originalZoom: viewState.zoom
+    //                 }
+    //             });
+
+    //             // Check for tagged elements within rectangle bounds
+    //             paper.project.getItems({ class: paper.Path }).forEach(item => {
+    //                 if (item.data.fromMasdoc && rectangle.bounds.intersects(item.bounds)) {
+    //                     const rectangleInfo = {
+    //                         elementId: item._id,
+    //                         markId: rectData.markId,
+    //                         rectId: rectData.rectId
+    //                     };
+    //                     recttagRef.current.push(rectangleInfo);
+    //                     window.api.send('fetch-element-tag', item._id);
+    //                 }
+    //             });
+
+    //             rectangle.strokeWidth = (rectData.strokeWidth / viewState.zoom) * paper.view.zoom;
+    //             drawingLayerRef.current.addChild(rectangle);
+    //         } catch (error) {
+    //             console.error('Error recreating rectangle:', error);
+    //         }
+    //     });
+
+    //     console.log("Tagged elements in rectangles:", recttagRef.current);
+    //     paper.view.draw();
+    // };
+
+    // const recreateGroupMarkings = (savedData) => {
+    //     if (!drawingLayerRef.current) {
+    //         drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //     }
+    //     drawingLayerRef.current.removeChildren();
+    //     drawingLayerRef.current.activate();
+
+    //     // Create menu handler function
+    //     const showContextMenu = (e, rect) => {
+    //         e.preventDefault();
+
+    //         const menu = document.createElement('div');
+    //         menu.className = 'context-menu';
+    //         menu.style.position = 'absolute';
+    //         menu.style.left = e.pageX + 'px';
+    //         menu.style.top = e.pageY + 'px';
+    //         menu.style.backgroundColor = 'white';
+    //         menu.style.color = 'black';
+    //         menu.style.border = '1px solid #ccc';
+    //         menu.style.padding = '8px';
+    //         menu.style.borderRadius = '4px';
+    //         menu.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    //         menu.style.zIndex = '1000';
+
+    //         const groupOption = document.createElement('div');
+    //         groupOption.textContent = 'Group markings';
+    //         groupOption.style.cursor = 'pointer';
+    //         groupOption.style.padding = '4px 8px';
+    //         groupOption.onclick = () => handleGroupMarkings(rect);
+
+    //         const addMTOOption = document.createElement('div');
+    //         addMTOOption.textContent = 'Add MTO';
+    //         addMTOOption.style.cursor = 'pointer';
+    //         addMTOOption.style.padding = '4px 8px';
+    //         addMTOOption.onclick = handleaddmto;
+
+    //         menu.appendChild(groupOption);
+    //         menu.appendChild(addMTOOption);
+    //         document.body.appendChild(menu);
+
+    //         const closeMenu = (event) => {
+    //             if (!menu.contains(event.target)) {
+    //                 menu.remove();
+    //                 document.removeEventListener('mousedown', closeMenu);
+    //             }
+    //         };
+    //         document.addEventListener('mousedown', closeMenu);
+    //     };
+
+    //     const selectedRectangles = new Set();
+
+    //     savedData.forEach(rectData => {
+    //         try {
+    //             const projectCoords = JSON.parse(rectData.projectCoords);
+    //             const viewState = JSON.parse(rectData.viewState);
+
+    //             const topLeft = new paper.Point(projectCoords.topLeft[1], projectCoords.topLeft[2]);
+    //             const bottomRight = new paper.Point(projectCoords.bottomRight[1], projectCoords.bottomRight[2]);
+
+    //             const rectangle = new paper.Path.Rectangle({
+    //                 from: topLeft,
+    //                 to: bottomRight,
+    //                 strokeColor: rectData.strokeColor,
+    //                 fillColor: new paper.Color(rectData.fillColor).multiply(0.5),
+    //                 strokeWidth: rectData.strokeWidth / paper.view.zoom,
+    //                 data: {
+    //                     type: 'rectangle',
+    //                     markId: rectData.markId,
+    //                     rectId: rectData.rectId,
+    //                     originalZoom: viewState.zoom
+    //                 }
+    //             });
+
+    //             // Add right-click event listener to each rectangle
+    //             rectangle.onMouseEnter = () => {
+    //                 document.addEventListener('contextmenu', (e) => {
+    //                     if (rectangle.contains(paper.view.viewToProject(new paper.Point(e.offsetX, e.offsetY)))) {
+    //                         selectedRectangles.add(rectangle);
+    //                         rectangle.strokeColor = 'blue';
+    //                         rectangle.strokeWidth = 3 / paper.view.zoom;
+    //                         showContextMenu(e, rectangle);
+    //                     }
+    //                 });
+    //             };
+
+    //             rectangle.onMouseLeave = () => {
+    //                 selectedRectangles.delete(rectangle);
+    //                 rectangle.strokeColor = rectData.strokeColor;
+    //                 rectangle.strokeWidth = rectData.strokeWidth / paper.view.zoom;
+    //             };
+
+    //             // Check for tagged elements within rectangle bounds
+    //             paper.project.getItems({ class: paper.Path }).forEach(item => {
+    //                 if (item.data.fromMasdoc && rectangle.bounds.intersects(item.bounds)) {
+    //                     const rectangleInfo = {
+    //                         elementId: item._id,
+    //                         markId: rectData.markId,
+    //                         rectId: rectData.rectId
+    //                     };
+    //                     recttagRef.current.push(rectangleInfo);
+    //                     window.api.send('fetch-element-tag', item._id);
+    //                 }
+    //             });
+
+    //             rectangle.strokeWidth = (rectData.strokeWidth / viewState.zoom) * paper.view.zoom;
+    //             drawingLayerRef.current.addChild(rectangle);
+    //         } catch (error) {
+    //             console.error('Error recreating rectangle:', error);
+    //         }
+    //     });
+
+    //     console.log("Tagged elements in rectangles:", recttagRef.current);
+    //     paper.view.draw();
+    // };
+
     const recreateGroupMarkings = (savedData) => {
         if (!drawingLayerRef.current) {
             drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
         }
         drawingLayerRef.current.removeChildren();
         drawingLayerRef.current.activate();
+
+        // Create menu handler function that takes the specific rectangle as parameter
+        const showContextMenu = (e, rect) => {
+            e.preventDefault();
+
+            const menu = document.createElement('div');
+            menu.className = 'context-menu';
+            menu.style.position = 'absolute';
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+            menu.style.backgroundColor = 'white';
+            menu.style.color = 'black';
+            menu.style.border = '1px solid #ccc';
+            menu.style.padding = '8px';
+            menu.style.borderRadius = '4px';
+            menu.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            menu.style.zIndex = '1000';
+
+            const groupOption = document.createElement('div');
+            groupOption.textContent = 'Group markings';
+            groupOption.style.cursor = 'pointer';
+            groupOption.style.padding = '4px 8px';
+            groupOption.onclick = () => handleGroupMarkings(rect);
+
+            const addMTOOption = document.createElement('div');
+            addMTOOption.textContent = 'Add MTO';
+            addMTOOption.style.cursor = 'pointer';
+            addMTOOption.style.padding = '4px 8px';
+            addMTOOption.onclick = () => {
+                // Use the specific rectangle's markId to filter matching tags
+                const matchingTags = temarrRef.current.filter(tag => tag.markId === rect.data.markId);
+                setSelectedRectTagData(matchingTags);
+                setmatarea(true);
+                menu.remove();
+            };
+
+            menu.appendChild(groupOption);
+            menu.appendChild(addMTOOption);
+            document.body.appendChild(menu);
+
+            const closeMenu = (event) => {
+                if (!menu.contains(event.target)) {
+                    menu.remove();
+                    document.removeEventListener('mousedown', closeMenu);
+                }
+            };
+            document.addEventListener('mousedown', closeMenu);
+        };
 
         savedData.forEach(rectData => {
             try {
@@ -2643,6 +2883,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
                     strokeColor: rectData.strokeColor,
                     fillColor: new paper.Color(rectData.fillColor).multiply(0.5),
                     strokeWidth: rectData.strokeWidth / paper.view.zoom,
+                    opacity: 0.5, // Set semi-transparency here
                     data: {
                         type: 'rectangle',
                         markId: rectData.markId,
@@ -2650,6 +2891,20 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
                         originalZoom: viewState.zoom
                     }
                 });
+
+                // Add right-click event listener to the specific rectangle
+                rectangle.onMouseEnter = () => {
+                    document.addEventListener('contextmenu', (e) => {
+                        if (rectangle.contains(paper.view.viewToProject(new paper.Point(e.offsetX, e.offsetY)))) {
+                            showContextMenu(e, rectangle);
+                        }
+                    });
+                };
+
+                rectangle.onMouseLeave = () => {
+                    rectangle.strokeColor = rectData.strokeColor;
+                    rectangle.strokeWidth = rectData.strokeWidth / paper.view.zoom;
+                };
 
                 // Check for tagged elements within rectangle bounds
                 paper.project.getItems({ class: paper.Path }).forEach(item => {
@@ -3680,14 +3935,27 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             groupOption.onclick = handleGroupMarkings;
 
             // Option 2: Add MTO
-            const addMTOOption = document.createElement('div');
-            addMTOOption.textContent = 'Add MTO';
-            addMTOOption.style.cursor = 'pointer';
-            addMTOOption.style.padding = '4px 8px';
-            addMTOOption.onclick = handleaddmto;
+            // const addMTOOption = document.createElement('div');
+            // addMTOOption.textContent = 'Add MTO';
+            // addMTOOption.style.cursor = 'pointer';
+            // addMTOOption.style.padding = '4px 8px';
+            // addMTOOption.onclick = handleaddmto;
+
+
+            // const addMTOOption = document.createElement('div');
+            // addMTOOption.textContent = 'Add MTO';
+            // addMTOOption.style.cursor = 'pointer';
+            // addMTOOption.style.padding = '4px 8px';
+            // addMTOOption.onclick = () => {
+            //     // Use the specific rectangle's markId to filter matching tags
+            //     const matchingTags =  temarrRef.current.filter(tag => tag.markId === rect.data.markId);
+            //     setSelectedRectTagData(matchingTags);
+            //     setmatarea(true);
+            //     menu.remove();
+            // };
 
             menu.appendChild(groupOption);
-            menu.appendChild(addMTOOption);
+            // menu.appendChild(addMTOOption);
             document.body.appendChild(menu);
 
             const closeMenu = (e) => {
@@ -3848,15 +4116,59 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
         };
     };
 
-    const handleaddmto = () => {
-        console.log('enter handleaddmto');
+    // const handleaddmto = () => {
+    //     console.log('enter handleaddmto');
 
-        const menu = document.querySelector('.context-menu');
-        if (menu) menu.remove();
-        // setmatadd(true)
-        setmatarea(true)
+    //     const menu = document.querySelector('.context-menu');
+    //     if (menu) menu.remove();
+    //     // setmatadd(true)
+    //     setmatarea(true)
 
-    }
+    // }
+
+    // const handleaddmto = () => {
+    //     console.log('enter handleaddmto');
+    //     const menu = document.querySelector('.context-menu');
+    //     if (menu) menu.remove();
+
+    //     // Get the markId of the selected rectangle
+    //     const selectedRectangle = Array.from(selectedRectangles)[0]; // Get first selected rectangle
+    //     const markId = selectedRectangle.data.markId;
+
+    //     // Filter temarrRef.current to get tags for this marking group
+    //     const tagsInRectangle = temarrRef.current.filter(item => {
+    //         const rectInfo = recttagRef.current.find(rect => 
+    //             rect.elementId === item.elementId && 
+    //             rect.markId === markId
+    //         );
+    //         return rectInfo !== undefined;
+    //     });
+
+    //     // Set state to show MtoPidArea with filtered data
+    //     setmatarea(true);
+    //     selectedRectTagData(tagsInRectangle); // Add this state variable
+    // };
+
+    // const handleaddmto = (selectedRect) => {
+    //     console.log('enter handleaddmto');
+
+    //     if (selectedRect && selectedRect.data && selectedRect.data.markId) {
+    //         // Get the markId of the clicked rectangle
+    //         const clickedMarkId = selectedRect.data.markId;
+
+    //         // Filter temarrRef.current to get only elements with matching markId
+    //         const matchingTags = recttagRef.current.filter(tag => tag.markId === clickedMarkId);
+
+    //         // Store the matching tags in state
+    //         setSelectedRectTagData(matchingTags);
+
+    //         const menu = document.querySelector('.context-menu');
+    //         if (menu) menu.remove();
+    //         setmatarea(true);
+    //     } else {
+    //         console.error('No rectangle selected or invalid rectangle data');
+    //     }
+    // };
 
     useEffect(() => {
         console.log(matarea);
@@ -4177,7 +4489,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
                 commentdet={commentdet} docdetnum={docdetnum} ></Comment>}
             {/* {editcomment && <CommentStatus onstop={handleclosecommentstatus} commentdet={commentdet}></CommentStatus>} */}
 
-            {matarea && <MtoPidArea allAreasInTable={allAreasInTable}></MtoPidArea>}
+            {matarea && <MtoPidArea allAreasInTable={allAreasInTable} specmatDetails={specmatDetails} selectedRectTagData={selectedRectTagData} sindocid={sindocid} masterid={masterid}></MtoPidArea>}
 
         </>
 
