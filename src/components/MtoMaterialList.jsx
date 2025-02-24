@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx';
 import Alert from './Alert';
 
 
-function MtoMaterialList({ matdataarea }) {
+function MtoMaterialList({ matdataarea,handleOpenSpid }) {
     const [editedRowIndex, setEditedRowIndex] = useState(-1);
     const [editedLineData, setEditedLineData] = useState({});
     const [currentDeleteNumber, setCurrentDeleteNumber] = useState(null);
@@ -13,6 +13,26 @@ function MtoMaterialList({ matdataarea }) {
     const [customAlert, setCustomAlert] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [contextMenu, setContextMenu] = useState({
+        visible: false,
+        x: 0,
+        y: 0,
+        tagNo: null
+    });
+
+    // Add event listener to handle clicks outside menu
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (contextMenu.visible && !event.target.closest('.context-menu')) {
+                setContextMenu({ visible: false, x: 0, y: 0, tagNo: null });
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [contextMenu.visible]);
 
     useEffect(() => {
         window.api.receive('tag-exists', (data) => {
@@ -67,7 +87,7 @@ function MtoMaterialList({ matdataarea }) {
 
     const handleImportClick = () => {
         console.log("enter import");
-        
+
         window.api.send('import-mtodataline-list');
     };
 
@@ -146,6 +166,36 @@ function MtoMaterialList({ matdataarea }) {
         setSearchQuery(e.target.value);
     };
 
+    // Add handler for tag cell click
+    const handleTagCellClick = (event, tagNo, DocNo, docId, markId) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Get the position of the clicked cell
+        const rect = event.currentTarget.getBoundingClientRect();
+
+        setContextMenu({
+            visible: true,
+            x: rect.right, // Position menu to the right of the cell
+            y: rect.top,
+            tagNo: tagNo,
+            DocNo: DocNo,
+            docId: docId,
+            markId: markId
+        });
+    };
+
+    // Handler for "Show P&ID" option
+    const handleShowPID = (tagNo, DocNo, docId, markId) => {
+        console.log(`Show P&ID for tag: ${tagNo} ${DocNo} ${docId}`);
+        // Add your P&ID display logic here
+        window.api.send('mto-pid-tag', tagNo)
+        window.api.send('mto-pid-rect',markId)
+        window.api.send('mto-pid-doc', docId)
+        handleOpenSpid('spid')
+        setContextMenu({ visible: false, x: 0, y: 0, tagNo: null, DocNo: null, docId: null, markId:null });
+    };
+
     // const filteredLineList = matdataarea.filter(line =>
     //     line.tag.toLowerCase().includes(searchQuery.toLowerCase())
     // );
@@ -215,7 +265,20 @@ function MtoMaterialList({ matdataarea }) {
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('M_DocNo', e.target.value)} type="text" value={editedLineData.M_DocNo || ''} /> : mat.M_DocNo}</td>
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('fileNo', e.target.value)} type="text" value={editedLineData.fileNo || ''} /> : mat.fileNo}</td>
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('DocNo', e.target.value)} type="text" value={editedLineData.DocNo || ''} /> : mat.DocNo}</td>
-                                    <td>{editedRowIndex === index ? <input onChange={e => handleChange('tagNo', e.target.value)} type="text" value={editedLineData.tagNo || ''} /> : mat.tagNo}</td>
+                                    {/* <td>{editedRowIndex === index ? <input onChange={e => handleChange('tagNo', e.target.value)} type="text" value={editedLineData.tagNo || ''} /> : mat.tagNo}</td> */}
+                                    <td
+                                        onClick={(e) => handleTagCellClick(e, mat.tagNo, mat.DocNo, mat.docId, mat.markId)}
+                                        style={{ cursor: 'pointer', color: 'blue' }}
+                                    >
+                                        {editedRowIndex === index ?
+                                            <input
+                                                onChange={e => handleChange('tagNo', e.target.value)}
+                                                type="text"
+                                                value={editedLineData.tagNo || ''}
+                                            />
+                                            : mat.tagNo
+                                        }
+                                    </td>
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('areaName', e.target.value)} type="text" value={editedLineData.areaName || ''} /> : mat.areaName}</td>
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('DisName', e.target.value)} type="text" value={editedLineData.DisName || ''} /> : mat.DisName}</td>
                                     <td>{editedRowIndex === index ? <input onChange={e => handleChange('SysName', e.target.value)} type="text" value={editedLineData.SysName || ''} /> : mat.SysName}</td>
@@ -260,6 +323,38 @@ function MtoMaterialList({ matdataarea }) {
                                 </tr>
                             ))}
                         </tbody>
+                        {/* Context Menu */}
+                        {contextMenu.visible && (
+                            <div
+                                className="context-menu"
+                                style={{
+                                    position: 'fixed',
+                                    top: `${contextMenu.y}px`,
+                                    left: `${contextMenu.x}px`,
+                                    backgroundColor: 'white',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    padding: '8px',
+                                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                                    zIndex: 1000,
+                                    color: 'black'
+
+                                }}
+                            >
+                                <div
+                                    onClick={() => handleShowPID(contextMenu.tagNo, contextMenu.DocNo, contextMenu.docId, contextMenu.markId)}
+                                    style={{
+                                        padding: '4px 8px',
+                                        cursor: 'pointer',
+                                        hover: {
+                                            backgroundColor: '#f0f0f0'
+                                        }
+                                    }}
+                                >
+                                    Show P&ID
+                                </div>
+                            </div>
+                        )}
                     </table>
                 </div>
             </form>

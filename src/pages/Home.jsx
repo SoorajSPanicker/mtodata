@@ -56,6 +56,12 @@ import ReviewMtoTag from '../components/ReviewMtoTag';
 import ReviewMtoLine from '../components/ReviewMtoLine';
 import CreateMaterialList from '../components/CreateMaterialList';
 import MtoMaterialList from '../components/MtoMaterialList';
+import CreateIso from '../components/CreateIso';
+import SisoWorkspace from '../components/SisoWorkspace';
+import SisoReview from '../components/SisoReview';
+
+
+
 
 // import { div } from 'three/src/nodes/TSL.js';
 
@@ -94,6 +100,7 @@ function Home() {
   const [showSys, setshowSys] = useState({});
   const [lineList, setLineList] = useState(false);
   const [expandTags, setExpandTags] = useState(false);
+  const [expandIso, setExpandIso] = useState(false);
   const [expandGLobalModal, setexpandGLobalModal] = useState(false);
   const [assigntokenmodal, setAssignTokenModal] = useState(false);
   const [selectedprojectPath, setselectedprojectPath] = useState('')
@@ -187,6 +194,7 @@ function Home() {
   const [reviewlinemto, setreviewlinemto] = useState(false)
   const [reviewmtomat, setreviewmtomat] = useState(false)
   const [reviewmtotable, setreviewmtotable] = useState(false)
+
   // ------------------------------------PID--------------------------//
   const [svgcontent, setsvgcontent] = useState('')
   const [allspids, setAllspids] = useState([]);
@@ -213,7 +221,39 @@ function Home() {
   const [markdet, setmarkdet] = useState([])
   const [recteletag, setrecteletag] = useState([])
 
+  // -------------------------------------SISO-------------------------------------------
 
+  const [createiso, setcreateiso] = useState(false)
+  const [reviewiso, setreviewiso] = useState(false)
+  const [isosheets, setisosheets] = useState([])
+  const [isofilepath, setisofilepath] = useState({})
+  const [isolinelist, setisolinelist] = useState([])
+
+  useEffect(() => {
+    window.api.receive('line-tag-iso', (data) => {
+      console.log(data);
+      setisolinelist(data)
+    })
+  })
+
+  useEffect(() => {
+    window.api.receive('iso-sheet-details', (data) => {
+      console.log(data);
+      setisosheets(data)
+    })
+  })
+
+  useEffect(() => {
+    window.api.receive('wspace-file-path', (data) => {
+      console.log(data);
+      setisofilepath(data)
+    })
+  }, [])
+
+  useEffect(() => {
+    console.log(isosheets);
+
+  }, [isosheets])
   // useEffect(() => {
   //   // Initialize the start time when the component mounts
   //   const initializeSession = () => {
@@ -413,6 +453,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
+    setcreateiso(false);
   }
 
   const handleequipementList = (activesidelink) => {
@@ -450,7 +491,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
 
 
@@ -491,7 +532,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
   }
 
   const handlebulkmodelimport = (activesidelink) => {
@@ -529,7 +570,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
   }
 
   const handleExpandTag = (activesidelink) => {
@@ -566,6 +607,48 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
+    setcreateiso(false);
+
+  }
+
+  const handleIsoOpt = (activesidelink) => {
+    setActiveLink(activesidelink)
+    setExpandTags(false);
+    setEquipment(false);
+    setrightSideNavVisible(false);
+    setbulkimport(false);
+    setLineList(false);
+    setexpandGLobalModal(false);
+    setRegisterTag(false);
+    setReviewtag(false);
+    setExpandDocument(false)
+    setRegisterDocument(false);
+    setTagInfoTable(false);
+    setCommentExpand(false);
+    setEditCommentStatus(false);
+    setCommentReviewOpen(false);
+    setExpandTreeManangement(false);
+    setOpenTreeTable(false);
+    // setSpidOpen(false);
+    setOpenSpec(false);
+    setReviewBranchtable(false);
+    setOpenBranchTable(false);
+    setOpenSpectable(false);
+    setOpenCustomSpec(false)
+    setCreateBranchtable(false);
+    setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
+    setExpandIso(true)
+    setcreateiso(false)
+    setreviewiso(true)
+    setiRoamercanvas(false);
 
   }
 
@@ -605,7 +688,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
   }
 
@@ -635,7 +718,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
   }
 
@@ -670,10 +753,79 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
+    setcreateiso(false);
+  }
 
+  const handlecreateiso = (activetablink) => {
+    setReviewtag(false);
+    setRegisterTag(false);
+    setexpandGLobalModal(false);
+    setEquipment(false);
+    setrightSideNavVisible(false);
+    setbulkimport(false);
+    setLineList(false);
+    setExpandDocument(false)
+    setRegisterDocument(false);
+    setTagInfoTable(false);
+    setCommentExpand(false);
+    setEditCommentStatus(false);
+    setCommentReviewOpen(false);
+    setExpandTreeManangement(false);
+    setOpenTreeTable(false);
+    setSpidOpen(false);
+    setOpenSpec(false);
+    setReviewBranchtable(false);
+    setOpenBranchTable(false);
+    setOpenSpectable(false);
+    setOpenCustomSpec(false)
+    setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
+    setcreateiso(true);
+    setiRoamercanvas(false);
+    setreviewiso(true)
+  }
 
-
-
+  const handlereviewiso = (activetablink) => {
+    setReviewtag(false);
+    setRegisterTag(false);
+    setexpandGLobalModal(false);
+    setEquipment(false);
+    setrightSideNavVisible(false);
+    setbulkimport(false);
+    setLineList(false);
+    setExpandDocument(false)
+    setRegisterDocument(false);
+    setTagInfoTable(false);
+    setCommentExpand(false);
+    setEditCommentStatus(false);
+    setCommentReviewOpen(false);
+    setExpandTreeManangement(false);
+    setOpenTreeTable(false);
+    setSpidOpen(false);
+    setOpenSpec(false);
+    setReviewBranchtable(false);
+    setOpenBranchTable(false);
+    setOpenSpectable(false);
+    setOpenCustomSpec(false)
+    setOpenMto(false);
+    setreviewdocmto(false);
+    setreviewareamto(false);
+    setreviewtagmto(false);
+    setreviewlinemto(false);
+    setcreateMtoMat(false);
+    setreviewmtomat(false);
+    setreviewmtotable(false);
+    setcreateOpenMto(false);
+    setcreateiso(false);
+    setiRoamercanvas(false);
+    setreviewiso(true)
   }
 
   const handleExpandTreeManagement = (activesidelink) => {
@@ -711,7 +863,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
   }
 
@@ -749,7 +901,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
 
   }
@@ -788,7 +940,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
 
 
@@ -827,7 +979,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
   }
 
@@ -867,7 +1019,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
   }
 
@@ -905,7 +1057,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
   }
 
@@ -941,7 +1093,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
   }
 
@@ -977,7 +1129,7 @@ function Home() {
     setreviewmtomat(false)
     setreviewmtotable(false)
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
 
   }
@@ -1014,7 +1166,7 @@ function Home() {
     setreviewmtomat(false)
     setreviewmtotable(false)
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
   }
 
@@ -1051,7 +1203,7 @@ function Home() {
     setreviewmtomat(false)
     setreviewmtotable(false)
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
   }
 
@@ -1130,7 +1282,7 @@ function Home() {
     setreviewmtomat(false)
     setreviewmtotable(false)
     setcreateOpenMto(false);
-
+    setcreateiso(false);
 
   }
 
@@ -1174,7 +1326,7 @@ function Home() {
     setreviewmtomat(false)
     setreviewmtotable(false)
     setcreateOpenMto(false);
-
+    setcreateiso(false);
   }
 
   const handleOpenSpecmanagement = (activesidelink) => {
@@ -1209,6 +1361,7 @@ function Home() {
     setreviewmtomat(false)
     setreviewmtotable(false)
     setcreateOpenMto(false);
+    setcreateiso(false);
   }
 
   const handleopenMtomanagement = (activesidelink) => {
@@ -1518,7 +1671,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
   }
 
   const handleExpandSpecmanagement = (tab) => {
@@ -1538,7 +1691,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
-
+    setcreateiso(false);
   }
 
   const handleExpandCustomSpecmanagement = (tab) => {
@@ -1558,6 +1711,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
+    setcreateiso(false);
   }
 
   const handleReviewBranchtable = () => {
@@ -1574,6 +1728,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
+    setcreateiso(false);
   }
   const handleReviewSpecTable = () => {
     setReviewSpectable(true);
@@ -1589,6 +1744,7 @@ function Home() {
     setreviewmtomat(false);
     setreviewmtotable(false);
     setcreateOpenMto(false);
+    setcreateiso(false);
   }
 
   useEffect(() => {
@@ -3168,6 +3324,29 @@ function Home() {
                     </div>
                   </li>
                   <li>
+                    <div id="tagsSideLnk" className={activeLink === 'expandtag' ? 'sideLnkActive' : 'sideLnkInactive'} onClick={() => handleIsoOpt('expandiiso')}>
+                      <i class="fa fa-tags sideLnkIcon"></i>
+                      <a class="sideLnk">Smart ISO</a>
+                    </div>
+                  </li>
+
+                  {
+                    expandIso &&
+                    <>
+                      <li>
+                        <div id="tagsSideLnk" className='tabActive' onClick={() => handlecreateiso('create')}>
+                          <a class="sideLnk">Create</a>
+                        </div>
+                      </li>
+                      <li>
+                        <div id="tagsSideLnk" className='tabInactive' onClick={() => handlereviewiso('review')}>
+                          {/* onClick={() => handleRegisterTag('regtag')} */}
+                          <a class="sideLnk">Review</a>
+                        </div>
+                      </li>
+                    </>
+                  }
+                  <li>
                     <div id="spidSideLnk" className={activeLink === 'spid' ? 'sideLnkActive' : 'sideLnkInactive'} onClick={() => handleOpenSpid('spid')} >
                       <i class="fa fa-pencil-square sideLnkIcon"></i>
                       <a class="sideLnk">Smart P&ID</a>
@@ -3537,7 +3716,7 @@ function Home() {
               {reviewlinemto && <ReviewMtoLine mtolinelist={mtolinelist} />}
               {/* mtoarea={mtoarea} */}
               {createMtoMat && <CreateMaterialList mtolinelist={mtolinelist} mtoarea={mtoarea} mtolinearea={mtolinearea} specmatDetails={specmatDetails} matdataarea={matdataarea} />}
-              {reviewmtomat && <MtoMaterialList matdataarea={matdataarea}></MtoMaterialList>}
+              {reviewmtomat && <MtoMaterialList matdataarea={matdataarea} handleOpenSpid={handleOpenSpid}></MtoMaterialList>}
               {
 
                 expanddocument && <Documenttable allDocuments={allDocuments} />
@@ -3571,6 +3750,15 @@ function Home() {
               {
                 sysPopUpBox && <SystemPopUp sysPopUpBox={sysPopUpBox} onClose={handleCloseAreaDialog} />
               }
+              {
+                createiso && <CreateIso alltags={alltags} onclose={() => setcreateiso(false)} />
+              }
+
+              {/* {
+                createiso && <SisoWorkspace />
+              } */}
+
+              {reviewiso && <SisoReview isosheets={isosheets} isofilepath={isofilepath} isolinelist={isolinelist} specmatDetails={specmatDetails}/>}
 
 
               {

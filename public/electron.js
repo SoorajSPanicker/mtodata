@@ -251,7 +251,7 @@ function createDatabase() {
             // db.run('CREATE TABLE IF NOT EXISTS MtoDocumentTable(Mto_DocID TEXT, ProjID TEXT, M_DocNo TEXT, M_DocName TEXT, RevNo TEXT, RevDate TEXT, RevDes TEXT, RevPreBy TEXT, RevChecBy TEXT, RevAppBy TEXT, RevPrepDate TEXT,RevCheckDate TEXT,RevAppDate TEXT, ChecklistNo TEXT, MtoSta TEXT, Preocur TEXT, PRIMARY KEY(Mto_DocID))')
             // // db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT, fileNo TEXT, DocNo TEXT, TagNo TEXT, AreaNO TEXT, DisNo TEXT, SysNo TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, PRIMARY KEY(MatID)  )')
             db.run('CREATE TABLE IF NOT EXISTS MtoDocumentTable(Mto_DocID TEXT, ProjID TEXT, M_DocNo TEXT, M_DocName TEXT, RevNo TEXT, RevDate TEXT, RevDes TEXT, RevPreBy TEXT, RevChecBy TEXT, RevAppBy TEXT, RevPrepDate TEXT,RevCheckDate TEXT,RevAppDate TEXT, ChecklistNo TEXT, MtoSta TEXT, Preocur TEXT, PRIMARY KEY(Mto_DocID))')
-            db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT,fileId Text, fileNo TEXT,Drawings_PnPRelPathId TEXT, DocNo TEXT, tagId TEXT, tagNo Text, areaId TEXT , areaName TEXT,DiscId TEXT, DisName TEXT,SysID TEXT, SysName TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT,Sizeone TEXT,Sizetwo TEXT, thkSizeOne TEXT, thkSizeTwo TEXT, schdSizeOne TEXT, schdSizeTwo TEXT,SpecSize TEXT,Length TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_Z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, markId TEXT, rectId TEXT, PRIMARY KEY(MatID)  )')
+            db.run('CREATE TABLE IF NOT EXISTS MtoMaterialListTable(MatID TEXT, M_DocNo TEXT,fileId Text, fileNo TEXT,Drawings_PnPRelPathId TEXT, docId TEX, DocNo TEXT, tagId TEXT, tagNo Text, areaId TEXT , areaName TEXT,DiscId TEXT, DisName TEXT,SysID TEXT, SysName TEXT, Item_Cat TEXT, Item TEXT, Item_Sh_Des TEXT, Item_Lo_Des TEXT, Mat_Cat TEXT, Material TEXT,Sizeone TEXT,Sizetwo TEXT, thkSizeOne TEXT, thkSizeTwo TEXT, schdSizeOne TEXT, schdSizeTwo TEXT,SpecSize TEXT,Length TEXT, Qty TEXT, Unit TEXT, Unit_Weight TEXT, Total_Weight TEXT,ItemPos_X TEXT,ItemPos_Y TEXT,ItemPos_Z TEXT , MTO_Source TEXT , Unit_Weight_Ref TEXT, markId TEXT, rectId TEXT, PRIMARY KEY(MatID)  )')
             db.run('CREATE TABLE IF NOT EXISTS MtoAreaTable(mtoareaId TEXT PRIMARY KEY, area TEXT, name TEXT)')
             db.run('CREATE TABLE IF NOT EXISTS MtoTagTable(mtotagId TEXT, number TEXT, name TEXT, PRIMARY KEY(number))')
 
@@ -267,6 +267,9 @@ function createDatabase() {
             // ------------------------- P&ID MTO--------------------------------------
             // db.run('CREATE TABLE IF NOT EXISTS MarkingDetailsTable(markId TEXT, rectId TEXT, X TEXT, Y TEXT, width TEXT, height TEXT, absoluteX TEXT, absoluteY TEXT, absoluteWidth TEXT, absoluteHeight TEXT, zoomLevel TEXT, fillColor TEXT, strokeColor TEXT, strokeWidth TEXT, PRIMARY KEY(rectId))')
             db.run('CREATE TABLE IF NOT EXISTS MarkingDetailsTable(markId TEXT,  rectId TEXT ,projectCoords TEXT , viewState TEXT, fillColor TEXT , strokeColor TEXT, strokeWidth REAL, PRIMARY KEY(rectId))')
+
+            // -------------------------------Smart ISO--------------------------------------
+            db.run('CREATE TABLE IF NOT EXISTS SisoCreateTable(SisoId TEXT PRIMARY KEY, sNumber TEXT, sName TEXT, sheetNumber TEXT, tag TEXT)')
         }
     });
     databasePath = path.join(selectedFolderPath, 'database.db');
@@ -1401,6 +1404,15 @@ app.whenReady().then(() => {
 
                         console.log('Data in the MarkingDetailsTable table:', rows);
                         mainWindow.webContents.send('group-markings-saved', rows);
+                    });
+                    db.all("SELECT * FROM SisoCreateTable", (err, rows) => {
+                        if (err) {
+                            console.error('Error fetching data from Tree table:', err.message);
+                            return;
+                        }
+
+                        console.log('Data in theSisoCreateTable table:', rows);
+                        mainWindow.webContents.send('iso-sheet-details', rows);
                     });
 
                 });
@@ -10799,8 +10811,8 @@ app.whenReady().then(() => {
             const MatID = generateCustomID('Ml');
 
             projectDb.run(
-                'INSERT INTO MtoMaterialListTable (MatID ,tagNo, areaId, areaName, Item, Sizeone, Sizetwo, thkSizeOne, thkSizeTwo, schdSizeOne, schdSizeTwo, Qty, markId, rectId, DocNo ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [MatID, data.tagNo, data.areaId, data.areaName, data.Item, data.Sizeone, data.Sizetwo, data.thkSizeOne, data.thkSizeTwo, data.schdSizeOne, data.schdSizeTwo, data.Qty, data.markId, data.rectId, data.DocNo],
+                'INSERT INTO MtoMaterialListTable (MatID ,tagNo, areaId, areaName, Item, Sizeone, Sizetwo, thkSizeOne, thkSizeTwo, schdSizeOne, schdSizeTwo, Qty, markId, rectId, DocNo, docId ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [MatID, data.tagNo, data.areaId, data.areaName, data.Item, data.Sizeone, data.Sizetwo, data.thkSizeOne, data.thkSizeTwo, data.schdSizeOne, data.schdSizeTwo, data.Qty, data.markId, data.rectId, data.DocNo, data.docId],
                 function (err) {
                     if (err) {
                         console.error('Error inserting into MtoMaterialListTable:', err.message);
@@ -10822,6 +10834,275 @@ app.whenReady().then(() => {
         })
 
     })
+
+    ipcMain.on('mto-pid-doc', (event, id) => {
+        console.log("Received request to search document by number");
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            projectDb.get('SELECT * FROM Documents WHERE documentId = ?', [id], (err, row) => {
+                if (err) {
+                    console.error('Error querying the database:', err.message);
+                    event.sender.send('tag-found', { success: false, message: 'Error querying the database' });
+                    return;
+                }
+
+                if (row) {
+                    console.log(`Element details: ${row}`);
+                    // event.sender.send('doc-found', { success: true, filePath: filePath });
+                    mainWindow.webContents.send('pid-doc-mto', row);
+                } else {
+                    console.error('Element not found in Elements table');
+                    // event.sender.send('doc-found', { success: false, message: 'File not found in Documents folder' });
+                }
+            });
+        });
+    });
+
+    ipcMain.on('mto-pid-tag', (event, id) => {
+        console.log("Received request to search document by number");
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            projectDb.get('SELECT * FROM Elements WHERE tagNumber = ?', [id], (err, row) => {
+                if (err) {
+                    console.error('Error querying the database:', err.message);
+                    event.sender.send('tag-found', { success: false, message: 'Error querying the database' });
+                    return;
+                }
+
+                if (row) {
+                    console.log(`Element details: ${row}`);
+                    // event.sender.send('doc-found', { success: true, filePath: filePath });
+                    mainWindow.webContents.send('pid-tag-mto', row);
+                } else {
+                    console.error('Element not found in Elements table');
+                    // event.sender.send('doc-found', { success: false, message: 'File not found in Documents folder' });
+                }
+            });
+        });
+    });
+
+    // ipcMain.on('mto-pid-rect', (event, markId) => {
+    //     console.log("Received request to search document by number");
+    //     if (!databasePath) {
+    //         console.error('Project database path not available.');
+    //         return;
+    //     }
+
+    //     const projectDb = new sqlite3.Database(databasePath, (err) => {
+    //         if (err) {
+    //             console.error('Error opening project database:', err.message);
+    //             return;
+    //         }
+
+    //         projectDb.all('SELECT * FROM MtoMaterialListTable WHERE markId = ?', [markId], (err, row) => {
+    //             if (err) {
+    //                 console.error('Error querying the database:', err.message);
+    //                 event.sender.send('tag-found', { success: false, message: 'Error querying the database' });
+    //                 return;
+    //             }
+
+    //             if (row) {
+    //                 console.log(`Element details: ${row}`);
+    //                 // event.sender.send('doc-found', { success: true, filePath: filePath });
+    //                 mainWindow.webContents.send('pid-rect-mto', row);
+    //             } else {
+    //                 console.error('Element not found in Elements table');
+    //                 // event.sender.send('doc-found', { success: false, message: 'File not found in Documents folder' });
+    //             }
+    //         });
+    //     });
+    // });
+
+    ipcMain.on('mto-pid-rect', (event, markId) => {
+        console.log("Received request to search document by number");
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            projectDb.all('SELECT * FROM MarkingDetailsTable WHERE markId = ?', [markId], (err, row) => {
+                if (err) {
+                    console.error('Error querying the database:', err.message);
+                    event.sender.send('tag-found', { success: false, message: 'Error querying the database' });
+                    return;
+                }
+
+                if (row) {
+                    console.log(`Element details: ${row}`);
+                    // event.sender.send('doc-found', { success: true, filePath: filePath });
+                    mainWindow.webContents.send('pid-rect-mto', row);
+                } else {
+                    console.error('Element not found in Elements table');
+                    // event.sender.send('doc-found', { success: false, message: 'File not found in Documents folder' });
+                }
+            });
+        });
+    });
+
+
+    ipcMain.on('iso-sheet-reg', (event, data) => {
+
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            const SisoId = generateCustomID('ISO');
+
+            projectDb.run(
+                'INSERT INTO SisoCreateTable (SisoId, sNumber, sName, sheetNumber, tag) VALUES (?, ?, ?, ?, ?)',
+                [SisoId, data.sNumber, data.sName, data.sheetNumber, data.tag],
+                function (err) {
+                    if (err) {
+                        console.error('Error inserting into SisoCreateTable:', err.message);
+                        return;
+                    }
+                    console.log(`Row inserted with ISO number: ${data.sNumber}`);
+                }
+
+            );
+            projectDb.all("SELECT * FROM SisoCreateTable", (err, rows) => {
+                if (err) {
+                    console.error('Error fetching data from Tree table:', err.message);
+                    return;
+                }
+
+                console.log('Data in the SisoCreateTable table:', rows);
+                mainWindow.webContents.send('iso-sheet-details', rows);
+            });
+        })
+
+    })
+
+
+    ipcMain.on('file-path-wspace', (event, number) => {
+        console.log("Received request to search unassigned by number");
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            projectDb.get('SELECT filename FROM Tags WHERE number = ?', [number], (err, row) => {
+                if (err) {
+                    console.error('Error querying the database:', err.message);
+                    event.sender.send('unassigned-found', { success: false, message: 'Error querying the database' });
+                    return;
+                }
+
+                if (row) {
+                    const documentsFolderPath = path.join(selectedFolderPath, 'Tags');
+                    const filePath = path.join(documentsFolderPath, row.filename);
+                    console.log("Tags", filePath);
+                    const filename = path.basename(filePath);
+
+
+                    if (fs.existsSync(filePath)) {
+                        console.log(`File found: ${filePath}`);
+                        event.sender.send('doc-found', { success: true, filePath: filePath });
+                        mainWindow.webContents.send('wspace-file-path', { number: number, filePath: filePath, filename: filename });
+                    } else {
+                        console.error('File not found in Unassigned folder');
+                        event.sender.send('doc-found', { success: false, message: 'File not found in Tags folder' });
+                    }
+                } else {
+                    console.error('Unassigned not found in database');
+                    event.sender.send('doc-found', { success: false, message: 'Tags not found in database' });
+                }
+            });
+        });
+    });
+
+
+    // ipcMain.on('read-glb-file', (event, filePath) => {
+    //     try {
+    //         // Read the file
+    //         const fileData = fs.readFileSync(filePath);
+    //         // Send the data back to the renderer
+    //         event.reply('glb-file-data', fileData);
+    //     } catch (error) {
+    //         console.error('Error reading GLB file:', error);
+    //         event.reply('glb-file-data-error', error.message);
+    //     }
+    // });
+
+    // Add this to your existing IPC handlers
+    ipcMain.handle('read-glb-file', async (event, filePath) => {
+        try {
+            return await fs.promises.readFile(filePath);
+        } catch (error) {
+            console.error('Error reading GLB file:', error);
+            throw error;
+        }
+    });
+
+    ipcMain.on('iso-line-tag', (event, id) => {
+        console.log("Received request to search document by number");
+        if (!databasePath) {
+            console.error('Project database path not available.');
+            return;
+        }
+
+        const projectDb = new sqlite3.Database(databasePath, (err) => {
+            if (err) {
+                console.error('Error opening project database:', err.message);
+                return;
+            }
+
+            projectDb.get('SELECT * FROM LineList WHERE tag = ?', [id], (err, row) => {
+                if (err) {
+                    console.error('Error querying the database:', err.message);
+                    event.sender.send('tag-found', { success: false, message: 'Error querying the database' });
+                    return;
+                }
+
+                if (row) {
+                    console.log(`Line tag details: ${row}`);
+                    // event.sender.send('doc-found', { success: true, filePath: filePath });
+                    mainWindow.webContents.send('line-tag-iso', row);
+                } else {
+                    console.error('Element not found in Elements table');
+                    // event.sender.send('doc-found', { success: false, message: 'File not found in Documents folder' });
+                }
+            });
+        });
+    });
+
 
 });
 app.on('window-all-closed', () => {

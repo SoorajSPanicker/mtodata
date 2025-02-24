@@ -12,7 +12,7 @@ import PidMatAdd from './PidMatAdd';
 import MtoPidArea from './MtoPidArea';
 
 
-function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible, markdet, specmatDetails, recteletag, allAreasInTable, masterid }) {
+function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNavOpen, allComments, allareas, sindocid, tagdocsel, setopenThreeCanvas, setiRoamercanvas, setOpenSpidCanvas, setSpidOpen, allCommentStatus, setrightSideNavVisible, markdet, specmatDetails, recteletag, allAreasInTable, masterid, tagData, rectData }) {
     const canvasRef = useRef(null);
     let canvas = canvasRef.current;
     const viewRef = useRef(null);
@@ -115,6 +115,19 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
     const [matarea, setmatarea] = useState(false)
     const [recttagcol, setrecttagcol] = useState([])
     const [selectedRectTagData, setSelectedRectTagData] = useState([]);
+
+    // const [highlightedElements, setHighlightedElements] = useState([]);
+    // const [highlightedRectangles, setHighlightedRectangles] = useState([]);
+
+
+
+    // useEffect(() => {
+    //     console.log(tagData);
+    // }, [tagData])
+    // useEffect(() => {
+    //     console.log(rectData);
+    // }, [rectData])
+
 
     useEffect(() => {
         console.log(masterid);
@@ -341,6 +354,60 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
 
     }, [conndoc, highlightConndoc]);
 
+    // useEffect(() => {
+    //     if (!viewRef.current || !masdoc) return;
+
+    //     if (overlayGroupRef.current) {
+    //         overlayGroupRef.current.remove();
+    //     }
+
+    //     overlayGroupRef.current = new paper.Group();
+    //     if (highlightMasdoc) {
+    //         const highlightRect = new paper.Path.Rectangle({
+    //             point: [0, 0],
+    //             size: paper.view.size,
+    //             fillColor: new paper.Color(1, 1, 0, 0.5) // Yellow with 50% opacity
+    //         });
+    //         overlayGroupRef.current.addChild(highlightRect);
+    //     }
+
+    //     paper.project.importSVG(masdoc, (importedSVG) => {
+    //         importedSVG.getItems({ class: paper.Path }).forEach((item, index) => {
+    //             if (!originalIdsMap.current.has(item.pathData)) {
+    //                 item._id = `overlay-path-${index}`;
+    //                 originalIdsMap.current.set(item.pathData, item._id);
+    //             } else {
+    //                 item._id = originalIdsMap.current.get(item.pathData);
+    //             }
+    //             item.data.fromMasdoc = true;
+    //         });
+
+    //         importedSVG.getItems({ class: paper.PointText }).forEach((item, index) => {
+    //             if (!originalIdsMap.current.has(item.content)) {
+    //                 item._id = `overlay-text-${index}`;
+    //                 originalIdsMap.current.set(item.content, item._id);
+    //             } else {
+    //                 item._id = originalIdsMap.current.get(item.content);
+    //             }
+    //             item.data.fromMasdoc = true;
+    //         });
+
+    //         importedSVG.opacity = 0.5; // Set transparency for the overlay
+
+    //         importedSVG.fitBounds(new paper.Rectangle(new Point(0, 0), new Size(paper.view.size.width, paper.view.size.height)));
+    //         overlayGroupRef.current.addChild(importedSVG);
+    //         // overlayGroupRef.current.position = paper.view.center;
+    //         overlayGroupRef.current.fitBounds(paper.view.bounds);
+    //         paper.view.draw();
+
+    //         masdocElementsRef.current = importedSVG.getItems({ class: paper.Item });
+    //         // handleResize();
+    //         startDrawingRectangles();
+
+    //     });
+
+    // }, [masdoc, highlightMasdoc]);
+
     useEffect(() => {
         if (!viewRef.current || !masdoc) return;
 
@@ -353,7 +420,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             const highlightRect = new paper.Path.Rectangle({
                 point: [0, 0],
                 size: paper.view.size,
-                fillColor: new paper.Color(1, 1, 0, 0.5) // Yellow with 50% opacity
+                fillColor: new paper.Color(1, 1, 0, 0.5)
             });
             overlayGroupRef.current.addChild(highlightRect);
         }
@@ -379,21 +446,337 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
                 item.data.fromMasdoc = true;
             });
 
-            importedSVG.opacity = 0.5; // Set transparency for the overlay
-
+            importedSVG.opacity = 0.5;
             importedSVG.fitBounds(new paper.Rectangle(new Point(0, 0), new Size(paper.view.size.width, paper.view.size.height)));
             overlayGroupRef.current.addChild(importedSVG);
-            // overlayGroupRef.current.position = paper.view.center;
             overlayGroupRef.current.fitBounds(paper.view.bounds);
             paper.view.draw();
 
             masdocElementsRef.current = importedSVG.getItems({ class: paper.Item });
-            // handleResize();
+
+            // Now that SVG is loaded, handle tag selection and rectangle drawing
+            if (tagData?.elementId) {
+                // Select the element based on tagData
+                paper.project.getItems({ class: paper.Path }).forEach(item => {
+                    if (item._id === tagData.elementId) {
+                        console.log('Found and selecting item:', item._id);
+                        item.selected = true;
+                    }
+                });
+            }
+
+            if (rectData?.length > 0) {
+                // Create drawing layer if it doesn't exist
+                if (!drawingLayerRef.current) {
+                    drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+                }
+                drawingLayerRef.current.removeChildren();
+
+                // Create rectangles from rectData
+                rectData.forEach(rectInfo => {
+                    try {
+                        const projectCoords = JSON.parse(rectInfo.projectCoords);
+                        const viewState = JSON.parse(rectInfo.viewState);
+
+                        const topLeft = new paper.Point(projectCoords.topLeft[1], projectCoords.topLeft[2]);
+                        const bottomRight = new paper.Point(projectCoords.bottomRight[1], projectCoords.bottomRight[2]);
+
+                        const rectangle = new paper.Path.Rectangle({
+                            from: topLeft,
+                            to: bottomRight,
+                            strokeColor: rectInfo.strokeColor,
+                            fillColor: new paper.Color(rectInfo.fillColor).multiply(0.5),
+                            opacity: 0.5,
+                            strokeWidth: rectInfo.strokeWidth / paper.view.zoom,
+                            data: {
+                                type: 'rectangle',
+                                markId: rectInfo.markId,
+                                rectId: rectInfo.rectId,
+                                originalZoom: viewState.zoom
+                            }
+                        });
+
+                        drawingLayerRef.current.addChild(rectangle);
+                    } catch (error) {
+                        console.error('Error creating rectangle:', error);
+                    }
+                });
+            }
+
+            // Add click handler for outside clicks
+            const handleOutsideClick = (event) => {
+                const point = new paper.Point(
+                    event.clientX - canvasRef.current.getBoundingClientRect().left,
+                    event.clientY - canvasRef.current.getBoundingClientRect().top
+                );
+                const projectPoint = paper.view.viewToProject(point);
+
+                let clickedInRectangle = false;
+                if (drawingLayerRef.current) {
+                    drawingLayerRef.current.children.forEach(rect => {
+                        if (rect.contains(projectPoint)) {
+                            clickedInRectangle = true;
+                        }
+                    });
+                }
+
+                if (!clickedInRectangle) {
+                    // Deselect elements and remove rectangles
+                    paper.project.getItems({ selected: true }).forEach(item => {
+                        item.selected = false;
+                    });
+                    if (drawingLayerRef.current) {
+                        drawingLayerRef.current.removeChildren();
+                    }
+                    paper.view.draw();
+                }
+            };
+
+            document.addEventListener('click', handleOutsideClick);
+            return () => {
+                document.removeEventListener('click', handleOutsideClick);
+            };
+
             startDrawingRectangles();
-
         });
+    }, [masdoc, highlightMasdoc, tagData, rectData]);
 
-    }, [masdoc, highlightMasdoc]);
+
+
+
+    // Add these useEffects to your Canvas component
+
+    // useEffect(() => {
+    //     // Only proceed if we have valid tagData and the canvas is set up
+    //     if (tagData?.elementId && canvasRef.current) {
+    //         // Select the element based on tagData
+    //         paper.project.getItems({ class: paper.Path }).forEach(item => {
+    //             if (item._id === tagData.elementId) {
+    //                 item.selected = true;
+    //             }
+    //         });
+
+    //         // Add click listener to handle deselection
+    //         const handleOutsideClick = (event) => {
+    //             const point = new paper.Point(
+    //                 event.clientX - canvasRef.current.getBoundingClientRect().left,
+    //                 event.clientY - canvasRef.current.getBoundingClientRect().top
+    //             );
+    //             const hitResult = paper.project.hitTest(paper.view.viewToProject(point), {
+    //                 stroke: true,
+    //                 segments: true,
+    //                 tolerance: 5,
+    //             });
+
+    //             if (!hitResult || hitResult.item._id !== tagData.elementId) {
+    //                 // Deselect the element if clicking outside
+    //                 paper.project.getItems({ selected: true }).forEach(item => {
+    //                     item.selected = false;
+    //                 });
+    //             }
+    //         };
+
+    //         document.addEventListener('click', handleOutsideClick);
+    //         return () => {
+    //             document.removeEventListener('click', handleOutsideClick);
+    //         };
+    //     }
+    // }, [tagData, canvasRef.current]);
+
+    // useEffect(() => {
+    //     // Only proceed if we have valid rectData and the canvas is set up
+    //     if (rectData?.length > 0 && canvasRef.current && drawingLayerRef.current) {
+    //         // Create a new layer for the rectangles if it doesn't exist
+    //         if (!drawingLayerRef.current) {
+    //             drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //         }
+    //         drawingLayerRef.current.removeChildren();
+
+    //         // Create rectangles from rectData
+    //         rectData.forEach(rectInfo => {
+    //             try {
+    //                 const projectCoords = JSON.parse(rectInfo.projectCoords);
+    //                 const viewState = JSON.parse(rectInfo.viewState);
+
+    //                 const topLeft = new paper.Point(projectCoords.topLeft[1], projectCoords.topLeft[2]);
+    //                 const bottomRight = new paper.Point(projectCoords.bottomRight[1], projectCoords.bottomRight[2]);
+
+    //                 const rectangle = new paper.Path.Rectangle({
+    //                     from: topLeft,
+    //                     to: bottomRight,
+    //                     strokeColor: rectInfo.strokeColor,
+    //                     fillColor: new paper.Color(rectInfo.fillColor).multiply(0.5),
+    //                     strokeWidth: rectInfo.strokeWidth / paper.view.zoom,
+    //                     data: {
+    //                         type: 'rectangle',
+    //                         markId: rectInfo.markId,
+    //                         rectId: rectInfo.rectId,
+    //                         originalZoom: viewState.zoom
+    //                     }
+    //                 });
+
+    //                 drawingLayerRef.current.addChild(rectangle);
+    //             } catch (error) {
+    //                 console.error('Error creating rectangle:', error);
+    //             }
+    //         });
+
+    //         // Add click listener to handle rectangle removal
+    //         const handleOutsideClick = (event) => {
+    //             const point = new paper.Point(
+    //                 event.clientX - canvasRef.current.getBoundingClientRect().left,
+    //                 event.clientY - canvasRef.current.getBoundingClientRect().top
+    //             );
+    //             const projectPoint = paper.view.viewToProject(point);
+
+    //             let clickedInRectangle = false;
+    //             drawingLayerRef.current.children.forEach(rect => {
+    //                 if (rect.contains(projectPoint)) {
+    //                     clickedInRectangle = true;
+    //                 }
+    //             });
+
+    //             if (!clickedInRectangle) {
+    //                 // Remove rectangles if clicking outside
+    //                 drawingLayerRef.current.removeChildren();
+    //                 paper.view.draw();
+    //             }
+    //         };
+
+    //         document.addEventListener('click', handleOutsideClick);
+    //         return () => {
+    //             document.removeEventListener('click', handleOutsideClick);
+    //         };
+    //     }
+    // }, [rectData, canvasRef.current]);
+
+
+
+    // // Add this effect to handle tagData and rectData changes
+    // useEffect(() => {
+    //     // Clear any existing highlights when component mounts or unmounts
+    //     return () => {
+    //         clearHighlights();
+    //     };
+    // }, []);
+
+    // useEffect(() => {
+    //     if (tagData && rectData) {
+    //         // Clear any existing highlights
+    //         clearHighlights();
+
+    //         // // Highlight the element from tagData
+    //         // highlightElement(tagData.elementId);
+
+    //         // Recreate rectangles from rectData
+    //         recreateHighlightRectangles(rectData);
+
+    //         // Add click listener for clearing highlights
+    //         document.addEventListener('click', handleOutsideClick);
+
+    //         return () => {
+    //             document.removeEventListener('click', handleOutsideClick);
+    //         };
+    //     }
+    // }, [tagData, rectData]);
+
+    // // Function to clear all highlights
+    // const clearHighlights = () => {
+    //     // Clear highlighted elements
+    //     highlightedElements.forEach(item => {
+    //         if (item && item.selected) {
+    //             item.selected = false;
+    //         }
+    //     });
+    //     setHighlightedElements([]);
+
+    //     // Remove highlighted rectangles
+    //     highlightedRectangles.forEach(rect => {
+    //         if (rect) {
+    //             rect.remove();
+    //         }
+    //     });
+    //     setHighlightedRectangles([]);
+    // };
+
+    // // // Function to highlight specific element
+    // // const highlightElement = (elementId) => {
+    // //     const items = paper.project.getItems({
+    // //         match: (item) => item._id === elementId && item.data.fromMasdoc
+    // //     });
+
+    // //     items.forEach(item => {
+    // //         item.selected = true;
+    // //         setHighlightedElements(prev => [...prev, item]);
+    // //     });
+    // // };
+
+    // // Function to recreate rectangles
+    // const recreateHighlightRectangles = (rectData) => {
+    //     if (!drawingLayerRef.current) {
+    //         drawingLayerRef.current = new paper.Layer({ name: 'highlightLayer' });
+    //     }
+
+    //     const newRectangles = rectData.map(rectData => {
+    //         try {
+    //             const projectCoords = JSON.parse(rectData.projectCoords);
+    //             const viewState = JSON.parse(rectData.viewState);
+
+    //             const topLeft = new paper.Point(projectCoords.topLeft[1], projectCoords.topLeft[2]);
+    //             const bottomRight = new paper.Point(projectCoords.bottomRight[1], projectCoords.bottomRight[2]);
+
+    //             const rectangle = new paper.Path.Rectangle({
+    //                 from: topLeft,
+    //                 to: bottomRight,
+    //                 strokeColor: rectData.strokeColor,
+    //                 fillColor: new paper.Color(rectData.fillColor).multiply(0.5),
+    //                 strokeWidth: rectData.strokeWidth / paper.view.zoom,
+    //                 opacity: 0.5,
+    //                 data: {
+    //                     type: 'rectangle',
+    //                     markId: rectData.markId,
+    //                     rectId: rectData.rectId,
+    //                     originalZoom: viewState.zoom
+    //                 }
+    //             });
+
+    //             drawingLayerRef.current.addChild(rectangle);
+    //             return rectangle;
+    //         } catch (error) {
+    //             console.error('Error recreating rectangle:', error);
+    //             return null;
+    //         }
+    //     }).filter(Boolean); // Remove any null values
+
+    //     setHighlightedRectangles(newRectangles);
+    // };
+
+    // // Handler for clicks outside rectangles
+    // const handleOutsideClick = (event) => {
+    //     // Get the canvas element
+    //     const canvas = canvasRef.current;
+    //     if (!canvas) return;
+
+    //     // Convert click coordinates to paper.js coordinates
+    //     const rect = canvas.getBoundingClientRect();
+    //     const point = new paper.Point(
+    //         event.clientX - rect.left,
+    //         event.clientY - rect.top
+    //     );
+
+    //     // Convert to project coordinates
+    //     const projectPoint = paper.view.viewToProject(point);
+
+    //     // Check if click is inside any highlighted rectangle
+    //     const clickedInsideRectangle = highlightedRectangles.some(rect =>
+    //         rect && rect.contains(projectPoint)
+    //     );
+
+    //     // If click is outside rectangles, clear highlights
+    //     if (!clickedInsideRectangle) {
+    //         clearHighlights();
+    //     }
+    // };
 
 
 
@@ -3017,8 +3400,11 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
         setOpenSpidCanvas(false);
         setSpidOpen(false);
         setrightSideNavVisible(true);
-
     }
+
+
+
+
     const handledrawhigh = (e) => {
         setenableselect(false)
         setpanonoff(false)
@@ -4497,3 +4883,4 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
 }
 
 export default Canvas
+

@@ -1713,27 +1713,30 @@ img#close {
 
 
 span.fg-space {
-  margin:0 5px;
+  margin: 0 5px;
 }
-div#mtoItemAddDiv div.popup{
+
+div#mtoItemAddDiv div.popup {
   min-width: 600px;
 }
 
-div#mtoItemAddDiv div.input-section{
+div#mtoItemAddDiv div.input-section {
   text-align: center;
 }
 
-div#mtoItemAddDiv div.input-section input,button {
+div#mtoItemAddDiv div.input-section input,
+button {
   margin-top: 10px;
   margin-bottom: 10px;
 }
-div#specSearchResultDiv{
+
+div#specSearchResultDiv {
   white-space: nowrap;
   max-height: calc(100vh - 388px);
   overflow: auto;
 }
 
-div#specSearchResultDiv div.mtoItemSearchListDiv{
+div#specSearchResultDiv div.mtoItemSearchListDiv {
   margin: 10px;
   display: flex;
   padding: 10px;
@@ -1743,13 +1746,13 @@ div#specSearchResultDiv div.mtoItemSearchListDiv{
   align-items: center;
 }
 
-div#specSearchResultDiv div i{
+div#specSearchResultDiv div i {
   font-size: 25px;
   margin: auto;
   color: #7980d4;
 }
 
-div#specSearchResultDiv div input{
+div#specSearchResultDiv div input {
   width: 50px;
   text-align: center;
 }
@@ -1792,10 +1795,364 @@ div#specSearchResultDiv div input{
 
 .delete-icon {
   cursor: pointer !important;
-  color: #ff4d4d !important;  /* Red color for delete */
+  color: #ff4d4d !important;
+  /* Red color for delete */
   transition: color 0.2s;
 }
 
 .delete-icon:hover {
   color: #ff0000 !important;
+}
+
+/* --------------------------------------------------------------------- */
+
+/* MEASURE */
+div.measureDiv {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 240px;
+  z-index: 1;
+  display: none;
+}
+
+input.measureFlag:checked+div.measureDiv {
+  width: 285px;
+}
+
+div.measureInfo {
+  width: 250px;
+  height: 230px;
+  padding: 5px;
+  background-color: #52526B;
+  border: 1px solid #52526B;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  display: none;
+}
+
+input.measureFlag:checked+div.measureDiv>div.measureInfo {
+  display: inline-block;
+}
+
+input#themeFlag:checked+div#viewer>div.measureDiv>div.measureInfo {
+  background-color: #E0E0E0;
+  border: 1px solid #E0E0E0;
+  border-left: none;
+}
+
+div.hsMeasureInfo {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  padding: 9px 4px;
+  background-color: #45455E;
+  border-radius: 0 7px 7px 0;
+  line-height: 16px;
+  font-size: 13px;
+  color: #F0F0F0;
+  writing-mode: vertical-lr;
+  cursor: default;
+}
+
+div.hsMeasureInfo:hover {
+  background-color: #4F4F68;
+}
+
+input#themeFlag:checked+div#viewer>div.measureDiv>div.hsMeasureInfo {
+  background-color: #D3D3D3;
+  color: black;
+}
+
+input#themeFlag:checked+div#viewer>div.measureDiv>div.hsMeasureInfo:hover {
+  background-color: #DDDDDD;
+}
+
+table.measureInfoTable {
+  width: 100%;
+  height: 100%;
+  color: white;
+  border-color: #5c5c75;
+}
+
+input#themeFlag:checked+div#viewer>div.measureDiv>div.measureInfo>table.measureInfoTable {
+  color: black;
+  border-color: #D6D6D6;
+}
+
+table.measureInfoTable tbody {
+  border-color: inherit;
+}
+
+table.measureInfoTable tr {
+  background-color: initial;
+  border-color: inherit !important;
+}
+
+table.measureInfoTable th {
+  padding: 5px;
+  background-color: inherit !important;
+  border: none !important;
+  color: inherit;
+}
+
+table.measureInfoTable td {
+  background-color: inherit !important;
+  border: none !important;
+  text-align: center;
+}
+
+table.measureInfoTable .left {
+  border-right: 1px solid !important;
+  border-color: inherit !important;
+}
+
+th.measureCornerCell {
+  width: 62px;
+}
+
+/* ----------------- */
+
+.topBordered {
+  border-top: 1px solid !important;
+}
+
+.left {
+  text-align: left;
+}
+
+div#sisoSwitchDiv {
+  position: absolute;
+  bottom: 45px;
+  left: 0;
+  font-size: 13px;
+  cursor: default;
+  z-index: 1;
+}
+
+i.sisoSwitch {
+  margin-bottom: 10px;
+  margin-left: 10px;
+  color: #F0F0F0;
+  cursor: pointer;
+}
+
+i#sisoDimSwitch {
+  color: #F0F0F0;
+}
+
+div#sisoLnkDocList {
+  bottom: 44px;
+  left: 45px;
+}
+
+div#sisoSideDiv {
+  position: absolute;
+  left: 70%;
+  width: 30%;
+  height: 100%;
+  overflow: hidden;
+}
+
+div#sisoMTODiv {
+  height: calc(70% - 2px);
+}
+
+div#sisoMTODiv div.sisoContentDiv {
+  overflow: hidden;
+}
+
+div#sisoMTODiv div.sisoMatTableDiv {
+  width: 100%;
+  height: calc(50% - 33px);
+  overflow: auto;
+}
+
+div#sisoRevisionDiv {
+  top: 70%;
+  height: calc(30% - 68px);
+}
+
+div#sisoDocDataDiv {
+  top: calc(100% - 66px);
+  width: calc(100% - 22px);
+  height: 54px;
+  padding: 10px;
+  padding-bottom: 0;
+  overflow: auto;
+}
+
+div.sisoDdBlock {
+  display: inline-block;
+  width: 85px;
+  margin: 0 10px 10px 10px;
+  vertical-align: top;
+}
+
+div.sisoDdBlock label {
+  display: block;
+  margin-top: 4px;
+}
+
+div#sisoBottomDiv {
+  position: absolute;
+  bottom: 0;
+  width: 70%;
+  height: 30%;
+  overflow: hidden;
+}
+
+div#sisoNotesDiv {
+  width: calc(30% - 2px);
+}
+
+div#sisoLineDataDiv {
+  left: 30%;
+  width: calc(70% - 2px);
+}
+
+div#sisoLineDataDiv input,
+div#sisoDocDataDiv input {
+  margin-top: 3px;
+  padding: 0;
+  width: 100%;
+  background-color: transparent !important;
+  border: none;
+  color: #F0F0F0;
+}
+
+div#sisoLdContentDiv {
+  padding: 0 10px;
+  width: calc(100% - 20px) !important;
+  height: calc(100% - 33px) !important;
+}
+
+div.sisoLdBlock {
+  display: inline-block;
+  width: 217px;
+  margin: 0 10px 10px 10px;
+  vertical-align: top;
+}
+
+div.sisoLdBlock label {
+  display: block;
+  margin-top: 4px;
+}
+
+a.sisoLdDoc {
+  color: #F0F0F0;
+  display: block;
+  margin-top: 4px;
+}
+
+label.sisoLdValue {
+  color: white;
+}
+
+/* --------------------------- */
+
+div#sisoCanvasDiv {
+  position: absolute;
+  width: calc(70% - 2px);
+  height: calc(70% - 2px);
+}
+
+div#sisoCanvasCtrls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  overflow-y: auto;
+  z-index: 1;
+}
+
+@media only screen and (min-height: 1010px) {
+  div#sisoCanvasCtrls {
+    height: auto;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+@media only screen and (min-height: 654px) {
+  input#sisoFsFlag:checked+div#sisoCanvasCtrls {
+    height: auto;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+div#sisoCanvasCtrls img.button {
+  width: 28px;
+}
+
+@media only screen and (min-height: 654px) {
+  input#spoolFsFlag:checked+div#sisoCanvasCtrls {
+    height: auto;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+div.pad {
+  position: absolute;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  margin: 2px;
+  background-color: #303030;
+}
+
+div.pad h2 {
+  margin: 8px;
+  font-size: 13px;
+  color: #8C97F5;
+  text-align: center;
+  white-space: nowrap;
+}
+
+div.pad h3 {
+  margin: 8px;
+  font-size: 13px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+div.pad i.expandButton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 7px;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+div.pad i.cornerButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 7px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+div#siso3D {
+  width: 100%;
+  height: 100%;
+}
+
+div#smartIsoDiv div.sisoContentDiv {
+  position: absolute;
+  top: 33px;
+  width: 100%;
+  height: calc(100% - 33px);
+  overflow: auto;
+}
+
+label.sisoLabel {
+  color: #7E7E7E;
+ 
 }

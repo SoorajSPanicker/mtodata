@@ -99,7 +99,8 @@ function PidMatAdd({ specmatDetails, name, areaid, sindocid, masterid, selectedR
                 schdSizeTwo: searchResults[0].schdSizeTwo,
                 markId: rectTag.markId,   // Assign markId from rectTag
                 rectId: rectTag.rectId,   // Assign rectId from rectTag
-                DocNo: masterid           // Use existing master document ID
+                DocNo: masterid,           // Use existing master document ID
+                docId: sindocid
             };
     
             // Log the data object (optional, for debugging purposes)

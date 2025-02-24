@@ -6,7 +6,7 @@ import Alert from './Alert';
 import DeleteConfirm from './DeleteConfirm';
 
 
-function Spid({ allDocuments, openSpidCanvas, setOpenSpidCanvas, alltags, allspids, svgcontent, allareas, setopenThreeCanvas, setiRoamercanvas, setSpidOpen, allCommentStatus, allComments, tagdocsel, setsvgcontent, markdet, specmatDetails, recteletag, allAreasInTable}) {
+function Spid({ allDocuments, openSpidCanvas, setOpenSpidCanvas, alltags, allspids, svgcontent, allareas, setopenThreeCanvas, setiRoamercanvas, setSpidOpen, allCommentStatus, allComments, tagdocsel, setsvgcontent, markdet, specmatDetails, recteletag, allAreasInTable }) {
   const [openRegisterDocument, setOpenRegisterDocument] = useState(false)
   const [documentnumber, setDocumentNumber] = useState('')
 
@@ -37,6 +37,34 @@ function Spid({ allDocuments, openSpidCanvas, setOpenSpidCanvas, alltags, allspi
   const [ismaster, setmaster] = useState({});
   const [showmasConfirm, setShowmasConfirm] = useState(false);
   const [masterid, setmasterid] = useState('');
+  const [tagData, setTagData] = useState([]);
+  const [rectData, setRectData] = useState([]);
+
+  useEffect(() => {
+    window.api.receive('pid-tag-mto', (data) => {
+      console.log(data);
+      setTagData(data);
+    });
+  }, [])
+
+  useEffect(() => {
+    window.api.receive('pid-rect-mto', (data) => {
+      console.log(data);
+      setRectData(data);
+    });
+  }, [])
+  useEffect(() => {
+
+    window.api.receive('pid-doc-mto', (data) => {
+      console.log(data);
+      handledocdis(data.number, data.documentId)
+      // data.forEach(element => {
+      //   handledocdis(element.number, element.docId)
+      // });
+
+    });
+
+  }, [])
 
   const handledocdis = async (id, docId) => {
     console.log("Enter doc click");
@@ -168,7 +196,7 @@ function Spid({ allDocuments, openSpidCanvas, setOpenSpidCanvas, alltags, allspi
   return (
     <div style={{ zIndex: '1', position: 'absolute', width: '100%', height: '90vh', backgroundColor: '#33334c', color: 'white' }}>
       {
-        openSpidCanvas ? (<Canvas alltags={alltags} openSpidCanvas={openSpidCanvas} svgcontent={svgcontent} setsvgcontent={setsvgcontent} allspids={allspids} mascontent={mascontent} allareas={allareas} sindocid={sindocid} setopenThreeCanvas={setopenThreeCanvas} setiRoamercanvas={setiRoamercanvas} setOpenSpidCanvas={setOpenSpidCanvas} setSpidOpen={setSpidOpen} allCommentStatus={allCommentStatus} allComments={allComments} tagdocsel={tagdocsel} markdet={markdet} specmatDetails={specmatDetails} recteletag={recteletag} allAreasInTable={allAreasInTable} masterid={masterid} />
+        openSpidCanvas ? (<Canvas alltags={alltags} openSpidCanvas={openSpidCanvas} svgcontent={svgcontent} setsvgcontent={setsvgcontent} allspids={allspids} mascontent={mascontent} allareas={allareas} sindocid={sindocid} setopenThreeCanvas={setopenThreeCanvas} setiRoamercanvas={setiRoamercanvas} setOpenSpidCanvas={setOpenSpidCanvas} setSpidOpen={setSpidOpen} allCommentStatus={allCommentStatus} allComments={allComments} tagdocsel={tagdocsel} markdet={markdet} specmatDetails={specmatDetails} recteletag={recteletag} allAreasInTable={allAreasInTable} masterid={masterid} tagData={tagData} rectData={rectData}/>
         ) : (<div>
           <div className="head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px' }}>
             <h3 style={{ fontWeight: 'bold' }}>Smart P&IDs</h3>
