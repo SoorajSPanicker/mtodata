@@ -82,21 +82,21 @@ function SisoMaterialAdd({specmatDetails,handleclose}) {
        console.log(searchResults);
        console.log(searchResults[0].thkSizeOne);
        
-        const data = {
-            tagId: mttagid,
-            tagNo: mttagno,
-            areaId: mtareaid,
-            areaName: mtareaname,
-            Qty: mtlqty,
-            Item: materialval,
-            Sizeone: sizeoneval,
-            Sizetwo: sizetwoval,
-            thkSizeOne: searchResults[0].thkSizeOne,
-            thkSizeTwo: searchResults[0].thkSizeTwo,
-            schdSizeOne: searchResults[0].schdSizeOne,
-            schdSizeTwo: searchResults[0].schdSizeTwo
-        }
-        // window.api.send('save-material-data', data);
+        // const data = {
+        //     tagId: mttagid,
+        //     tagNo: mttagno,
+        //     areaId: mtareaid,
+        //     areaName: mtareaname,
+        //     Qty: mtlqty,
+        //     Item: materialval,
+        //     Sizeone: sizeoneval,
+        //     Sizetwo: sizetwoval,
+        //     thkSizeOne: searchResults[0].thkSizeOne,
+        //     thkSizeTwo: searchResults[0].thkSizeTwo,
+        //     schdSizeOne: searchResults[0].schdSizeOne,
+        //     schdSizeTwo: searchResults[0].schdSizeTwo
+        // }
+        // // window.api.send('save-material-data', data);
         handleclose()
     }
 

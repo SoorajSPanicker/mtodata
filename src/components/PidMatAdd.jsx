@@ -8,7 +8,7 @@ function PidMatAdd({ specmatDetails, name, areaid, sindocid, masterid, selectedR
     const [searchResults, setSearchResults] = useState([]);
     const [mtlqty, setmtlqty] = useState('')
     const handleclose = () => {
-        onClose();
+        // onClose();
     };
 
     // Get unique items from specmatDetails using lodash

@@ -1968,29 +1968,31 @@ function SisoWorkspace({ isofilepath, isolinelist, specmatDetails }) {
     //     }
     // }, [selectedItem]);
 
-    // right click	
-    const onRightClickMenu = (event) => {
-        // Prevent the default right-click context menu
-        event.preventDefault();
-        const { clientX, clientY } = event;
-        const windowHeight = window.innerHeight;
-        const windowWidth = window.innerWidth;
+    // right click
+    
+    
+    // const onRightClickMenu = (event) => {
+    //     // Prevent the default right-click context menu
+    //     event.preventDefault();
+    //     const { clientX, clientY } = event;
+    //     const windowHeight = window.innerHeight;
+    //     const windowWidth = window.innerWidth;
 
-        // Calculate if there is more space above or below the click point
-        const isSpaceBelow = clientY + menuHeight <= windowHeight;
-        const isSpaceRight = clientX + 180 <= windowWidth; // assuming menu width is 180px
+    //     // Calculate if there is more space above or below the click point
+    //     const isSpaceBelow = clientY + menuHeight <= windowHeight;
+    //     const isSpaceRight = clientX + 180 <= windowWidth; // assuming menu width is 180px
 
-        // Set the position to either use 'top' or 'bottom' based on the available space
-        const top = isSpaceBelow ? clientY : clientY - menuHeight;
-        const left = isSpaceRight ? clientX : clientX - 180;
+    //     // Set the position to either use 'top' or 'bottom' based on the available space
+    //     const top = isSpaceBelow ? clientY : clientY - menuHeight;
+    //     const left = isSpaceRight ? clientX : clientX - 180;
 
-        setMenuPosition({ top, left });
-        const x = event.clientX;
-        const y = event.clientY;
-        console.log(x, y)
-        setRightClickCoordinates({ x, y });
-        setIsMenuOpen1(true);
-    }
+    //     setMenuPosition({ top, left });
+    //     const x = event.clientX;
+    //     const y = event.clientY;
+    //     console.log(x, y)
+    //     setRightClickCoordinates({ x, y });
+    //     setIsMenuOpen1(true);
+    // }
 
     // First, create the FreeCameraMouseInput class
     class FreeCameraMouseInput {

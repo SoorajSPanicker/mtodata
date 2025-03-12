@@ -4299,6 +4299,47 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
             currentRectangle = null;
         };
 
+        const handleGroupMarkings = () => {
+            const selectedArray = Array.from(selectedRectangles);
+
+            const rectangleData = selectedArray.map(rect => {
+                const rectId = generateCustomID('Rect');
+
+                // Get the rectangle bounds in project coordinates
+                const bounds = rect.bounds;
+                const projectTopLeft = paper.view.projectToView(bounds.topLeft);
+                const projectBottomRight = paper.view.projectToView(bounds.bottomRight);
+
+                // Store both project and view coordinates
+                const data = {
+                    rectId,
+                    // Store original project coordinates
+                    projectCoords: JSON.stringify({
+                        topLeft: bounds.topLeft,
+                        bottomRight: bounds.bottomRight,
+                        width: bounds.width,
+                        height: bounds.height
+                    }),
+                    // Store current view state
+                    viewState: JSON.stringify({
+                        zoom: paper.view.zoom,
+                        center: paper.view.center,
+                        matrix: paper.view.matrix.values // Store complete transformation matrix
+                    }),
+                    fillColor: rect.fillColor.toCSS(true),
+                    strokeColor: rect.strokeColor.toCSS(true),
+                    strokeWidth: rect.strokeWidth
+                };
+
+                return data;
+            });
+
+            window.api.send('save-group-markings', rectangleData);
+            const menu = document.querySelector('.context-menu');
+            if (menu) menu.remove();
+            // setenablehigh(false)
+        };
+
         const showContextMenu = (x, y) => {
             const menu = document.createElement('div');
             menu.className = 'context-menu';
@@ -4450,46 +4491,7 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
         //     setenablehigh(false)
         // };
 
-        const handleGroupMarkings = () => {
-            const selectedArray = Array.from(selectedRectangles);
 
-            const rectangleData = selectedArray.map(rect => {
-                const rectId = generateCustomID('Rect');
-
-                // Get the rectangle bounds in project coordinates
-                const bounds = rect.bounds;
-                const projectTopLeft = paper.view.projectToView(bounds.topLeft);
-                const projectBottomRight = paper.view.projectToView(bounds.bottomRight);
-
-                // Store both project and view coordinates
-                const data = {
-                    rectId,
-                    // Store original project coordinates
-                    projectCoords: JSON.stringify({
-                        topLeft: bounds.topLeft,
-                        bottomRight: bounds.bottomRight,
-                        width: bounds.width,
-                        height: bounds.height
-                    }),
-                    // Store current view state
-                    viewState: JSON.stringify({
-                        zoom: paper.view.zoom,
-                        center: paper.view.center,
-                        matrix: paper.view.matrix.values // Store complete transformation matrix
-                    }),
-                    fillColor: rect.fillColor.toCSS(true),
-                    strokeColor: rect.strokeColor.toCSS(true),
-                    strokeWidth: rect.strokeWidth
-                };
-
-                return data;
-            });
-
-            window.api.send('save-group-markings', rectangleData);
-            const menu = document.querySelector('.context-menu');
-            if (menu) menu.remove();
-            // setenablehigh(false)
-        };
 
 
 
@@ -4561,9 +4563,9 @@ function Canvas({ svgcontent, mascontent, alltags, allspids, projectNo, isSideNa
 
     }, [matarea])
 
-    const handleclose = () => {
-        setmatadd(false)
-    }
+    // const handleclose = () => {
+    //     setmatadd(false)
+    // }
 
 
 

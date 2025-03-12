@@ -27,7 +27,7 @@ function SisoReview({ isosheets, isofilepath, isolinelist, specmatDetails }) {
 
     const handleEditOpen = (index) => {
         setEditedRowIndex(index);
-        setEditedLineData(allLineList[index]);
+        // setEditedLineData(allLineList[index]);
     };
 
     const handleCloseEdit = () => {
@@ -36,7 +36,7 @@ function SisoReview({ isosheets, isofilepath, isolinelist, specmatDetails }) {
     };
 
     const handleSave = (SisoId) => {
-        const updatedLineList = [...allLineList];
+        // const updatedLineList = [...allLineList];
         updatedLineList[editedRowIndex] = { ...editedLineData, SisoId: SisoId };
 
         setEditedRowIndex(-1);
