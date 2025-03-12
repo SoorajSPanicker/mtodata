@@ -1479,7 +1479,7 @@ import { SceneLoader } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import SisoMaterialAdd from './SisoMaterialAdd';
 
-const ContextMenu = ({ x, y, onClose, onAddMaterial }) => {
+const ContextMenu = ({ x, y, onClose, onAddMaterial, onFocusItem }) => {
     return (
         <div
             style={{
@@ -1510,7 +1510,24 @@ const ContextMenu = ({ x, y, onClose, onAddMaterial }) => {
                 onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                 onClick={onAddMaterial}
             >
-                Add Material
+                Assign Material
+            </button>
+            <button
+                style={{
+                    width: '100%',
+                    padding: '8px 16px',
+                    textAlign: 'left',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    color: '#333',
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onClick={onFocusItem}
+            >
+                Focus Item
             </button>
         </div>
     );
@@ -1550,6 +1567,7 @@ function SisoWorkspace({ isofilepath, isolinelist, specmatDetails }) {
         x: 0,
         y: 0
     });
+    const [sisomaterialadd, setsisomaterialadd] = useState(false);
 
     // Handle right click
     const handleContextMenu = useCallback((event) => {
@@ -1575,7 +1593,52 @@ function SisoWorkspace({ isofilepath, isolinelist, specmatDetails }) {
     const handleAddMaterial = useCallback(() => {
         console.log("Add material clicked");
         setContextMenu(prev => ({ ...prev, visible: false }));
+        setsisomaterialadd(true)
         // Add your material handling logic here
+    }, []);
+
+    const handleFocusItem = useCallback(() => {
+        console.log("Focus item clicked");
+
+        // // Check if there's a focused item
+        // if (focus) {
+        //     // Get the bounding box of the focused mesh
+        //     const boundingInfo = focus.getBoundingInfo();
+        //     const center = boundingInfo.boundingBox.centerWorld;
+
+        //     // Get the active camera
+        //     const camera = sceneRef.current.activeCamera;
+
+        //     // Calculate a good distance based on mesh size
+        //     const size = boundingInfo.boundingBox.extendSize;
+        //     const maxDimension = Math.max(size.x, size.y, size.z) * 2;
+
+        //     if (camera instanceof BABYLON.ArcRotateCamera) {
+        //         // Set camera target to mesh center
+        //         camera.setTarget(center);
+
+        //         // Update radius for a good view
+        //         camera.radius = maxDimension * 2;
+
+        //         // Optional: Set to a nice viewing angle
+        //         camera.alpha = Math.PI / 4;
+        //         camera.beta = Math.PI / 3;
+
+        //         // Force update
+        //         camera.rebuildAnglesAndRadius();
+        //     } else if (camera instanceof BABYLON.FreeCamera) {
+        //         // Set camera target to mesh center
+        //         camera.setTarget(center);
+
+        //         // Position camera at a distance from the mesh
+        //         const direction = camera.getDirection(new BABYLON.Vector3(0, 0, 1));
+        //         direction.normalize();
+
+        //         camera.position = center.subtract(direction.scale(maxDimension * 2));
+        //     }
+        // }
+
+        setContextMenu(prev => ({ ...prev, visible: false }));
     }, []);
 
     useEffect(() => {
@@ -2742,6 +2805,7 @@ function SisoWorkspace({ isofilepath, isolinelist, specmatDetails }) {
                             y={contextMenu.y}
                             onClose={() => setContextMenu(prev => ({ ...prev, visible: false }))}
                             onAddMaterial={handleAddMaterial}
+                            onFocusItem={handleFocusItem}
                         />
                     )}
                     <div id="hover-info" style={{
@@ -2972,7 +3036,7 @@ function SisoWorkspace({ isofilepath, isolinelist, specmatDetails }) {
 
                 </div>
             </div> */}
-
+            {sisomaterialadd && <SisoMaterialAdd specmatDetails={specmatDetails} handleclose={() => setsisomaterialadd(false)} />}
         </div >
     )
 }
